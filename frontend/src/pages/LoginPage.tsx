@@ -1,6 +1,7 @@
 // Auth page wrapper for switching between sign-in and sign-up states.
 import AuthSection from "../components/AuthSection";
 import { IconCompass, IconHeart, IconUpload } from "../components/Icons";
+import { brandLogoUrl } from "../constants";
 
 type LoginPageProps = {
   onNavigate: (path: string) => void;
@@ -16,7 +17,7 @@ function LoginPage({ onNavigate }: LoginPageProps) {
       <div className="auth-page-grid">
         <section className="auth-hero">
           <div className="auth-brand-badge">
-            <img className="auth-hero-logo" src="/logo.png" alt="Glam SA logo" />
+            <img className="auth-hero-logo" src={brandLogoUrl} alt="Glam SA logo" />
             <span className="brand-badge-name">Glam SA</span>
           </div>
 

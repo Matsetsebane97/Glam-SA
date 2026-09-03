@@ -1,6 +1,6 @@
 // Desktop navigation and the signed-in user's quick profile summary.
 import type { ReactNode } from "react";
-import { navItems } from "../constants";
+import { brandLogoUrl, navItems } from "../constants";
 import { IconCompass, IconHeart, IconHome, IconMessage, IconUpload, IconVerified } from "./Icons";
 import type { CurrentUser, NavItem } from "../types";
 
@@ -26,7 +26,7 @@ function Sidebar({ activeNav, currentUser, onNavigate, onLogout }: SidebarProps)
         {/* Brand Header */}
         <div className="brand" onClick={() => onNavigate("/")} style={{ cursor: "pointer" }}>
           <div className="brand-logo-container">
-            <img className="brand-logo" src="/logo.png" alt="Glam SA logo" />
+            <img className="brand-logo" src={brandLogoUrl} alt="Glam SA logo" />
           </div>
           <div className="brand-text">
             <strong>Glam SA</strong>

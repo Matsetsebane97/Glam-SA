@@ -1,6 +1,8 @@
 // Shared navigation and fallback display values used by the app shell.
 import type { NavItem } from "./types";
 
+export const brandLogoUrl = `${import.meta.env.BASE_URL}logo.png`;
+
 export const navItems: NavItem[] = ["Home", "Discover", "Following", "Messages", "Upload"];
 
 export const fallbackCategories = ["Hair", "Nails", "Barbering", "Makeup", "Skincare", "Tattoos"];

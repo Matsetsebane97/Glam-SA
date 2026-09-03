@@ -1,6 +1,7 @@
 // Global search and account controls displayed above each page.
 import { useEffect, useState } from "react";
 import { getConversations } from "../api";
+import { brandLogoUrl } from "../constants";
 import { IconBell, IconClose, IconSearch } from "./Icons";
 import type { Conversation, CurrentUser } from "../types";
 
@@ -38,7 +39,7 @@ function Topbar({ currentUser, query, onQueryChange, onNavigate }: TopbarProps) 
   return (
     <header className="topbar">
       <div className="mobile-brand" onClick={() => onNavigate("/")} style={{ cursor: "pointer" }}>
-        <img className="brand-logo" src="/logo.png" alt="Glam SA logo" />
+        <img className="brand-logo" src={brandLogoUrl} alt="Glam SA logo" />
         <span className="brand-title">Glam SA</span>
       </div>
 
