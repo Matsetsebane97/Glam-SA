@@ -24,12 +24,12 @@ services:
         fromDatabase:
           name: glam-sa-db
           property: connectionString
-      - key: MEDIA_ROOT
-        value: /var/data/media
-    disk:
-      name: glam-sa-media
-      mountPath: /var/data
-      sizeGB: 1
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_SERVICE_ROLE_KEY
+        sync: false
+      - key: SUPABASE_STORAGE_BUCKET
+        value: media
 
 databases:
   - name: glam-sa-db
