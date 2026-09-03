@@ -1976,7 +1976,7 @@
 }
 
 /* Glam SA visual refresh */
-.app-shell { max-width: 1600px; background: var(--bg-primary); }
+.app-shell { max-width: 1600px; background: #ffffff; }
 .sidebar { padding: 28px 20px; background: var(--ink-primary); color: #fffdf8; }
 .brand-logo-container { border-color: rgba(255, 253, 248, .18); background: #fffdf8; }
 .brand-text strong, .brand-subtitle { color: #fffdf8; }
@@ -1991,7 +1991,7 @@
 .profile-handle, .profile-location { color: rgba(255, 253, 248, .55); }
 .profile-card .btn-outline-sm { color: #fffdf8; background: transparent; border-color: rgba(255, 253, 248, .25); }
 .profile-card .sidebar-logout-btn { color: #f2a19c; border-color: rgba(242, 161, 156, .35); }
-.feed-main { background: var(--bg-primary); border-color: var(--border-subtle); }
+.feed-main { background: #ffffff; border-color: var(--border-subtle); }
 .topbar { padding: 16px 34px; background: rgba(255, 253, 248, .92); border-color: var(--border-subtle); backdrop-filter: blur(14px); }
 .search-box { background: var(--bg-secondary); border-color: transparent; }
 .search-box:focus-within { border-color: var(--accent-gold); background: var(--bg-surface); box-shadow: 0 0 0 3px rgba(215, 168, 67, .14); }
