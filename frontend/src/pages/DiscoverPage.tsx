@@ -2,7 +2,7 @@
 import { useEffect, useState } from "react";
 import { getNearbyArtists } from "../api";
 import NearbyMap from "../components/NearbyMap";
-import { IconCompass, IconPin, IconVerified, IconWhatsApp } from "../components/Icons";
+import { IconCompass, IconNavigation, IconPin, IconVerified, IconWhatsApp } from "../components/Icons";
 import type { Coordinates, CurrentUser, NearbyArtist } from "../types";
 import { formatDistance } from "../utils/geo";
 import { requestUserLocation } from "../utils/geolocation";
@@ -54,6 +54,9 @@ function DiscoverPage({ currentUser, onNavigate }: DiscoverPageProps) {
       setIsLocating(false);
     }
   };
+
+  const directionsUrl = (artist: NearbyArtist) =>
+    `https://www.google.com/maps/dir/?api=1&destination=${artist.latitude},${artist.longitude}`;
 
   return (
     <div className="page-content discover-page">
@@ -174,6 +177,16 @@ function DiscoverPage({ currentUser, onNavigate }: DiscoverPageProps) {
                       <span className="distance-val">{formatDistance(artist.distanceKm)}</span>
                       <small>{artist.postCount} {artist.postCount === 1 ? "look" : "looks"}</small>
                     </div>
+                    <a
+                      href={directionsUrl(artist)}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="take-me-there-btn"
+                      onClick={(event) => event.stopPropagation()}
+                    >
+                      <IconNavigation size={15} />
+                      <span>Take me there</span>
+                    </a>
                     <a
                       href={`https://wa.me/?text=${encodeURIComponent(`Hi ${artist.name}, I found you on Glam SA and want to inquire about booking a session!`)}`}
                       target="_blank"

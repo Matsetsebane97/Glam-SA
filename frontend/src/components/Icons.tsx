@@ -95,6 +95,15 @@ export function IconPin({ size = defaults.size, className = defaults.className }
   );
 }
 
+export function IconNavigation({ size = defaults.size, className = defaults.className }: IconProps) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" className={className} aria-hidden="true">
+      <path d="M21 3L3 10.5l7 3.5L13.5 21 21 3z" stroke="currentColor" strokeWidth="1.6" strokeLinejoin="round" />
+      <path d="M10 14l4-4" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
+    </svg>
+  );
+}
+
 export function IconVerified({ size = 16, className = defaults.className }: IconProps) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none" className={className} aria-hidden="true">

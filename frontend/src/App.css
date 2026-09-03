@@ -72,6 +72,17 @@
 .profile-error { padding: 10px 14px; border: 1px solid #fecdd3; border-radius: var(--radius-sm); background: var(--accent-rose-bg); color: var(--accent-rose); font-size: 13px; }
 .profile-login-state { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; min-height: 55vh; padding: 40px 24px; text-align: center; color: var(--ink-muted); }
 .profile-login-state h1 { color: var(--ink-primary); }
+.take-me-there-btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; padding: 8px 11px; border: 1px solid var(--accent-gold); border-radius: var(--radius-sm); background: var(--accent-gold); color: var(--ink-primary); font-size: 12px; font-weight: 700; text-decoration: none; transition: transform var(--transition-fast), box-shadow var(--transition-fast); }
+.take-me-there-btn:hover { transform: translateY(-1px); box-shadow: 0 5px 14px rgba(196, 145, 55, .22); }
+.map-artist-popup .take-me-there-btn { width: 100%; margin-top: 12px; }
+.artist-card-footer .take-me-there-btn { flex: 1; min-width: 120px; }
+.discover-hero { position: relative; overflow: hidden; padding: 30px; border: 1px solid #ead9b9; border-radius: var(--radius-lg); background: linear-gradient(135deg, #fffaf0 0%, #ffffff 58%, #f1f5f2 100%); }
+.discover-hero::after { position: absolute; right: 28px; bottom: -54px; width: 180px; height: 180px; border: 1px solid rgba(196, 145, 55, .28); border-radius: 50%; content: ""; }
+.discover-hero h1, .discover-hero p, .discover-hero .hero-badge { position: relative; z-index: 1; }
+.discover-map-wrapper { padding: 8px; border: 1px solid #ead9b9; border-radius: var(--radius-lg); background: #fffaf0; box-shadow: var(--shadow-xs); }
+.discover-map-wrapper .nearby-map-container { border-radius: calc(var(--radius-lg) - 4px); }
+.artist-portfolio-card { border-color: #eadfca; box-shadow: var(--shadow-xs); transition: transform var(--transition-fast), box-shadow var(--transition-fast), border-color var(--transition-fast); }
+.artist-portfolio-card:hover { border-color: var(--accent-gold); box-shadow: 0 10px 24px rgba(32, 38, 34, .1); transform: translateY(-2px); }
 .portfolio-lightbox { position: fixed; z-index: 20; inset: 0; display: grid; place-items: center; padding: 32px; background: rgba(16, 18, 20, .88); }
 .portfolio-lightbox-close { position: absolute; top: 20px; right: 20px; display: grid; place-items: center; width: 42px; height: 42px; border: 1px solid rgba(255, 255, 255, .3); border-radius: 50%; background: rgba(255, 255, 255, .1); color: #ffffff; cursor: pointer; }
 .portfolio-lightbox-content { display: flex; flex-direction: column; gap: 14px; width: min(900px, 100%); max-height: calc(100vh - 64px); margin: 0; }

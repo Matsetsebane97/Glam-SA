@@ -2,7 +2,7 @@
 import { useState } from "react";
 import type { Coordinates, NearbyArtist } from "../types";
 import { boundsFromCenter, osmTileUrl, toMapPercent } from "../utils/geo";
-import { IconPin, IconVerified } from "./Icons";
+import { IconNavigation, IconPin, IconVerified } from "./Icons";
 
 type NearbyMapProps = {
   center: Coordinates;
@@ -21,6 +21,9 @@ function NearbyMap({ center, artists, radiusKm = 50, showYou = true, onSelectArt
     setActivePin(artist);
     if (onSelectArtist) onSelectArtist(artist);
   };
+
+  const directionsUrl = (artist: NearbyArtist) =>
+    `https://www.google.com/maps/dir/?api=1&destination=${artist.latitude},${artist.longitude}`;
 
   return (
     <div className="nearby-map-container" aria-label="Interactive Map of Nearby Beauty Artists">
@@ -79,6 +82,16 @@ function NearbyMap({ center, artists, radiusKm = 50, showYou = true, onSelectArt
             <span><IconPin size={11} /> {activePin.distanceKm} km away</span>
             <span>{activePin.postCount} looks</span>
           </div>
+          <a
+            className="take-me-there-btn"
+            href={directionsUrl(activePin)}
+            target="_blank"
+            rel="noreferrer"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <IconNavigation size={15} />
+            <span>Take me there</span>
+          </a>
           <button
             className="popup-close-btn"
             type="button"
