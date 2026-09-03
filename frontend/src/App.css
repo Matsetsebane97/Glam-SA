@@ -85,6 +85,10 @@
   .profile-hero-actions { width: 100%; }
   .profile-hero-actions > button { flex: 1; }
   .profile-work-grid { grid-template-columns: 1fr; }
+  .profile-work-title-row { align-items: flex-start; flex-direction: column; gap: 4px; }
+  .profile-work-title-row h3 { overflow-wrap: anywhere; }
+  .profile-work-actions, .profile-edit-actions { flex-wrap: wrap; }
+  .profile-work-actions .btn-outline-sm, .profile-edit-actions > button { flex: 1 1 120px; }
   .portfolio-lightbox { padding: 20px; }
 }
 
@@ -1915,6 +1919,10 @@
     border: none;
     padding-bottom: 90px;
   }
+  .topbar { flex-wrap: wrap; gap: 10px; padding: 12px 16px; }
+  .mobile-brand { order: 1; }
+  .topbar-actions { order: 2; }
+  .search-container { order: 3; flex-basis: 100%; max-width: none; }
   .page-content {
     padding: 16px;
   }
