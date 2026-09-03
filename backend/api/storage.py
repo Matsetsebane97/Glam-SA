@@ -42,5 +42,25 @@ def upload_media(uploaded_file):
             pass
         raise RuntimeError(f"Supabase upload failed: {detail}") from error
 
-    public_url = f"{settings.SUPABASE_URL.rstrip('/')}/storage/v1/object/public/{bucket}/{encoded_path}"
-    return public_url
+    signed_request = urllib.request.Request(
+        f"{settings.SUPABASE_URL.rstrip('/')}/storage/v1/object/sign/{bucket}/{encoded_path}",
+        data=json.dumps({"expiresIn": 31536000}).encode("utf-8"),
+        method="POST",
+        headers={
+            "Authorization": f"Bearer {settings.SUPABASE_SERVICE_ROLE_KEY}",
+            "apikey": settings.SUPABASE_SERVICE_ROLE_KEY,
+            "Content-Type": "application/json",
+        },
+    )
+
+    try:
+        with urllib.request.urlopen(signed_request, timeout=30) as response:
+            signed_path = json.loads(response.read().decode("utf-8")).get("signedURL", "")
+    except (urllib.error.HTTPError, urllib.error.URLError, json.JSONDecodeError) as error:
+        detail = error.read().decode("utf-8", errors="replace") if hasattr(error, "read") else str(error)
+        raise RuntimeError(f"Supabase could not create a media URL: {detail}") from error
+
+    if not signed_path:
+        raise RuntimeError("Supabase did not return a media URL.")
+
+    return f"{settings.SUPABASE_URL.rstrip('/')}/storage/v1{signed_path}"

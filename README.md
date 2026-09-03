@@ -75,7 +75,7 @@ Render supplies `DATABASE_URL` and `SECRET_KEY`. The service runs migrations and
 
 ### Supabase media storage
 
-Create a public Storage bucket named `media` in Supabase, then add these environment variables to the Render web service:
+Create a Storage bucket named `media` in Supabase, then add these environment variables to the Render web service:
 
 ```env
 SUPABASE_URL=https://your-project.supabase.co
@@ -83,7 +83,7 @@ SUPABASE_SERVICE_ROLE_KEY=your-server-only-service-role-key
 SUPABASE_STORAGE_BUCKET=media
 ```
 
-Keep `SUPABASE_SERVICE_ROLE_KEY` private and use the Supabase service-role key only on the Django backend. New uploads are stored in Supabase and returned as public URLs; local uploads continue using Django media storage when these variables are absent.
+Keep `SUPABASE_SERVICE_ROLE_KEY` private and use the Supabase service-role key only on the Django backend. New uploads are stored in Supabase and returned as signed URLs; local uploads continue using Django media storage when these variables are absent.
 
 This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
 
