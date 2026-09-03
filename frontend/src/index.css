@@ -2,24 +2,24 @@
   /* Color, spacing, and typography tokens for the application UI. */
   /* Color Palette - Minimalist Luxury White Aesthetic */
   --bg-primary: #ffffff;
-  --bg-secondary: #ebe5d9;
-  --bg-surface: #fffdf8;
+  --bg-secondary: #f1f1ee;
+  --bg-surface: #ffffff;
   --bg-surface-elevated: #ffffff;
-  --bg-muted: #e7e0d4;
+  --bg-muted: #ededeb;
   
   --ink-primary: #161812;
-  --ink-secondary: #45483d;
-  --ink-muted: #7c8072;
-  --ink-light: #aeb1a4;
+  --ink-secondary: #4d4d49;
+  --ink-muted: #777873;
+  --ink-light: #a5a6a0;
   
-  --border-subtle: #ded8cb;
-  --border-medium: #c8c0b2;
+  --border-subtle: #deded9;
+  --border-medium: #bfc0ba;
   --border-strong: #161812;
 
   --accent-primary: #161812;
-  --accent-secondary: #45483d;
-  --accent-gold: #d7a843;
-  --accent-gold-bg: #f7e8b9;
+  --accent-secondary: #4d4d49;
+  --accent-gold: #161812;
+  --accent-gold-bg: #eeeeeb;
   --accent-rose: #b44b49;
   --accent-rose-bg: #ffe4e6;
   --accent-green: #15803d;

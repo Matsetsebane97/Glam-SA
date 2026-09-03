@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 180" role="img" aria-labelledby="title desc">
+  <title id="title">Glam SA</title>
+  <desc id="desc">Black and white Glam SA monogram and wordmark</desc>
+  <rect width="160" height="160" rx="34" fill="#11130f"/>
+  <path d="M111 44c-12-10-27-15-44-15-35 0-59 24-59 57s24 57 59 57c17 0 33-5 44-15v-38H70v19h18v9c-5 3-11 5-19 5-20 0-34-15-34-37s14-37 34-37c10 0 19 3 27 10l15-15z" fill="#fffdf8"/>
+  <circle cx="118" cy="31" r="8" fill="#fffdf8"/>
+  <path d="M199 119V45h15v60h38v14h-53zm69 0V45h15v74h-15zm40 0V45h17l28 46 28-46h17v74h-15V69l-25 41h-10l-25-41v50h-15zm108 0V45h15v74h-15zm40 0V45h16l40 48V45h15v74h-15l-41-49v49h-15zm94 2c-23 0-39-15-39-39s16-39 39-39c15 0 27 5 35 15l-11 10c-6-7-14-11-24-11-14 0-24 10-24 25s10 25 24 25c8 0 15-2 20-7v-10h-22v-13h37v30c-9 9-20 14-35 14z" fill="#11130f"/>
+  <path d="M199 145h310" stroke="#11130f" stroke-width="3"/>
+  <text x="520" y="158" fill="#11130f" font-family="Arial, sans-serif" font-size="12" letter-spacing="3">BEAUTY COMMUNITY</text>
+</svg>
