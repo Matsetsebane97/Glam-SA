@@ -1,27 +1,27 @@
 :root {
   /* Color, spacing, and typography tokens for the application UI. */
   /* Color Palette - Minimalist Luxury White Aesthetic */
-  --bg-primary: #ffffff;
-  --bg-secondary: #f1f1ee;
-  --bg-surface: #ffffff;
+  --bg-primary: #f3f0e9;
+  --bg-secondary: #e8e9e1;
+  --bg-surface: #fffdf8;
   --bg-surface-elevated: #ffffff;
-  --bg-muted: #ededeb;
+  --bg-muted: #dedfd6;
   
-  --ink-primary: #161812;
-  --ink-secondary: #4d4d49;
-  --ink-muted: #777873;
-  --ink-light: #a5a6a0;
+  --ink-primary: #24271f;
+  --ink-secondary: #575b51;
+  --ink-muted: #7e8379;
+  --ink-light: #a9ada3;
   
-  --border-subtle: #deded9;
-  --border-medium: #bfc0ba;
-  --border-strong: #161812;
+  --border-subtle: rgba(36, 39, 31, .1);
+  --border-medium: rgba(36, 39, 31, .2);
+  --border-strong: #24271f;
 
-  --accent-primary: #161812;
-  --accent-secondary: #4d4d49;
-  --accent-gold: #161812;
-  --accent-gold-bg: #eeeeeb;
+  --accent-primary: #c26f3e;
+  --accent-secondary: #7c4b3a;
+  --accent-gold: #c26f3e;
+  --accent-gold-bg: #f5e3d8;
   --accent-rose: #b44b49;
-  --accent-rose-bg: #ffe4e6;
+  --accent-rose-bg: #f8dfdd;
   --accent-green: #15803d;
   --accent-green-bg: #dcfce7;
 
