@@ -11,6 +11,7 @@ from django.views.decorators.csrf import csrf_exempt
 
 from .geo import haversine_km, parse_optional_coordinate
 from .models import Message, Post, UserProfile
+from .storage import is_configured, upload_media
 
 
 CATEGORIES = ["For you", "Hair", "Nails", "Barbering", "Makeup", "Skincare", "Tattoos"]
@@ -192,6 +193,13 @@ def posts(request):
         else:
             media_type = ""
 
+        uploaded_media_url = ""
+        if media_file and is_configured():
+            try:
+                uploaded_media_url = upload_media(media_file)
+            except RuntimeError as error:
+                return JsonResponse({"error": str(error)}, status=502)
+
         required_fields = ["creator", "handle", "service"]
         missing_fields = [field for field in required_fields if not payload.get(field)]
         if missing_fields:
@@ -208,8 +216,8 @@ def posts(request):
             longitude=profile.longitude if profile else None,
             service=payload["service"],
             caption=payload.get("caption", ""),
-            image_url=payload.get("imageUrl", ""),
-            media_file=media_file,
+            image_url=uploaded_media_url or payload.get("imageUrl", ""),
+            media_file=None if uploaded_media_url else media_file,
             media_type=media_type,
             owner=request.user,
         )
