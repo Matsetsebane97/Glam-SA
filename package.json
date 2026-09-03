@@ -1,0 +1,13 @@
+{
+  "name": "glam-sa-workspace",
+  "private": true,
+  "scripts": {
+    "dev": "concurrently --kill-others-on-fail --names frontend,backend \"npm --prefix frontend run dev\" \"python backend/manage.py runserver 127.0.0.1:8000\"",
+    "dev:frontend": "npm --prefix frontend run dev",
+    "dev:backend": "python backend/manage.py runserver 127.0.0.1:8000",
+    "build": "npm --prefix frontend run build"
+  },
+  "devDependencies": {
+    "concurrently": "^9.2.1"
+  }
+}
