@@ -42,6 +42,7 @@ class Post(models.Model):
         ordering = ["-created_at"]
 
     def as_dict(self, distance_km=None):
+        media_url = self.media_file.url if self.media_file else self.image_url
         payload = {
             "id": self.id,
             "ownerId": self.owner_id,
@@ -51,7 +52,7 @@ class Post(models.Model):
             "service": self.service,
             "caption": self.caption,
             "imageUrl": self.image_url,
-            "mediaUrl": self.media_file.url if self.media_file else "",
+            "mediaUrl": media_url,
             "mediaType": self.media_type,
             "createdAt": self.created_at.isoformat(),
             "likesCount": self.likes_count,
