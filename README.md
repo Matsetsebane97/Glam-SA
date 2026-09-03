@@ -73,6 +73,18 @@ The included `render.yaml` deploys the Vite build and Django API as one web serv
 
 Render supplies `DATABASE_URL` and `SECRET_KEY`. The service runs migrations and collects static files during each build.
 
+### Supabase media storage
+
+Create a public Storage bucket named `media` in Supabase, then add these environment variables to the Render web service:
+
+```env
+SUPABASE_URL=https://your-project.supabase.co
+SUPABASE_SERVICE_ROLE_KEY=your-server-only-service-role-key
+SUPABASE_STORAGE_BUCKET=media
+```
+
+Keep `SUPABASE_SERVICE_ROLE_KEY` private and use the Supabase service-role key only on the Django backend. New uploads are stored in Supabase and returned as public URLs; local uploads continue using Django media storage when these variables are absent.
+
 This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
 
 Currently, two official plugins are available:
