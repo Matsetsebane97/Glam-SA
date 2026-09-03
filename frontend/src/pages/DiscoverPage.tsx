@@ -6,6 +6,7 @@ import { IconCompass, IconNavigation, IconPin, IconVerified, IconWhatsApp } from
 import type { Coordinates, CurrentUser, NearbyArtist } from "../types";
 import { formatDistance } from "../utils/geo";
 import { requestUserLocation } from "../utils/geolocation";
+import DirectionsConfirmModal from "../components/DirectionsConfirmModal";
 
 type DiscoverPageProps = {
   currentUser: CurrentUser | null;
@@ -22,6 +23,7 @@ function DiscoverPage({ currentUser, onNavigate }: DiscoverPageProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [isLocating, setIsLocating] = useState(false);
   const [error, setError] = useState("");
+  const [directionsArtist, setDirectionsArtist] = useState<NearbyArtist | null>(null);
 
   const loadArtists = async (nextCoords: Coordinates) => {
     setIsLoading(true);
@@ -179,10 +181,12 @@ function DiscoverPage({ currentUser, onNavigate }: DiscoverPageProps) {
                     </div>
                     <a
                       href={directionsUrl(artist)}
-                      target="_blank"
-                      rel="noreferrer"
                       className="take-me-there-btn"
                       onClick={(event) => event.stopPropagation()}
+                      onClickCapture={(event) => {
+                        event.preventDefault();
+                        setDirectionsArtist(artist);
+                      }}
                     >
                       <IconNavigation size={15} />
                       <span>Take me there</span>
@@ -203,6 +207,17 @@ function DiscoverPage({ currentUser, onNavigate }: DiscoverPageProps) {
               ))}
             </div>
           </section>
+          {directionsArtist && (
+            <DirectionsConfirmModal
+              artistName={directionsArtist.name}
+              locationLabel={directionsArtist.locationLabel}
+              onCancel={() => setDirectionsArtist(null)}
+              onConfirm={() => {
+                window.open(directionsUrl(directionsArtist), "_blank", "noopener,noreferrer");
+                setDirectionsArtist(null);
+              }}
+            />
+          )}
         </div>
       )}
     </div>

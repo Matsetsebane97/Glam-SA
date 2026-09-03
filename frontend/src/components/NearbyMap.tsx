@@ -3,6 +3,7 @@ import { useState } from "react";
 import type { Coordinates, NearbyArtist } from "../types";
 import { boundsFromCenter, osmTileUrl, toMapPercent } from "../utils/geo";
 import { IconNavigation, IconPin, IconVerified } from "./Icons";
+import DirectionsConfirmModal from "./DirectionsConfirmModal";
 
 type NearbyMapProps = {
   center: Coordinates;
@@ -14,6 +15,7 @@ type NearbyMapProps = {
 
 function NearbyMap({ center, artists, radiusKm = 50, showYou = true, onSelectArtist }: NearbyMapProps) {
   const [activePin, setActivePin] = useState<NearbyArtist | null>(null);
+  const [directionsArtist, setDirectionsArtist] = useState<NearbyArtist | null>(null);
   const bounds = boundsFromCenter(center.latitude, center.longitude, radiusKm);
   const youPosition = toMapPercent(center.latitude, center.longitude, bounds);
 
@@ -85,9 +87,11 @@ function NearbyMap({ center, artists, radiusKm = 50, showYou = true, onSelectArt
           <a
             className="take-me-there-btn"
             href={directionsUrl(activePin)}
-            target="_blank"
-            rel="noreferrer"
             onClick={(event) => event.stopPropagation()}
+            onClickCapture={(event) => {
+              event.preventDefault();
+              setDirectionsArtist(activePin);
+            }}
           >
             <IconNavigation size={15} />
             <span>Take me there</span>
@@ -100,6 +104,17 @@ function NearbyMap({ center, artists, radiusKm = 50, showYou = true, onSelectArt
             ✕
           </button>
         </div>
+      )}
+      {directionsArtist && (
+        <DirectionsConfirmModal
+          artistName={directionsArtist.name}
+          locationLabel={directionsArtist.locationLabel}
+          onCancel={() => setDirectionsArtist(null)}
+          onConfirm={() => {
+            window.open(directionsUrl(directionsArtist), "_blank", "noopener,noreferrer");
+            setDirectionsArtist(null);
+          }}
+        />
       )}
     </div>
   );

@@ -75,7 +75,16 @@
 .take-me-there-btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; padding: 8px 11px; border: 1px solid var(--accent-gold); border-radius: var(--radius-sm); background: var(--accent-gold); color: var(--ink-primary); font-size: 12px; font-weight: 700; text-decoration: none; transition: transform var(--transition-fast), box-shadow var(--transition-fast); }
 .take-me-there-btn:hover { transform: translateY(-1px); box-shadow: 0 5px 14px rgba(196, 145, 55, .22); }
 .map-artist-popup .take-me-there-btn { width: 100%; margin-top: 12px; }
-.artist-card-footer .take-me-there-btn { flex: 1; min-width: 120px; }
+.artist-card-footer .take-me-there-btn { width: 100%; min-width: 0; padding-inline: 6px; font-size: 11px; }
+.directions-modal-backdrop { position: fixed; z-index: 80; inset: 0; display: grid; place-items: center; padding: 20px; background: rgba(22, 24, 18, .68); backdrop-filter: blur(5px); }
+.directions-modal { position: relative; width: min(440px, 100%); padding: 30px; border: 1px solid #d4be8d; border-radius: var(--radius-lg); background: var(--bg-surface); box-shadow: var(--shadow-lg); text-align: center; }
+.directions-modal-close { position: absolute; top: 14px; right: 14px; display: grid; place-items: center; width: 34px; height: 34px; border: 1px solid var(--border-subtle); border-radius: 50%; color: var(--ink-muted); }
+.directions-modal-icon { display: grid; place-items: center; width: 54px; height: 54px; margin: 0 auto 16px; border-radius: 50%; background: var(--accent-gold-bg); color: var(--ink-primary); }
+.directions-modal .eyebrow { margin-bottom: 8px; color: var(--accent-gold); }
+.directions-modal h2 { font-family: var(--font-display); font-size: 30px; }
+.directions-modal p { margin-top: 10px; color: var(--ink-secondary); font-size: 14px; }
+.directions-modal-actions { display: flex; justify-content: center; gap: 10px; margin-top: 24px; }
+@media (max-width: 520px) { .directions-modal { padding: 26px 20px 22px; } .directions-modal-actions { flex-direction: column-reverse; } .directions-modal-actions button { width: 100%; } }
 .discover-hero { position: relative; overflow: hidden; padding: 30px; border: 1px solid #ead9b9; border-radius: var(--radius-lg); background: linear-gradient(135deg, #fffaf0 0%, #ffffff 58%, #f1f5f2 100%); }
 .discover-hero::after { position: absolute; right: 28px; bottom: -54px; width: 180px; height: 180px; border: 1px solid rgba(196, 145, 55, .28); border-radius: 50%; content: ""; }
 .discover-hero h1, .discover-hero p, .discover-hero .hero-badge { position: relative; z-index: 1; }
@@ -1334,12 +1343,15 @@
 }
 
 .artist-card-footer {
-  display: flex;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
   align-items: center;
-  justify-content: space-between;
+  gap: 10px;
   padding-top: 10px;
   border-top: 1px solid var(--border-subtle);
 }
+
+.artist-distance-info { grid-column: 1 / -1; }
 
 .distance-val {
   display: block;
@@ -1356,13 +1368,24 @@
 .btn-whatsapp-sm {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 5px;
-  padding: 5px 12px;
-  border-radius: var(--radius-full);
-  background: #25D366;
-  color: #ffffff;
+  width: 100%;
+  min-width: 0;
+  padding: 8px 9px;
+  border: 1px solid #9ed9b4;
+  border-radius: var(--radius-sm);
+  background: #ecfaf1;
+  color: #168447;
   font-size: 12px;
   font-weight: 600;
+  transition: background var(--transition-fast), border-color var(--transition-fast), transform var(--transition-fast);
+}
+
+.btn-whatsapp-sm:hover {
+  border-color: #55b978;
+  background: #dff6e8;
+  transform: translateY(-1px);
 }
 
 /* 11. Upload Studio */
