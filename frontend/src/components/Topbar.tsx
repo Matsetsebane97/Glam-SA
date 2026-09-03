@@ -38,7 +38,7 @@ function Topbar({ currentUser, query, onQueryChange, onNavigate }: TopbarProps) 
   return (
     <header className="topbar">
       <div className="mobile-brand" onClick={() => onNavigate("/")} style={{ cursor: "pointer" }}>
-        <img className="brand-logo" src="/logo.svg" alt="Glam SA" />
+        <img className="brand-logo" src="/logo.png" alt="Glam SA logo" />
         <span className="brand-title">Glam SA</span>
       </div>
 

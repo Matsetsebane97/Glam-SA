@@ -16,7 +16,7 @@ function LoginPage({ onNavigate }: LoginPageProps) {
       <div className="auth-page-grid">
         <section className="auth-hero">
           <div className="auth-brand-badge">
-            <img className="auth-hero-logo" src="/logo.svg" alt="Glam SA" />
+            <img className="auth-hero-logo" src="/logo.png" alt="Glam SA logo" />
             <span className="brand-badge-name">Glam SA</span>
           </div>
 

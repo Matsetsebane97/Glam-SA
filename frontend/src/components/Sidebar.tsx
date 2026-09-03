@@ -26,7 +26,7 @@ function Sidebar({ activeNav, currentUser, onNavigate, onLogout }: SidebarProps)
         {/* Brand Header */}
         <div className="brand" onClick={() => onNavigate("/")} style={{ cursor: "pointer" }}>
           <div className="brand-logo-container">
-            <img className="brand-logo" src="/logo.svg" alt="Glam SA Emblem" />
+            <img className="brand-logo" src="/logo.png" alt="Glam SA logo" />
           </div>
           <div className="brand-text">
             <strong>Glam SA</strong>
