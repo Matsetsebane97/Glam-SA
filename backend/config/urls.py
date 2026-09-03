@@ -1,4 +1,5 @@
 from django.conf import settings
+from django.contrib import admin
 from django.urls import include, path, re_path
 from django.http import FileResponse
 from django.views.static import serve
@@ -13,6 +14,7 @@ def frontend(request):
 
 
 urlpatterns = [
+    path("admin/", admin.site.urls),
     path("api/", include("api.urls")),
     path("", frontend),
     re_path(r"^(?!static/|media/).+$", frontend),

@@ -12,7 +12,7 @@ services:
       cp -R frontend/dist/. backend/static/app/ &&
       python backend/manage.py migrate --noinput &&
       python backend/manage.py collectstatic --noinput
-    startCommand: gunicorn config.wsgi:application --chdir backend --bind 0.0.0.0:$PORT
+    startCommand: python backend/manage.py ensure_admin && gunicorn config.wsgi:application --chdir backend --bind 0.0.0.0:$PORT
     envVars:
       - key: SECRET_KEY
         generateValue: true
