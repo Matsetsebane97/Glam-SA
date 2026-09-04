@@ -1,5 +1,5 @@
-import { useEffect, useState, useRef } from "react";
-import type { FormEvent, DragEvent } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import type { DragEvent, FormEvent } from "react";
 import { suggestCategory } from "../api";
 import { fallbackCategories } from "../constants";
 import { IconCamera, IconCheck, IconClose, IconUpload } from "./Icons";
@@ -26,64 +26,83 @@ function UploadSection({ userName, handle, categories, onUploaded }: UploadSecti
   const [suggestedCategory, setSuggestedCategory] = useState<string | null>(null);
   const [isSuggestingCategory, setIsSuggestingCategory] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const visibleCategories = categories.filter((item) => item !== "For you").length > 0
-    ? categories.filter((item) => item !== "For you")
-    : fallbackCategories;
+  const previewObjectUrlRef = useRef("");
+  const suggestionTimerRef = useRef<number | null>(null);
+
+  const visibleCategories = useMemo(() => {
+    const cleanedCategories = categories.filter((item) => item !== "For you");
+    return cleanedCategories.length > 0 ? cleanedCategories : fallbackCategories;
+  }, [categories]);
+
+  const canPublish = Boolean(media && service.trim() && category && price && Number(price) >= 0 && Number(durationMinutes) >= 15);
+  const priceLabel = price ? `R${Number(price).toLocaleString("en-ZA")}` : "Price";
+  const durationLabel = durationMinutes ? `${durationMinutes} min` : "Time";
 
   useEffect(() => {
-    if (!media) {
-      setPreviewUrl("");
-      return undefined;
+    return () => {
+      if (previewObjectUrlRef.current) URL.revokeObjectURL(previewObjectUrlRef.current);
+      if (suggestionTimerRef.current) window.clearTimeout(suggestionTimerRef.current);
+    };
+  }, []);
+
+  const setSelectedMedia = (file: File | null) => {
+    if (previewObjectUrlRef.current) {
+      URL.revokeObjectURL(previewObjectUrlRef.current);
+      previewObjectUrlRef.current = "";
     }
 
-    const nextPreviewUrl = URL.createObjectURL(media);
-    setPreviewUrl(nextPreviewUrl);
-    return () => URL.revokeObjectURL(nextPreviewUrl);
-  }, [media]);
+    setMedia(file);
+    if (!file) {
+      setPreviewUrl("");
+      return;
+    }
 
-  useEffect(() => {
-    const serviceName = service.trim();
+    const nextPreviewUrl = URL.createObjectURL(file);
+    previewObjectUrlRef.current = nextPreviewUrl;
+    setPreviewUrl(nextPreviewUrl);
+  };
+
+  const handleServiceChange = (nextService: string) => {
+    setService(nextService);
+    if (suggestionTimerRef.current) window.clearTimeout(suggestionTimerRef.current);
+
+    const serviceName = nextService.trim();
     if (serviceName.length < 3) {
       setSuggestedCategory(null);
-      return undefined;
+      setIsSuggestingCategory(false);
+      return;
     }
 
-    let isCurrent = true;
-    const timer = window.setTimeout(() => {
+    suggestionTimerRef.current = window.setTimeout(() => {
       setIsSuggestingCategory(true);
       void suggestCategory(serviceName)
         .then(({ category: predictedCategory }) => {
-          if (isCurrent && predictedCategory) setSuggestedCategory(predictedCategory);
+          setSuggestedCategory(predictedCategory || null);
         })
         .catch(() => {
-          if (isCurrent) setSuggestedCategory(null);
+          setSuggestedCategory(null);
         })
         .finally(() => {
-          if (isCurrent) setIsSuggestingCategory(false);
+          setIsSuggestingCategory(false);
         });
     }, 350);
+  };
 
-    return () => {
-      isCurrent = false;
-      window.clearTimeout(timer);
-    };
-  }, [service]);
-
-  const handleDragOver = (e: DragEvent<HTMLDivElement>) => {
-    e.preventDefault();
+  const handleDragOver = (event: DragEvent<HTMLDivElement>) => {
+    event.preventDefault();
     setIsDragging(true);
   };
 
-  const handleDragLeave = (e: DragEvent<HTMLDivElement>) => {
-    e.preventDefault();
+  const handleDragLeave = (event: DragEvent<HTMLDivElement>) => {
+    event.preventDefault();
     setIsDragging(false);
   };
 
-  const handleDrop = (e: DragEvent<HTMLDivElement>) => {
-    e.preventDefault();
+  const handleDrop = (event: DragEvent<HTMLDivElement>) => {
+    event.preventDefault();
     setIsDragging(false);
-    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
-      setMedia(e.dataTransfer.files[0]);
+    if (event.dataTransfer.files && event.dataTransfer.files[0]) {
+      setSelectedMedia(event.dataTransfer.files[0]);
     }
   };
 
@@ -94,7 +113,7 @@ function UploadSection({ userName, handle, categories, onUploaded }: UploadSecti
     setPrice("");
     setDurationMinutes("60");
     setCaption("");
-    setMedia(null);
+    setSelectedMedia(null);
     setMessage("");
     setShowSuccessPopup(false);
     if (fileInputRef.current) fileInputRef.current.value = "";
@@ -103,22 +122,22 @@ function UploadSection({ userName, handle, categories, onUploaded }: UploadSecti
   const submit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (!media) {
-      setMessage("Please choose or drop an image/video to showcase.");
+      setMessage("Add a photo or video first.");
       return;
     }
 
-    if (!service) {
-      setMessage("Please enter a service name.");
+    if (!service.trim()) {
+      setMessage("Add a service name.");
       return;
     }
 
     if (!category) {
-      setMessage("Please select a category.");
+      setMessage("Choose a category.");
       return;
     }
 
     if (!price || Number(price) < 0 || Number(durationMinutes) < 15) {
-      setMessage("Enter a valid price and an estimated time of at least 15 minutes.");
+      setMessage("Check the price and time.");
       return;
     }
 
@@ -127,7 +146,7 @@ function UploadSection({ userName, handle, categories, onUploaded }: UploadSecti
     const formData = new FormData();
     formData.append("creator", userName);
     formData.append("handle", handle);
-    formData.append("service", service);
+    formData.append("service", service.trim());
     formData.append("category", category);
     formData.append("price", price);
     formData.append("durationMinutes", durationMinutes);
@@ -149,9 +168,9 @@ function UploadSection({ userName, handle, categories, onUploaded }: UploadSecti
 
   return (
     <>
-      <section className="upload-studio-card" aria-label="Creator Upload Studio">
+      <form className="upload-launchpad" onSubmit={submit} aria-label="Creator Upload Studio">
         <div
-          className={`upload-dropzone ${isDragging ? "dragging" : ""} ${previewUrl ? "has-preview" : ""}`}
+          className={`upload-media-stage ${isDragging ? "dragging" : ""} ${previewUrl ? "has-preview" : ""}`}
           onDragOver={handleDragOver}
           onDragLeave={handleDragLeave}
           onDrop={handleDrop}
@@ -167,35 +186,28 @@ function UploadSection({ userName, handle, categories, onUploaded }: UploadSecti
               <button
                 className="preview-remove-btn"
                 type="button"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setMedia(null);
+                onClick={(event) => {
+                  event.stopPropagation();
+                  setSelectedMedia(null);
                 }}
                 title="Remove media"
               >
                 <IconClose size={16} />
               </button>
-              <div className="preview-status-pill">
-                <IconCheck size={12} />
-                <span>Ready</span>
-              </div>
             </div>
           ) : (
-            <div className="dropzone-empty-state">
-              <div className="dropzone-icon-circle">
-                <IconCamera size={32} />
-              </div>
-              <h3>Add media</h3>
-              <p>Photo or video</p>
+            <div className="upload-media-empty">
+              <IconCamera size={34} />
+              <strong>Drop work here</strong>
               <button
                 className="btn-outline-sm"
                 type="button"
-                onClick={(e) => {
-                  e.stopPropagation();
+                onClick={(event) => {
+                  event.stopPropagation();
                   fileInputRef.current?.click();
                 }}
               >
-                Browse
+                Choose file
               </button>
             </div>
           )}
@@ -205,109 +217,115 @@ function UploadSection({ userName, handle, categories, onUploaded }: UploadSecti
             type="file"
             accept="image/*,video/*"
             className="hidden-file-input"
-            onChange={(event) => setMedia(event.target.files?.[0] || null)}
+            onChange={(event) => setSelectedMedia(event.target.files?.[0] || null)}
           />
+
+          <div className="upload-preview-plate">
+            <span>{handle}</span>
+            <h2>{service.trim() || "Untitled look"}</h2>
+            <div className="upload-preview-meta">
+              <b>{category || "Category"}</b>
+              <b>{priceLabel}</b>
+              <b>{durationLabel}</b>
+            </div>
+          </div>
         </div>
 
-        <form className="upload-studio-form" onSubmit={submit}>
-          <div className="form-header">
-            <span className="upload-author">{handle}</span>
-            <h2>Post details</h2>
+        <section className="upload-control-panel">
+          <div className="upload-panel-head">
+            <span>Creator post</span>
+            <h2>Make it bookable</h2>
           </div>
 
-          <div className="form-field-group">
-            <div className="upload-booking-fields" aria-label="Booking details">
-              <label className="studio-label">
-                <span>Category</span>
-                <select className="studio-input" value={category} onChange={(event) => setCategory(event.target.value)} required>
-                  <option value="" disabled>Select</option>
-                  {visibleCategories.map((item) => <option key={item} value={item}>{item}</option>)}
-                </select>
-                {suggestedCategory && suggestedCategory !== category && (
-                  <button className="category-suggestion" type="button" onClick={() => { setCategory(suggestedCategory); setSuggestedCategory(null); }}>
-                    {isSuggestingCategory ? "Checking..." : `Use ${suggestedCategory}`}
-                  </button>
-                )}
-              </label>
-              <label className="studio-label upload-service-field">
-                <span>Service</span>
-                <input className="studio-input" value={service} onChange={(event) => setService(event.target.value)} placeholder="Knotless braids" required />
-              </label>
-              <label className="studio-label">
-                <span>Price</span>
-                <input className="studio-input" type="number" min="0" step="0.01" value={price} onChange={(event) => setPrice(event.target.value)} placeholder="850" required />
-              </label>
-              <label className="studio-label">
-                <span>Time</span>
-                <input className="studio-input" type="number" min="15" step="15" value={durationMinutes} onChange={(event) => setDurationMinutes(event.target.value)} required />
-              </label>
-            </div>
+          <label className="studio-label upload-service-field">
+            <span>Service</span>
+            <input className="studio-input" value={service} onChange={(event) => handleServiceChange(event.target.value)} placeholder="Knotless braids" required />
+          </label>
 
+          <div className="studio-label">
+            <span>Category</span>
+            <div className="category-chip-grid" aria-label="Category">
+              {visibleCategories.map((item) => (
+                <button
+                  key={item}
+                  className={`category-choice ${category === item ? "selected" : ""}`}
+                  type="button"
+                  onClick={() => setCategory(item)}
+                >
+                  {category === item && <IconCheck size={13} />}
+                  <span>{item}</span>
+                </button>
+              ))}
+            </div>
+            {suggestedCategory && suggestedCategory !== category && (
+              <button className="category-suggestion" type="button" onClick={() => { setCategory(suggestedCategory); setSuggestedCategory(null); }}>
+                {isSuggestingCategory ? "Checking..." : `Use ${suggestedCategory}`}
+              </button>
+            )}
+          </div>
+
+          <div className="upload-rate-row">
             <label className="studio-label">
-              <span>Caption</span>
-              <textarea
-                value={caption}
-                onChange={(event) => setCaption(event.target.value)}
-                placeholder="Short note for clients"
-                rows={3}
-                className="studio-input studio-textarea"
-              />
+              <span>Price</span>
+              <input className="studio-input" type="number" min="0" step="0.01" value={price} onChange={(event) => setPrice(event.target.value)} placeholder="850" required />
+            </label>
+            <label className="studio-label">
+              <span>Minutes</span>
+              <input className="studio-input" type="number" min="15" step="15" value={durationMinutes} onChange={(event) => setDurationMinutes(event.target.value)} required />
             </label>
           </div>
 
-          <button
-            className="btn-primary studio-submit-btn"
-            type="submit"
-            disabled={isSubmitting || !media}
-          >
-            <IconUpload size={18} />
-            <span>{isSubmitting ? "Publishing..." : "Publish"}</span>
-          </button>
+          <label className="studio-label">
+            <span>Note</span>
+            <textarea
+              value={caption}
+              onChange={(event) => setCaption(event.target.value)}
+              placeholder="Optional"
+              rows={3}
+              className="studio-input studio-textarea"
+            />
+          </label>
+
+          <div className="upload-action-dock">
+            <button className="btn-ghost upload-clear-btn" type="button" onClick={resetForm}>
+              Clear
+            </button>
+            <button className="btn-primary studio-submit-btn" type="submit" disabled={isSubmitting || !canPublish}>
+              <IconUpload size={18} />
+              <span>{isSubmitting ? "Publishing..." : "Publish"}</span>
+            </button>
+          </div>
 
           {message && (
             <p className="form-message form-message-error" role="status">
               {message}
             </p>
           )}
-        </form>
-      </section>
+        </section>
+      </form>
 
       {showSuccessPopup && (
         <div className="success-modal-backdrop" onClick={onUploaded}>
-          <div className="success-modal-card" onClick={(e) => e.stopPropagation()}>
+          <div className="success-modal-card" onClick={(event) => event.stopPropagation()}>
             <div className="success-modal-icon-wrap">
               <IconCheck size={28} />
             </div>
 
             <div className="success-modal-text">
-              <h3>Published</h3>
-              <p>Your work is live on the feed.</p>
+              <h3>Live</h3>
+              <p>Your post is ready for clients.</p>
             </div>
 
             <div className="success-modal-actions">
-              <button
-                className="btn-primary"
-                type="button"
-                onClick={onUploaded}
-              >
+              <button className="btn-primary" type="button" onClick={onUploaded}>
                 View feed
               </button>
-
-              <button
-                className="btn-ghost"
-                type="button"
-                onClick={resetForm}
-              >
-                Add another
+              <button className="btn-ghost" type="button" onClick={resetForm}>
+                New post
               </button>
             </div>
 
-            <button
-              className="success-modal-close"
-              type="button"
-              onClick={onUploaded}
-              aria-label="Close"
-            >
+            <button className="success-modal-close" type="button" onClick={onUploaded} aria-label="Close">
               <IconClose size={18} />
             </button>
           </div>

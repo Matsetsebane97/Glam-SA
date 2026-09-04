@@ -12,14 +12,15 @@ type UploadPageProps = {
 function UploadPage({ categories, currentUser, onNavigate, onUploaded }: UploadPageProps) {
   return (
     <section className="page-content upload-page">
-      <div className="upload-topline">
-        <button className="btn-ghost back-link" type="button" onClick={() => onNavigate("/")}>
+      <div className="upload-command-bar">
+        <button className="upload-back-button" type="button" onClick={() => onNavigate("/")}>
           Back
         </button>
-        <div>
-          <span className="upload-kicker">New post</span>
-          <h1>Show your latest work</h1>
+        <div className="upload-command-title">
+          <span>Upload</span>
+          <strong>New creator listing</strong>
         </div>
+        <span className="upload-command-status">Draft</span>
       </div>
 
       {currentUser?.accountType === "client" ? (
