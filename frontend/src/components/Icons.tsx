@@ -116,8 +116,9 @@ export function IconVerified({ size = 16, className = defaults.className }: Icon
 export function IconWhatsApp({ size = defaults.size, className = defaults.className }: IconProps) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none" className={className} aria-hidden="true">
-      <path d="M21 11.5a8.5 8.5 0 01-13 7.3L3 21l2.3-4.8A8.5 8.5 0 1121 11.5z" stroke="currentColor" strokeWidth="1.6" strokeLinejoin="round" />
-      <path d="M9.5 8.5c-.3-.7-.6-.7-.9-.7h-.7c-.2 0-.6.1-.9.4s-1.2 1.2-1.2 2.9 1.2 3.4 1.4 3.6c.2.2 2.4 3.7 5.8 5.1 2.8 1.2 3.4 1 4 .9.6-.1 1.9-.8 2.2-1.5.3-.8.3-1.4.2-1.5-.1-.1-.3-.2-.7-.4s-2.3-1.1-2.6-1.3-.6-.2-.9.2-1 1.3-1.3 1.6c-.2.2-.5.3-.8.1-.4-.2-1.6-.6-3-1.9-1.1-1-1.9-2.2-2.1-2.6-.2-.4 0-.6.2-.8.2-.2.4-.4.5-.6s.2-.4.3-.6c.1-.2.1-.4 0-.6s-.9-2.3-1.3-3.1z" fill="currentColor" />
+      {/* Filled mark keeps the WhatsApp action recognizable at small sizes. */}
+      <path d="M12 2.25a9.75 9.75 0 00-8.4 14.7L2.25 21.75l4.95-1.3A9.75 9.75 0 1012 2.25z" fill="#25D366" />
+      <path d="M8.2 7.7c.2-.35.4-.37.7-.37h.55c.2 0 .4.1.5.35l.8 1.85c.1.25.08.45-.08.65l-.55.7c-.14.17-.16.35-.05.55.42.73 1 1.35 1.65 1.85.55.42 1.2.77 1.87.97.22.07.4.01.55-.16l.7-.82c.16-.2.36-.24.6-.13l1.82.85c.24.11.35.3.3.56-.1.65-.42 1.2-.98 1.5-.45.24-1.04.27-1.57.18-1.3-.22-2.8-1-4.2-2.2-1.1-.94-2.1-2.1-2.8-3.3-.48-.82-.8-1.7-.82-2.55-.01-.5.1-.98.36-1.43z" fill="#FFFFFF" />
     </svg>
   );
 }
