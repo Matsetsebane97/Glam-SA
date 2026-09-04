@@ -1,16 +1,14 @@
 import { useEffect, useState, useRef } from "react";
 import type { FormEvent, DragEvent } from "react";
-import { fallbackCategories } from "../constants";
 import { IconCamera, IconCheck, IconClose, IconUpload } from "./Icons";
 
 type UploadSectionProps = {
   userName: string;
   handle: string;
-  categories: string[];
   onUploaded: () => void;
 };
 
-function UploadSection({ userName, handle, categories, onUploaded }: UploadSectionProps) {
+function UploadSection({ userName, handle, onUploaded }: UploadSectionProps) {
   const [service, setService] = useState("");
   const [price, setPrice] = useState("");
   const [durationMinutes, setDurationMinutes] = useState("60");
@@ -22,9 +20,6 @@ function UploadSection({ userName, handle, categories, onUploaded }: UploadSecti
   const [isDragging, setIsDragging] = useState(false);
   const [showSuccessPopup, setShowSuccessPopup] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
-
-  const serviceOptions = categories.filter((category) => category !== "For you");
-  const visibleServiceOptions = serviceOptions.length > 0 ? serviceOptions : fallbackCategories;
 
   useEffect(() => {
     if (!media) {
@@ -179,22 +174,12 @@ function UploadSection({ userName, handle, categories, onUploaded }: UploadSecti
           </div>
 
           <div className="form-field-group">
-            <label className="studio-label">
-              <span>Style Specialty Category</span>
-              <select
-                value={service}
-                onChange={(event) => setService(event.target.value)}
-                required
-                className="studio-input"
-              >
-                <option value="" disabled>Select category (e.g. Tattoos, Knotless Braids, Nails)</option>
-                {visibleServiceOptions.map((cat) => (
-                  <option key={cat} value={cat}>{cat}</option>
-                ))}
-              </select>
-            </label>
-
-            <div className="upload-booking-fields">
+            <div className="booking-fields-title">Booking details</div>
+            <div className="upload-booking-fields" aria-label="Booking details">
+              <label className="studio-label upload-service-field">
+                <span>Service name</span>
+                <input className="studio-input" value={service} onChange={(event) => setService(event.target.value)} placeholder="e.g. Knotless braids" required />
+              </label>
               <label className="studio-label">
                 <span>Price (ZAR)</span>
                 <input className="studio-input" type="number" min="0" step="0.01" value={price} onChange={(event) => setPrice(event.target.value)} placeholder="e.g. 850.00" required />

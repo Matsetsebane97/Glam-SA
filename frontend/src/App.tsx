@@ -144,7 +144,6 @@ function App() {
     if (pathname === "/upload") {
       return (
         <UploadPage
-          categories={categories}
           currentUser={currentUser}
           onNavigate={navigate}
           onUploaded={() => {

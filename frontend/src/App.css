@@ -2372,8 +2372,18 @@ body {
 
 .upload-booking-fields {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 1.4fr 1fr 1fr;
   gap: 12px;
+  padding: 14px;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  background: #fbfaf6;
+}
+
+.booking-fields-title {
+  color: var(--ink-primary);
+  font-size: 13px;
+  font-weight: 800;
 }
 
 .booking-summary {
