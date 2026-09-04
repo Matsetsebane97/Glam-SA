@@ -1,6 +1,5 @@
 // Page-level layout for submitting a new creator post.
 import UploadSection from "../components/UploadSection";
-import { IconUpload } from "../components/Icons";
 import type { CurrentUser } from "../types";
 
 type UploadPageProps = {
@@ -13,21 +12,14 @@ type UploadPageProps = {
 function UploadPage({ categories, currentUser, onNavigate, onUploaded }: UploadPageProps) {
   return (
     <section className="page-content upload-page">
-      <button className="btn-ghost back-link" type="button" onClick={() => onNavigate("/")}>
-        ← Back to Feed
-      </button>
-
-      <div className="upload-hero">
-        <div className="hero-badge">
-          <IconUpload size={14} />
-          <span>CREATOR STUDIO · INSPIRE MZANSI</span>
+      <div className="upload-topline">
+        <button className="btn-ghost back-link" type="button" onClick={() => onNavigate("/")}>
+          Back
+        </button>
+        <div>
+          <span className="upload-kicker">New post</span>
+          <h1>Show your latest work</h1>
         </div>
-        <h1>
-          Showcase your <em>beauty mastery</em>
-        </h1>
-        <p className="hero-subtitle">
-          Upload crisp photos and videos of your hair, makeup, barbering, or nail styles to connect with clients across South Africa.
-        </p>
       </div>
 
       {currentUser?.accountType === "client" ? (

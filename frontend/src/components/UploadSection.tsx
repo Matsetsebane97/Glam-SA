@@ -138,7 +138,7 @@ function UploadSection({ userName, handle, categories, onUploaded }: UploadSecti
       const response = await fetch("/api/posts/", { method: "POST", body: formData });
       const data = (await response.json()) as { error?: string };
       if (!response.ok) throw new Error(data.error || "Your work could not be shared.");
-      
+
       setShowSuccessPopup(true);
     } catch (error) {
       setMessage(error instanceof Error ? error.message : "Your work could not be shared.");
@@ -177,7 +177,7 @@ function UploadSection({ userName, handle, categories, onUploaded }: UploadSecti
               </button>
               <div className="preview-status-pill">
                 <IconCheck size={12} />
-                <span>Ready to publish</span>
+                <span>Ready</span>
               </div>
             </div>
           ) : (
@@ -185,8 +185,8 @@ function UploadSection({ userName, handle, categories, onUploaded }: UploadSecti
               <div className="dropzone-icon-circle">
                 <IconCamera size={32} />
               </div>
-              <h3>Drop your photo or video here</h3>
-              <p>Support for high-res JPG, PNG, WEBP, or MP4 videos</p>
+              <h3>Add media</h3>
+              <p>Photo or video</p>
               <button
                 className="btn-outline-sm"
                 type="button"
@@ -195,7 +195,7 @@ function UploadSection({ userName, handle, categories, onUploaded }: UploadSecti
                   fileInputRef.current?.click();
                 }}
               >
-                Browse Files
+                Browse
               </button>
             </div>
           )}
@@ -211,48 +211,44 @@ function UploadSection({ userName, handle, categories, onUploaded }: UploadSecti
 
         <form className="upload-studio-form" onSubmit={submit}>
           <div className="form-header">
-            <div className="eyebrow">
-              <span>PORTFOLIO SHOWCASE</span>
-            </div>
-            <h2>Publish to Glam SA</h2>
-            <p>Share details so clients near you can discover and request this style.</p>
+            <span className="upload-author">{handle}</span>
+            <h2>Post details</h2>
           </div>
 
           <div className="form-field-group">
-            <div className="booking-fields-title">Booking details</div>
             <div className="upload-booking-fields" aria-label="Booking details">
               <label className="studio-label">
                 <span>Category</span>
                 <select className="studio-input" value={category} onChange={(event) => setCategory(event.target.value)} required>
-                  <option value="" disabled>Select a category</option>
+                  <option value="" disabled>Select</option>
                   {visibleCategories.map((item) => <option key={item} value={item}>{item}</option>)}
                 </select>
                 {suggestedCategory && suggestedCategory !== category && (
                   <button className="category-suggestion" type="button" onClick={() => { setCategory(suggestedCategory); setSuggestedCategory(null); }}>
-                    {isSuggestingCategory ? "Checking..." : `Suggest ${suggestedCategory}`}
+                    {isSuggestingCategory ? "Checking..." : `Use ${suggestedCategory}`}
                   </button>
                 )}
               </label>
               <label className="studio-label upload-service-field">
-                <span>Service name</span>
-                <input className="studio-input" value={service} onChange={(event) => setService(event.target.value)} placeholder="e.g. Knotless braids" required />
+                <span>Service</span>
+                <input className="studio-input" value={service} onChange={(event) => setService(event.target.value)} placeholder="Knotless braids" required />
               </label>
               <label className="studio-label">
-                <span>Price (ZAR)</span>
-                <input className="studio-input" type="number" min="0" step="0.01" value={price} onChange={(event) => setPrice(event.target.value)} placeholder="e.g. 850.00" required />
+                <span>Price</span>
+                <input className="studio-input" type="number" min="0" step="0.01" value={price} onChange={(event) => setPrice(event.target.value)} placeholder="850" required />
               </label>
               <label className="studio-label">
-                <span>Estimated time (minutes)</span>
+                <span>Time</span>
                 <input className="studio-input" type="number" min="15" step="15" value={durationMinutes} onChange={(event) => setDurationMinutes(event.target.value)} required />
               </label>
             </div>
 
             <label className="studio-label">
-              <span>Caption & Technique Notes</span>
+              <span>Caption</span>
               <textarea
                 value={caption}
                 onChange={(event) => setCaption(event.target.value)}
-                placeholder="e.g. Fine line floral tattoo on forearm. Completed in 3 hours at our Rosebank studio."
+                placeholder="Short note for clients"
                 rows={3}
                 className="studio-input studio-textarea"
               />
@@ -265,7 +261,7 @@ function UploadSection({ userName, handle, categories, onUploaded }: UploadSecti
             disabled={isSubmitting || !media}
           >
             <IconUpload size={18} />
-            <span>{isSubmitting ? "Publishing Look..." : "Publish Look to Feed"}</span>
+            <span>{isSubmitting ? "Publishing..." : "Publish"}</span>
           </button>
 
           {message && (
@@ -276,7 +272,6 @@ function UploadSection({ userName, handle, categories, onUploaded }: UploadSecti
         </form>
       </section>
 
-      {/* Success Popup Modal */}
       {showSuccessPopup && (
         <div className="success-modal-backdrop" onClick={onUploaded}>
           <div className="success-modal-card" onClick={(e) => e.stopPropagation()}>
@@ -285,8 +280,8 @@ function UploadSection({ userName, handle, categories, onUploaded }: UploadSecti
             </div>
 
             <div className="success-modal-text">
-              <h3>Look Published Successfully!</h3>
-              <p>Your work is now live on the Glam SA community feed and searchable by clients across South Africa.</p>
+              <h3>Published</h3>
+              <p>Your work is live on the feed.</p>
             </div>
 
             <div className="success-modal-actions">
@@ -295,7 +290,7 @@ function UploadSection({ userName, handle, categories, onUploaded }: UploadSecti
                 type="button"
                 onClick={onUploaded}
               >
-                View on Feed
+                View feed
               </button>
 
               <button
@@ -303,7 +298,7 @@ function UploadSection({ userName, handle, categories, onUploaded }: UploadSecti
                 type="button"
                 onClick={resetForm}
               >
-                Upload Another Look
+                Add another
               </button>
             </div>
 
@@ -313,7 +308,7 @@ function UploadSection({ userName, handle, categories, onUploaded }: UploadSecti
               onClick={onUploaded}
               aria-label="Close"
             >
-              ✕
+              <IconClose size={18} />
             </button>
           </div>
         </div>
