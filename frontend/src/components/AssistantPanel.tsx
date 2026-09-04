@@ -11,7 +11,14 @@ type ChatMessage = {
   id: number;
   author: "assistant" | "user";
   text: string;
-  matches?: Post[];
+  matches?: ArtistMatch[];
+};
+
+type ArtistMatch = {
+  id: string;
+  ownerId?: number;
+  name: string;
+  resultCount: number;
 };
 
 const categoryAliases: Record<string, string> = {
@@ -32,6 +39,29 @@ const categoryAliases: Record<string, string> = {
   tattoos: "Tattoos",
 };
 
+function getArtistMatches(posts: Post[]): ArtistMatch[] {
+  const artistsByKey = new Map<string, ArtistMatch>();
+
+  posts.forEach((post) => {
+    const key = post.ownerId ? `owner-${post.ownerId}` : `handle-${post.handle.toLowerCase()}`;
+    const existingArtist = artistsByKey.get(key);
+
+    if (existingArtist) {
+      artistsByKey.set(key, { ...existingArtist, resultCount: existingArtist.resultCount + 1 });
+      return;
+    }
+
+    artistsByKey.set(key, {
+      id: key,
+      ownerId: post.ownerId,
+      name: post.creator,
+      resultCount: 1,
+    });
+  });
+
+  return Array.from(artistsByKey.values());
+}
+
 function answerQuestion(question: string, posts: Post[]): Pick<ChatMessage, "text" | "matches"> {
   const normalizedQuestion = question.toLowerCase();
   const categoryToken = normalizedQuestion.match(/\b(braids?|hair|nails?|manicure|pedicure|barber(?:ing|s)?|makeup|facials?|skincare|tattoos?)\b/);
@@ -51,9 +81,9 @@ function answerQuestion(question: string, posts: Post[]): Pick<ChatMessage, "tex
     return { text: "I could not find a matching look yet. Try a broader location, category, or budget." };
   }
 
-  const matches = matchingPosts.slice(0, 3);
-  const suffix = matchingPosts.length > 3 ? ` I found ${matchingPosts.length} in total.` : "";
-  return { text: `Here are ${matches.length} matching look${matches.length === 1 ? "" : "s"}.${suffix}`, matches };
+  const matches = getArtistMatches(matchingPosts).slice(0, 3);
+  const suffix = matchingPosts.length > matches.length ? ` I found ${matchingPosts.length} matching looks in total.` : "";
+  return { text: `Here are ${matches.length} matching artist${matches.length === 1 ? "" : "s"}.${suffix}`, matches };
 }
 
 function AssistantPanel({ posts, onNavigate }: AssistantPanelProps) {
@@ -93,18 +123,20 @@ function AssistantPanel({ posts, onNavigate }: AssistantPanelProps) {
                 <span>{message.text}</span>
                 {message.matches && (
                   <div className="assistant-match-list">
-                    {message.matches.map((post) => (
-                      post.ownerId ? (
+                    {message.matches.map((artist) => (
+                      artist.ownerId ? (
                         <button
                           className="assistant-artist-link"
                           type="button"
-                          key={post.id}
-                          onClick={() => { setIsOpen(false); onNavigate(`/profile/${post.ownerId}`); }}
+                          key={artist.id}
+                          title={`${artist.resultCount} matching look${artist.resultCount === 1 ? "" : "s"}`}
+                          aria-label={`View ${artist.name}'s profile`}
+                          onClick={() => { setIsOpen(false); onNavigate(`/profile/${artist.ownerId}`); }}
                         >
-                          {post.creator}
+                          {artist.name}
                         </button>
                       ) : (
-                        <span className="assistant-artist-name" key={post.id}>{post.creator}</span>
+                        <span className="assistant-artist-name" key={artist.id}>{artist.name}</span>
                       )
                     ))}
                   </div>
