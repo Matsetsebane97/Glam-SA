@@ -72,6 +72,14 @@ function Sidebar({ activeNav, currentUser, onNavigate, onLogout }: SidebarProps)
             <IconUpload size={18} />
             <span>Share Your Look</span>
           </button>
+          <button
+            className="btn-ghost sidebar-map-btn"
+            type="button"
+            onClick={() => onNavigate("/discover")}
+          >
+            <IconCompass size={18} />
+            <span>Find an Artist on Map</span>
+          </button>
         </div>
       </div>
 

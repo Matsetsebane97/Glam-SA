@@ -1193,12 +1193,20 @@ body {
 
 .sidebar-action-wrap {
   margin-top: 6px;
+  display: grid;
+  gap: 8px;
 }
 
 .sidebar-create-btn {
   width: 100%;
   padding: 12px 16px;
   font-size: 14px;
+}
+
+.sidebar-map-btn {
+  width: 100%;
+  padding: 11px 16px;
+  font-size: 13px;
 }
 
 .profile-card {
