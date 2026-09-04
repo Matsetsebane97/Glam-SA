@@ -37,9 +37,11 @@ function PostCard({ post, currentUser, onNavigate }: PostCardProps) {
   const [selectedServiceId, setSelectedServiceId] = useState("");
   const [selectedSlotId, setSelectedSlotId] = useState("");
   const [bookingStatus, setBookingStatus] = useState("");
+  const styleImageUrl = post.mediaType.startsWith("image/") ? (post.mediaUrl || post.imageUrl) : post.imageUrl;
   const whatsappLink = whatsappUrl(
     post.whatsappNumber,
-    `Hi ${post.creator}, I saw your ${post.service} style on Glam SA and would love to inquire about booking a session!`,
+    inquiryText,
+    styleImageUrl,
   );
 
   useEffect(() => {
