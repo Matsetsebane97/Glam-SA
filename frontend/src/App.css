@@ -2370,6 +2370,36 @@ body {
   margin: 0 auto;
 }
 
+.upload-booking-fields {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.booking-summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 12px;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  background: var(--bg-secondary);
+  color: var(--ink-secondary);
+  font-size: 12px;
+}
+
+.booking-summary strong {
+  color: var(--ink-primary);
+  font-size: 16px;
+}
+
+@media (max-width: 520px) {
+  .upload-booking-fields {
+    grid-template-columns: 1fr;
+  }
+}
+
 .back-link {
   align-self: flex-start;
   margin-bottom: -10px;

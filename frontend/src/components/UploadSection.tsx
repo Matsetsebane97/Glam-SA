@@ -12,6 +12,8 @@ type UploadSectionProps = {
 
 function UploadSection({ userName, handle, categories, onUploaded }: UploadSectionProps) {
   const [service, setService] = useState("");
+  const [price, setPrice] = useState("");
+  const [durationMinutes, setDurationMinutes] = useState("60");
   const [caption, setCaption] = useState("");
   const [media, setMedia] = useState<File | null>(null);
   const [message, setMessage] = useState("");
@@ -55,6 +57,8 @@ function UploadSection({ userName, handle, categories, onUploaded }: UploadSecti
 
   const resetForm = () => {
     setService("");
+    setPrice("");
+    setDurationMinutes("60");
     setCaption("");
     setMedia(null);
     setMessage("");
@@ -74,12 +78,19 @@ function UploadSection({ userName, handle, categories, onUploaded }: UploadSecti
       return;
     }
 
+    if (!price || Number(price) < 0 || Number(durationMinutes) < 15) {
+      setMessage("Enter a valid price and an estimated time of at least 15 minutes.");
+      return;
+    }
+
     setMessage("");
     setIsSubmitting(true);
     const formData = new FormData();
     formData.append("creator", userName);
     formData.append("handle", handle);
     formData.append("service", service);
+    formData.append("price", price);
+    formData.append("durationMinutes", durationMinutes);
     formData.append("caption", caption);
     formData.append("media", media);
 
@@ -182,6 +193,17 @@ function UploadSection({ userName, handle, categories, onUploaded }: UploadSecti
                 ))}
               </select>
             </label>
+
+            <div className="upload-booking-fields">
+              <label className="studio-label">
+                <span>Price (ZAR)</span>
+                <input className="studio-input" type="number" min="0" step="0.01" value={price} onChange={(event) => setPrice(event.target.value)} placeholder="e.g. 850.00" required />
+              </label>
+              <label className="studio-label">
+                <span>Estimated time (minutes)</span>
+                <input className="studio-input" type="number" min="15" step="15" value={durationMinutes} onChange={(event) => setDurationMinutes(event.target.value)} required />
+              </label>
+            </div>
 
             <label className="studio-label">
               <span>Caption & Technique Notes</span>

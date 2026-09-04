@@ -45,7 +45,7 @@ function PostCard({ post, currentUser, onNavigate }: PostCardProps) {
   useEffect(() => {
     if (!showInquire || !post.ownerId) return;
     setBookingStatus("");
-    void Promise.all([getServices(post.ownerId), getAvailability(post.ownerId)])
+    void Promise.all([getServices(post.ownerId, post.id), getAvailability(post.ownerId)])
       .then(([nextServices, nextSlots]) => {
         setServices(nextServices.filter((service) => service.isActive));
         setSlots(nextSlots.filter((slot) => slot.isAvailable));
@@ -292,6 +292,10 @@ function PostCard({ post, currentUser, onNavigate }: PostCardProps) {
             <p className="inquiry-desc">
               Connect directly with {post.creator} to check calendar availability, request quotes, or book a session for this style.
             </p>
+            <div className="booking-summary">
+              <strong>R {post.price}</strong>
+              <span>Estimated time: {post.durationMinutes} minutes</span>
+            </div>
 
             <label className="inquiry-message-label">Your booking message
               <textarea rows={3} value={inquiryText} onChange={(event) => setInquiryText(event.target.value)} />

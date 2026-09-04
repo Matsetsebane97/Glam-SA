@@ -108,8 +108,9 @@ export const getUserProfile = async (userId: number): Promise<UserProfile> => {
   return (await response.json()) as UserProfile;
 };
 
-export const getServices = async (ownerId?: number): Promise<ServiceOffering[]> => {
-  const response = await fetch(ownerId ? `/api/users/${ownerId}/services/` : "/api/services/");
+export const getServices = async (ownerId?: number, postId?: number): Promise<ServiceOffering[]> => {
+  const baseUrl = ownerId ? `/api/users/${ownerId}/services/` : "/api/services/";
+  const response = await fetch(postId ? `${baseUrl}?postId=${postId}` : baseUrl);
   if (!response.ok) throw new Error("Unable to load services.");
   return ((await response.json()) as { services: ServiceOffering[] }).services;
 };

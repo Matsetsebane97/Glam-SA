@@ -8,6 +8,8 @@ export type Post = {
   handle: string;
   location: string;
   service: string;
+  price: string;
+  durationMinutes: number;
   caption: string;
   imageUrl: string;
   mediaUrl: string;

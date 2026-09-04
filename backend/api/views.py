@@ -254,6 +254,14 @@ def posts(request):
                 status=400,
             )
 
+        try:
+            price = Decimal(str(payload.get("price", "")))
+            duration_minutes = int(payload.get("durationMinutes", ""))
+        except (InvalidOperation, TypeError, ValueError):
+            return JsonResponse({"error": "A valid price and estimated time are required."}, status=400)
+        if price < 0 or duration_minutes < 15:
+            return JsonResponse({"error": "Price must be non-negative and estimated time must be at least 15 minutes."}, status=400)
+
         post = Post.objects.create(
             creator=payload["creator"],
             handle=payload["handle"],
@@ -261,11 +269,23 @@ def posts(request):
             latitude=profile.latitude if profile else None,
             longitude=profile.longitude if profile else None,
             service=payload["service"],
+            price=price,
+            duration_minutes=duration_minutes,
             caption=payload.get("caption", ""),
             image_url=uploaded_media_url or payload.get("imageUrl", ""),
             media_file=None if uploaded_media_url else media_file,
             media_type=media_type,
             owner=request.user,
+        )
+        ServiceOffering.objects.update_or_create(
+            owner=request.user,
+            post=post,
+            defaults={
+                "name": post.service,
+                "price": post.price,
+                "duration_minutes": post.duration_minutes,
+                "is_active": True,
+            },
         )
         return JsonResponse(post.as_dict(), status=201)
 
@@ -318,6 +338,10 @@ def post_detail(request, post_id):
             post.caption = str(payload["caption"]).strip()
         if "location" in payload:
             post.location = str(payload["location"]).strip()
+        if "price" in payload:
+            post.price = Decimal(str(payload["price"]))
+        if "durationMinutes" in payload:
+            post.duration_minutes = int(payload["durationMinutes"])
 
         post.save()
         return JsonResponse(post.as_dict())
@@ -421,6 +445,8 @@ def services(request, owner_id=None, service_id=None):
                 return JsonResponse({"error": "Log in to manage services."}, status=401)
             owner_id = request.user.id
         queryset = ServiceOffering.objects.filter(owner_id=owner_id)
+        if request.GET.get("postId"):
+            queryset = queryset.filter(post_id=request.GET["postId"])
         if service_id is not None:
             queryset = queryset.filter(id=service_id)
         return JsonResponse({"services": [_service_as_dict(service) for service in queryset]})
