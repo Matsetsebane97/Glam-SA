@@ -85,6 +85,8 @@ SUPABASE_STORAGE_BUCKET=media
 
 Keep `SUPABASE_SERVICE_ROLE_KEY` private and use the Supabase service-role key only on the Django backend. New uploads are stored in Supabase and returned as signed URLs; local uploads continue using Django media storage when these variables are absent.
 
+For the live Render service, both `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` are required. Production uploads are rejected when storage is not configured instead of being written to Render's temporary filesystem. Files uploaded locally before Supabase was configured must be uploaded again or migrated into the Supabase bucket.
+
 This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
 
 Currently, two official plugins are available:

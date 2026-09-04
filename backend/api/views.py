@@ -3,6 +3,7 @@
 import json
 from decimal import Decimal, InvalidOperation
 
+from django.conf import settings
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User
 from django.http import JsonResponse
@@ -190,6 +191,11 @@ def posts(request):
                 return JsonResponse({"error": "Upload an image or video file."}, status=400)
             if media_file.size > 50 * 1024 * 1024:
                 return JsonResponse({"error": "Files must be smaller than 50 MB."}, status=400)
+            if not is_configured() and not settings.DEBUG:
+                return JsonResponse(
+                    {"error": "Media storage is not configured on the server."},
+                    status=503,
+                )
         else:
             media_type = ""
 
