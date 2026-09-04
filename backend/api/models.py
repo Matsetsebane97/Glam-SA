@@ -77,3 +77,51 @@ class Message(models.Model):
 
     class Meta:
         ordering = ["created_at"]
+
+
+class ServiceOffering(models.Model):
+    owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name="service_offerings")
+    name = models.CharField(max_length=120)
+    price = models.DecimalField(max_digits=10, decimal_places=2)
+    duration_minutes = models.PositiveIntegerField(default=60)
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["name"]
+
+
+class AvailabilitySlot(models.Model):
+    owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name="availability_slots")
+    starts_at = models.DateTimeField()
+    ends_at = models.DateTimeField()
+    is_available = models.BooleanField(default=True)
+
+    class Meta:
+        ordering = ["starts_at"]
+        constraints = [
+            models.UniqueConstraint(fields=["owner", "starts_at", "ends_at"], name="unique_owner_availability_window"),
+        ]
+
+
+class Booking(models.Model):
+    STATUS_CHOICES = [
+        ("requested", "Requested"),
+        ("confirmed", "Confirmed"),
+        ("declined", "Declined"),
+        ("cancelled", "Cancelled"),
+    ]
+
+    client = models.ForeignKey(User, on_delete=models.CASCADE, related_name="bookings_made")
+    creator = models.ForeignKey(User, on_delete=models.CASCADE, related_name="bookings_received")
+    post = models.ForeignKey(Post, on_delete=models.SET_NULL, null=True, blank=True, related_name="bookings")
+    service_name = models.CharField(max_length=120)
+    price = models.DecimalField(max_digits=10, decimal_places=2)
+    starts_at = models.DateTimeField()
+    ends_at = models.DateTimeField()
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="requested")
+    notes = models.TextField(blank=True, max_length=2000)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-created_at"]

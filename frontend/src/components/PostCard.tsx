@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   IconBookmark,
   IconCheck,
@@ -12,7 +12,8 @@ import {
 import type { CurrentUser, Post } from "../types";
 import { formatDistance } from "../utils/geo";
 import { whatsappUrl } from "../utils/whatsapp";
-import { sendMessage, setPostLike } from "../api";
+import { createBooking, getAvailability, getServices, sendMessage, setPostLike } from "../api";
+import type { AvailabilitySlot, ServiceOffering } from "../types";
 
 type PostCardProps = {
   post: Post;
@@ -31,10 +32,29 @@ function PostCard({ post, currentUser, onNavigate }: PostCardProps) {
   const [inquiryText, setInquiryText] = useState(`Hi ${post.creator}, I would love to book this ${post.service} look.`);
   const [inquiryStatus, setInquiryStatus] = useState("");
   const [isSendingInquiry, setIsSendingInquiry] = useState(false);
+  const [services, setServices] = useState<ServiceOffering[]>([]);
+  const [slots, setSlots] = useState<AvailabilitySlot[]>([]);
+  const [selectedServiceId, setSelectedServiceId] = useState("");
+  const [selectedSlotId, setSelectedSlotId] = useState("");
+  const [bookingStatus, setBookingStatus] = useState("");
   const whatsappLink = whatsappUrl(
     post.whatsappNumber,
     `Hi ${post.creator}, I saw your ${post.service} style on Glam SA and would love to inquire about booking a session!`,
   );
+
+  useEffect(() => {
+    if (!showInquire || !post.ownerId) return;
+    setBookingStatus("");
+    void Promise.all([getServices(post.ownerId), getAvailability(post.ownerId)])
+      .then(([nextServices, nextSlots]) => {
+        setServices(nextServices.filter((service) => service.isActive));
+        setSlots(nextSlots.filter((slot) => slot.isAvailable));
+        const matchingService = nextServices.find((service) => service.name.toLowerCase() === post.service.toLowerCase());
+        setSelectedServiceId(String(matchingService?.id || nextServices[0]?.id || ""));
+        setSelectedSlotId(String(nextSlots[0]?.id || ""));
+      })
+      .catch(() => setBookingStatus("Booking times are not available right now."));
+  }, [post.ownerId, post.service, showInquire]);
 
   const toggleLike = async () => {
     if (isUpdatingLike) return;
@@ -64,6 +84,29 @@ function PostCard({ post, currentUser, onNavigate }: PostCardProps) {
       setInquiryStatus("Inquiry sent. You can continue the conversation from Messages.");
     } catch (error) { setInquiryStatus(error instanceof Error ? error.message : "Unable to send inquiry."); }
     finally { setIsSendingInquiry(false); }
+  };
+
+  const submitBooking = async () => {
+    if (!currentUser) {
+      setBookingStatus("Sign in to request a booking.");
+      return;
+    }
+    if (!selectedServiceId || !selectedSlotId) {
+      setBookingStatus("Choose a service and available time first.");
+      return;
+    }
+    try {
+      const booking = await createBooking({
+        serviceId: Number(selectedServiceId),
+        slotId: Number(selectedSlotId),
+        postId: post.id,
+        notes: inquiryText,
+      });
+      setBookingStatus(`Booking requested for ${new Date(booking.startsAt).toLocaleString("en-ZA", { day: "numeric", month: "short", hour: "numeric", minute: "2-digit" })}.`);
+      setSlots((current) => current.filter((slot) => slot.id !== Number(selectedSlotId)));
+    } catch (error) {
+      setBookingStatus(error instanceof Error ? error.message : "Unable to request booking.");
+    }
   };
 
   const handleShare = async () => {
@@ -253,7 +296,27 @@ function PostCard({ post, currentUser, onNavigate }: PostCardProps) {
             <label className="inquiry-message-label">Your booking message
               <textarea rows={3} value={inquiryText} onChange={(event) => setInquiryText(event.target.value)} />
             </label>
+            {currentUser && services.length > 0 && (
+              <div className="booking-fields">
+                <label className="inquiry-message-label">
+                  Service
+                  <select value={selectedServiceId} onChange={(event) => setSelectedServiceId(event.target.value)}>
+                    {services.map((service) => <option key={service.id} value={service.id}>{service.name} · R {service.price} · {service.durationMinutes} min</option>)}
+                  </select>
+                </label>
+                <label className="inquiry-message-label">
+                  Available time
+                  <select value={selectedSlotId} onChange={(event) => setSelectedSlotId(event.target.value)}>
+                    {slots.map((slot) => <option key={slot.id} value={slot.id}>{new Date(slot.startsAt).toLocaleString("en-ZA", { weekday: "short", day: "numeric", month: "short", hour: "numeric", minute: "2-digit" })}</option>)}
+                  </select>
+                </label>
+                <button type="button" className="btn-primary" onClick={() => void submitBooking()} disabled={!slots.length}>
+                  Request booking
+                </button>
+              </div>
+            )}
             {inquiryStatus && <p className="inquiry-status">{inquiryStatus}</p>}
+            {bookingStatus && <p className="inquiry-status">{bookingStatus}</p>}
             {inquiryStatus.startsWith("Inquiry sent") && (
               <button type="button" className="btn-outline-sm inquiry-messages-link" onClick={() => onNavigate("/messages")}>
                 View Messages

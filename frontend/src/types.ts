@@ -42,6 +42,35 @@ export type Conversation = {
   postService: string;
 };
 
+export type ServiceOffering = {
+  id: number;
+  name: string;
+  price: string;
+  durationMinutes: number;
+  isActive: boolean;
+};
+
+export type AvailabilitySlot = {
+  id: number;
+  startsAt: string;
+  endsAt: string;
+  isAvailable: boolean;
+};
+
+export type Booking = {
+  id: number;
+  clientId: number;
+  creatorId: number;
+  otherUserName: string;
+  serviceName: string;
+  price: string;
+  startsAt: string;
+  endsAt: string;
+  status: "requested" | "confirmed" | "declined" | "cancelled";
+  notes: string;
+  createdAt: string;
+};
+
 export type Message = {
   id: number;
   senderId: number;

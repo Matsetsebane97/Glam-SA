@@ -1,5 +1,5 @@
 // Centralizes browser requests so pages share one API contract.
-import type { Conversation, Coordinates, CurrentUser, Message, NearbyArtist, Post, UserProfile } from "./types";
+import type { AvailabilitySlot, Booking, Conversation, Coordinates, CurrentUser, Message, NearbyArtist, Post, ServiceOffering, UserProfile } from "./types";
 
 type CurrentUserResponse = {
   authenticated: boolean;
@@ -106,6 +106,61 @@ export const getUserProfile = async (userId: number): Promise<UserProfile> => {
   const response = await fetch(`/api/users/${userId}/`);
   if (!response.ok) throw new Error("Unable to load this profile.");
   return (await response.json()) as UserProfile;
+};
+
+export const getServices = async (ownerId?: number): Promise<ServiceOffering[]> => {
+  const response = await fetch(ownerId ? `/api/users/${ownerId}/services/` : "/api/services/");
+  if (!response.ok) throw new Error("Unable to load services.");
+  return ((await response.json()) as { services: ServiceOffering[] }).services;
+};
+
+export const saveService = async (payload: { id?: number; name: string; price: string; durationMinutes: number }): Promise<ServiceOffering> => {
+  const response = await fetch(payload.id ? `/api/services/${payload.id}/` : "/api/services/", {
+    method: payload.id ? "PATCH" : "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  });
+  const data = (await response.json().catch(() => ({}))) as ServiceOffering & { error?: string };
+  if (!response.ok) throw new Error(data.error || "Unable to save service.");
+  return data;
+};
+
+export const deleteService = async (serviceId: number): Promise<void> => {
+  const response = await fetch(`/api/services/${serviceId}/`, { method: "DELETE" });
+  if (!response.ok) throw new Error("Unable to delete service.");
+};
+
+export const getAvailability = async (ownerId?: number): Promise<AvailabilitySlot[]> => {
+  const response = await fetch(ownerId ? `/api/users/${ownerId}/availability/` : "/api/availability/");
+  if (!response.ok) throw new Error("Unable to load availability.");
+  return ((await response.json()) as { slots: AvailabilitySlot[] }).slots;
+};
+
+export const addAvailability = async (startsAt: string, endsAt: string): Promise<AvailabilitySlot> => {
+  const response = await fetch("/api/availability/", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ startsAt, endsAt }),
+  });
+  const data = (await response.json().catch(() => ({}))) as AvailabilitySlot & { error?: string };
+  if (!response.ok) throw new Error(data.error || "Unable to add availability.");
+  return data;
+};
+
+export const deleteAvailability = async (slotId: number): Promise<void> => {
+  const response = await fetch(`/api/availability/${slotId}/`, { method: "DELETE" });
+  if (!response.ok) throw new Error("Unable to remove availability.");
+};
+
+export const createBooking = async (payload: { serviceId: number; slotId: number; postId?: number; notes?: string }): Promise<Booking> => {
+  const response = await fetch("/api/bookings/", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  });
+  const data = (await response.json().catch(() => ({}))) as Booking & { error?: string };
+  if (!response.ok) throw new Error(data.error || "Unable to request booking.");
+  return data;
 };
 
 export const updatePost = async (

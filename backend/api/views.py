@@ -7,11 +7,13 @@ from django.conf import settings
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User
 from django.http import JsonResponse
-from django.db.models import F
+from django.db.models import F, Q
+from django.utils.dateparse import parse_datetime
+from django.utils import timezone
 from django.views.decorators.csrf import csrf_exempt
 
 from .geo import haversine_km, parse_optional_coordinate
-from .models import Message, Post, UserProfile
+from .models import AvailabilitySlot, Booking, Message, Post, ServiceOffering, UserProfile
 from .storage import is_configured, upload_media
 
 
@@ -374,6 +376,176 @@ def nearby_artists(request):
 
     artists.sort(key=lambda artist: artist["distanceKm"])
     return JsonResponse({"artists": artists})
+
+
+def _service_as_dict(service):
+    return {
+        "id": service.id,
+        "name": service.name,
+        "price": str(service.price),
+        "durationMinutes": service.duration_minutes,
+        "isActive": service.is_active,
+    }
+
+
+def _slot_as_dict(slot):
+    return {
+        "id": slot.id,
+        "startsAt": slot.starts_at.isoformat(),
+        "endsAt": slot.ends_at.isoformat(),
+        "isAvailable": slot.is_available,
+    }
+
+
+def _booking_as_dict(booking, viewer):
+    other_user = booking.creator if booking.client_id == viewer.id else booking.client
+    return {
+        "id": booking.id,
+        "clientId": booking.client_id,
+        "creatorId": booking.creator_id,
+        "otherUserName": other_user.get_full_name() or other_user.username,
+        "serviceName": booking.service_name,
+        "price": str(booking.price),
+        "startsAt": booking.starts_at.isoformat(),
+        "endsAt": booking.ends_at.isoformat(),
+        "status": booking.status,
+        "notes": booking.notes,
+        "createdAt": booking.created_at.isoformat(),
+    }
+
+
+def services(request, owner_id=None, service_id=None):
+    if request.method == "GET":
+        if owner_id is None:
+            if not request.user.is_authenticated:
+                return JsonResponse({"error": "Log in to manage services."}, status=401)
+            owner_id = request.user.id
+        queryset = ServiceOffering.objects.filter(owner_id=owner_id)
+        if service_id is not None:
+            queryset = queryset.filter(id=service_id)
+        return JsonResponse({"services": [_service_as_dict(service) for service in queryset]})
+
+    if not request.user.is_authenticated or (owner_id is not None and owner_id != request.user.id):
+        return JsonResponse({"error": "Only the profile owner can manage services."}, status=403)
+
+    if service_id is not None:
+        try:
+            service = ServiceOffering.objects.get(id=service_id, owner=request.user)
+        except ServiceOffering.DoesNotExist:
+            return JsonResponse({"error": "Service not found."}, status=404)
+        if request.method == "DELETE":
+            service.delete()
+            return JsonResponse({"message": "Service deleted."})
+        if request.method != "PATCH":
+            return JsonResponse({"error": "Method not allowed."}, status=405)
+        payload = json.loads(request.body or "{}")
+        is_new_service = False
+    else:
+        if request.method != "POST":
+            return JsonResponse({"error": "Method not allowed."}, status=405)
+        payload = json.loads(request.body or "{}")
+        service = ServiceOffering(owner=request.user)
+        is_new_service = True
+
+    name = str(payload.get("name", service.name)).strip()
+    try:
+        price = Decimal(str(payload.get("price", service.price)))
+        duration = int(payload.get("durationMinutes", service.duration_minutes))
+    except (InvalidOperation, TypeError, ValueError):
+        return JsonResponse({"error": "Price and duration must be valid numbers."}, status=400)
+    if not name or price < 0 or duration < 15:
+        return JsonResponse({"error": "Add a service name, a non-negative price, and a duration of at least 15 minutes."}, status=400)
+
+    service.name = name[:120]
+    service.price = price
+    service.duration_minutes = duration
+    service.is_active = bool(payload.get("isActive", service.is_active if service.pk else True))
+    service.save()
+    return JsonResponse(_service_as_dict(service), status=201 if is_new_service else 200)
+
+
+def availability(request, owner_id=None, slot_id=None):
+    if request.method == "GET":
+        if owner_id is None:
+            if not request.user.is_authenticated:
+                return JsonResponse({"error": "Log in to manage availability."}, status=401)
+            owner_id = request.user.id
+        slots = AvailabilitySlot.objects.filter(owner_id=owner_id, starts_at__gte=timezone.now())
+        if slot_id is not None:
+            slots = slots.filter(id=slot_id)
+        return JsonResponse({"slots": [_slot_as_dict(slot) for slot in slots]})
+
+    if not request.user.is_authenticated or (owner_id is not None and owner_id != request.user.id):
+        return JsonResponse({"error": "Only the profile owner can manage availability."}, status=403)
+    try:
+        payload = json.loads(request.body or "{}")
+        starts_at = parse_datetime(str(payload["startsAt"]))
+        ends_at = parse_datetime(str(payload["endsAt"]))
+    except (KeyError, TypeError, ValueError):
+        return JsonResponse({"error": "Valid start and end times are required."}, status=400)
+    if not starts_at or not ends_at or timezone.is_naive(starts_at) or timezone.is_naive(ends_at) or ends_at <= starts_at:
+        return JsonResponse({"error": "Availability must have an end time after its start time."}, status=400)
+    if slot_id is not None:
+        try:
+            slot = AvailabilitySlot.objects.get(id=slot_id, owner=request.user)
+        except AvailabilitySlot.DoesNotExist:
+            return JsonResponse({"error": "Availability slot not found."}, status=404)
+        if request.method == "DELETE":
+            slot.delete()
+            return JsonResponse({"message": "Availability removed."})
+        return JsonResponse({"error": "Only deletion is supported for existing slots."}, status=405)
+    if request.method != "POST":
+        return JsonResponse({"error": "Method not allowed."}, status=405)
+    slot, created = AvailabilitySlot.objects.get_or_create(owner=request.user, starts_at=starts_at, ends_at=ends_at)
+    if not created:
+        return JsonResponse({"error": "That availability slot already exists."}, status=409)
+    return JsonResponse(_slot_as_dict(slot), status=201)
+
+
+@csrf_exempt
+def bookings(request, booking_id=None):
+    if not request.user.is_authenticated:
+        return JsonResponse({"error": "Log in to manage bookings."}, status=401)
+    if request.method == "GET":
+        queryset = Booking.objects.filter(Q(client=request.user) | Q(creator=request.user)).select_related("client", "creator")
+        if booking_id is not None:
+            queryset = queryset.filter(id=booking_id)
+        return JsonResponse({"bookings": [_booking_as_dict(booking, request.user) for booking in queryset]})
+    if request.method != "POST":
+        return JsonResponse({"error": "Method not allowed."}, status=405)
+
+    try:
+        payload = json.loads(request.body or "{}")
+        service = ServiceOffering.objects.get(id=payload.get("serviceId"), is_active=True)
+        slot = AvailabilitySlot.objects.get(id=payload.get("slotId"), owner=service.owner, is_available=True)
+    except (json.JSONDecodeError, ServiceOffering.DoesNotExist, AvailabilitySlot.DoesNotExist, TypeError, ValueError):
+        return JsonResponse({"error": "Choose a valid service and available time."}, status=400)
+    if service.owner_id == request.user.id:
+        return JsonResponse({"error": "You cannot book your own service."}, status=400)
+    post_id = payload.get("postId") or None
+    if post_id:
+        try:
+            post = Post.objects.get(id=post_id, owner=service.owner)
+        except (Post.DoesNotExist, TypeError, ValueError):
+            return JsonResponse({"error": "That portfolio look does not belong to this creator."}, status=400)
+    else:
+        post = None
+    if Booking.objects.filter(creator=service.owner, starts_at__lt=slot.ends_at, ends_at__gt=slot.starts_at, status__in=["requested", "confirmed"]).exists():
+        return JsonResponse({"error": "That time is no longer available."}, status=409)
+
+    booking = Booking.objects.create(
+        client=request.user,
+        creator=service.owner,
+        post=post,
+        service_name=service.name,
+        price=service.price,
+        starts_at=slot.starts_at,
+        ends_at=slot.ends_at,
+        notes=str(payload.get("notes") or "").strip(),
+    )
+    slot.is_available = False
+    slot.save(update_fields=["is_available"])
+    return JsonResponse(_booking_as_dict(booking, request.user), status=201)
 
 
 @csrf_exempt
