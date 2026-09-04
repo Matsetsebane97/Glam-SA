@@ -169,7 +169,8 @@ body {
 }
 
 .app-shell {
-  max-width: 1540px;
+  width: 100%;
+  max-width: none;
   background: var(--bg-primary);
 }
 
@@ -2895,7 +2896,7 @@ body {
 }
 
 /* Glam SA visual refresh */
-.app-shell { max-width: 1600px; background: #ffffff; }
+.app-shell { width: 100%; max-width: none; background: #ffffff; }
 .sidebar { padding: 28px 20px; background: var(--ink-primary); color: #fffdf8; }
 .brand-logo-container { border-color: rgba(255, 253, 248, .18); background: #fffdf8; }
 .brand-text strong, .brand-subtitle { color: #fffdf8; }
@@ -2950,7 +2951,7 @@ body {
 
 /* Keep every authenticated page on the same content rail. */
 .page-content {
-  width: min(100%, 1040px);
+  width: 100%;
   max-width: none;
   margin-inline: auto;
   padding: 30px 34px 52px;
