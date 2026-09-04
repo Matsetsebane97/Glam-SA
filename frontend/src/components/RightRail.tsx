@@ -56,7 +56,18 @@ function RightRail({ currentUser, onNavigate }: RightRailProps) {
         ) : (
           <ul className="rail-artist-list">
             {artists.map((artist) => (
-              <li key={artist.id} className="rail-artist-item" role="button" tabIndex={0} onClick={() => onNavigate(`/profile/${artist.id}`)} onKeyDown={(event) => { if (event.key === "Enter" || event.key === " ") onNavigate(`/profile/${artist.id}`); }}>
+              <li
+                key={artist.id}
+                className="rail-artist-item"
+                role="button"
+                tabIndex={0}
+                onClick={() => onNavigate(`/profile/${artist.id}`)}
+                onKeyDown={(event) => {
+                  if (event.key === "Enter" || event.key === " ") {
+                    onNavigate(`/profile/${artist.id}`);
+                  }
+                }}
+              >
                 <div className="rail-artist-avatar" aria-hidden="true">
                   {artist.name.charAt(0).toUpperCase()}
                 </div>

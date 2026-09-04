@@ -61,7 +61,7 @@ export type NearbyArtist = {
   postCount: number;
 };
 
-export type NavItem = "Home" | "Discover" | "Following" | "Messages" | "Upload";
+export type NavItem = "Home" | "Discover" | "Messages" | "Upload";
 
 export type Coordinates = {
   latitude: number;

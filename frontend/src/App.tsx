@@ -161,7 +161,14 @@ function App() {
 
     if (pathname === "/profile" || pathname.startsWith("/profile/")) {
       const profileId = Number(pathname.split("/")[2]);
-      return <ProfilePage profileId={Number.isInteger(profileId) && profileId > 0 ? profileId : undefined} currentUser={currentUser} onNavigate={navigate} onLogout={() => void handleLogout()} />;
+      return (
+        <ProfilePage
+          profileId={Number.isInteger(profileId) && profileId > 0 ? profileId : undefined}
+          currentUser={currentUser}
+          onNavigate={navigate}
+          onLogout={() => void handleLogout()}
+        />
+      );
     }
 
     if (pathname === "/messages") {

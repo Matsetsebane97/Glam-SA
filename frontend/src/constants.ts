@@ -3,7 +3,7 @@ import type { NavItem } from "./types";
 
 export const brandLogoUrl = `${import.meta.env.BASE_URL}logo-mark.svg`;
 
-export const navItems: NavItem[] = ["Home", "Discover", "Following", "Messages", "Upload"];
+export const navItems: NavItem[] = ["Home", "Discover", "Messages", "Upload"];
 
 export const fallbackCategories = ["Hair", "Nails", "Barbering", "Makeup", "Skincare", "Tattoos"];
 

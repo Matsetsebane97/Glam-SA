@@ -47,7 +47,7 @@ function HomePage({
             Where artistry meets <em>signature style</em>
           </h1>
           <p className="hero-subtitle">
-            Discover verified hair stylists, makeup artists, nail technicians, and barbers across South Africa.
+            Discover hair stylists, makeup artists, nail technicians, and barbers across South Africa.
           </p>
 
           <div className="hero-button-row">

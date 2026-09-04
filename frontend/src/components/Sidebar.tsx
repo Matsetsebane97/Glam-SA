@@ -1,7 +1,7 @@
 // Desktop navigation and the signed-in user's quick profile summary.
 import type { ReactNode } from "react";
 import { brandLogoUrl, navItems } from "../constants";
-import { IconCompass, IconHeart, IconHome, IconMessage, IconUpload, IconVerified } from "./Icons";
+import { IconCompass, IconHome, IconMessage, IconUpload, IconVerified } from "./Icons";
 import type { CurrentUser, NavItem } from "../types";
 
 type SidebarProps = {
@@ -14,7 +14,6 @@ type SidebarProps = {
 const navIcons: Record<NavItem, ReactNode> = {
   Home: <IconHome size={20} />,
   Discover: <IconCompass size={20} />,
-  Following: <IconHeart size={20} />,
   Messages: <IconMessage size={20} />,
   Upload: <IconUpload size={20} />,
 };
@@ -38,13 +37,11 @@ function Sidebar({ activeNav, currentUser, onNavigate, onLogout }: SidebarProps)
         <nav className="main-nav" aria-label="Main navigation">
           {navItems.map((item) => {
             const isActive = activeNav === item;
-            const isClickable = item === "Home" || item === "Upload" || item === "Discover" || item === "Messages";
 
             return (
               <button
                 key={item}
                 className={`nav-item ${isActive ? "active" : ""}`}
-                disabled={!isClickable}
                 onClick={() => {
                   if (item === "Upload") onNavigate("/upload");
                   if (item === "Home") onNavigate("/");
@@ -64,6 +61,7 @@ function Sidebar({ activeNav, currentUser, onNavigate, onLogout }: SidebarProps)
 
         {/* Quick Share Action */}
         <div className="sidebar-action-wrap">
+          {/* Keep the two most common creation and discovery actions visible. */}
           <button
             className="btn-primary sidebar-create-btn"
             type="button"
@@ -109,8 +107,16 @@ function Sidebar({ activeNav, currentUser, onNavigate, onLogout }: SidebarProps)
             >
               {currentUser ? "Account" : "Join"}
             </button>
-              {currentUser && <button className="btn-outline-sm profile-btn" type="button" onClick={() => onNavigate("/settings")}>Settings</button>}
-            {currentUser && <button className="btn-outline-sm sidebar-logout-btn" type="button" onClick={onLogout}>Log out</button>}
+            {currentUser && (
+              <button className="btn-outline-sm profile-btn" type="button" onClick={() => onNavigate("/settings")}>
+                Settings
+              </button>
+            )}
+            {currentUser && (
+              <button className="btn-outline-sm sidebar-logout-btn" type="button" onClick={onLogout}>
+                Log out
+              </button>
+            )}
           </div>
         </div>
       </div>
