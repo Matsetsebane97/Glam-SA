@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { getNearbyArtists } from "../api";
-import { IconChevronRight, IconClose, IconMessage, IconPin, IconSend, IconWhatsApp } from "./Icons";
+import { IconBookmark, IconChevronRight, IconClose, IconMessage, IconMic, IconPin, IconSend, IconWhatsApp } from "./Icons";
 import type { CurrentUser, NearbyArtist, Post } from "../types";
 import { whatsappUrl } from "../utils/whatsapp";
 
@@ -8,6 +8,7 @@ type AssistantPanelProps = {
   posts: Post[];
   currentUser: CurrentUser | null;
   onNavigate: (path: string) => void;
+  onSearch: (query: string) => void;
 };
 
 type ChatMessage = {
@@ -16,6 +17,8 @@ type ChatMessage = {
   text: string;
   matches?: ArtistMatch[];
   quickReplies?: string[];
+  fullResultCount?: number;
+  fullResultQuery?: string;
 };
 
 type ArtistMatch = {
@@ -54,7 +57,19 @@ const categoryAliases: Record<string, string> = {
 const assistantSuggestions = ["Hair near me", "Nails under R500", "Makeup in Sandton", "Find artist Naledi"];
 const fallbackSuggestions = ["Try a broader budget", "Search another area", "Browse the full feed"];
 const recentSearchesKey = "glamAssistantRecentSearches";
+const savedArtistsKey = "glamAssistantSavedArtists";
 const searchStopWords = new Set(["a", "an", "artist", "artists", "beauty", "find", "for", "in", "look", "looks", "me", "near", "nearby", "show", "the", "under", "below", "less", "than"]);
+const speechRecognitionName = "webkitSpeechRecognition";
+
+type SpeechRecognitionConstructor = new () => {
+  continuous: boolean;
+  interimResults: boolean;
+  lang: string;
+  start: () => void;
+  onresult: ((event: { results: { [index: number]: { [index: number]: { transcript: string } } } }) => void) | null;
+  onend: (() => void) | null;
+  onerror: (() => void) | null;
+};
 
 type ParsedQuestion = {
   category?: string;
@@ -69,7 +84,7 @@ function parseQuestion(question: string): ParsedQuestion {
   const categoryToken = normalizedQuestion.match(/\b(braids?|hair|nails?|manicure|pedicure|barber(?:ing|s)?|makeup|facials?|skincare|tattoos?)\b/);
   const priceMatch = normalizedQuestion.match(/(?:under|below|less than)\s*r?\s*(\d+(?:\.\d+)?)/);
   const locationMatch = normalizedQuestion.match(/\bnear\s+(?!me\b)([a-z][a-z\s-]*?)(?=\s+(?:under|below|less than)\b|$)/);
-  const category = categoryToken ? categoryAliases[categoryToken[1]] : undefined;
+  const category = categoryToken ? categoryAliases[categoryToken[1]] : getFuzzyCategory(normalizedQuestion);
   const wantsNearby = /\b(near me|nearby|close to me|around me)\b/.test(normalizedQuestion);
   const searchTerms = normalizedQuestion
     .replace(categoryToken?.[0] || "", "")
@@ -87,6 +102,50 @@ function parseQuestion(question: string): ParsedQuestion {
     searchTerms,
     wantsNearby,
   };
+}
+
+function getEditDistance(firstValue: string, secondValue: string) {
+  const distances = Array.from({ length: firstValue.length + 1 }, (_, firstIndex) =>
+    Array.from({ length: secondValue.length + 1 }, (_, secondIndex) => firstIndex + secondIndex),
+  );
+
+  for (let firstIndex = 0; firstIndex <= firstValue.length; firstIndex += 1) distances[firstIndex][0] = firstIndex;
+  for (let secondIndex = 0; secondIndex <= secondValue.length; secondIndex += 1) distances[0][secondIndex] = secondIndex;
+
+  for (let firstIndex = 1; firstIndex <= firstValue.length; firstIndex += 1) {
+    for (let secondIndex = 1; secondIndex <= secondValue.length; secondIndex += 1) {
+      const cost = firstValue[firstIndex - 1] === secondValue[secondIndex - 1] ? 0 : 1;
+      distances[firstIndex][secondIndex] = Math.min(
+        distances[firstIndex - 1][secondIndex] + 1,
+        distances[firstIndex][secondIndex - 1] + 1,
+        distances[firstIndex - 1][secondIndex - 1] + cost,
+      );
+    }
+  }
+
+  return distances[firstValue.length][secondValue.length];
+}
+
+function isFuzzyMatch(term: string, candidate: string) {
+  if (!term || !candidate) return false;
+  if (candidate.includes(term) || term.includes(candidate)) return true;
+  const maxDistance = term.length > 6 ? 2 : 1;
+  return Math.abs(candidate.length - term.length) <= maxDistance && getEditDistance(term, candidate) <= maxDistance;
+}
+
+function textMatchesTerm(text: string, term: string) {
+  const normalizedText = text.toLowerCase();
+  if (normalizedText.includes(term)) return true;
+  return normalizedText.split(/[^a-z0-9]+/).some((word) => isFuzzyMatch(term, word));
+}
+
+function getFuzzyCategory(normalizedQuestion: string) {
+  const terms = normalizedQuestion.split(/[^a-z0-9]+/).filter(Boolean);
+  const categoryAlias = Object.entries(categoryAliases).find(([alias]) =>
+    terms.some((term) => isFuzzyMatch(term, alias)),
+  );
+
+  return categoryAlias?.[1];
 }
 
 function priceFromPost(post: Post) {
@@ -151,12 +210,12 @@ function getArtistMatches(posts: Post[]): ArtistMatch[] {
 
 function matchesQuestion(post: Post, parsedQuestion: ParsedQuestion) {
   const matchesCategory = !parsedQuestion.category || post.category.toLowerCase() === parsedQuestion.category.toLowerCase();
-  const matchesLocation = !parsedQuestion.location || post.location.toLowerCase().includes(parsedQuestion.location);
+  const matchesLocation = !parsedQuestion.location || textMatchesTerm(post.location, parsedQuestion.location);
   const matchesPrice = parsedQuestion.maxPrice == null || Number(post.price) <= parsedQuestion.maxPrice;
   const searchableText = [post.creator, post.handle, post.location, post.service, post.category, post.caption]
     .join(" ")
     .toLowerCase();
-  const matchesSearch = parsedQuestion.searchTerms.every((term) => searchableText.includes(term));
+  const matchesSearch = parsedQuestion.searchTerms.every((term) => textMatchesTerm(searchableText, term));
 
   return matchesCategory && matchesLocation && matchesPrice && matchesSearch;
 }
@@ -178,7 +237,7 @@ function mergeNearbyArtist(artist: NearbyArtist, postMatch?: ArtistMatch): Artis
   };
 }
 
-async function answerQuestion(question: string, posts: Post[], currentUser: CurrentUser | null): Promise<Pick<ChatMessage, "text" | "matches" | "quickReplies">> {
+async function answerQuestion(question: string, posts: Post[], currentUser: CurrentUser | null): Promise<Pick<ChatMessage, "text" | "matches" | "quickReplies" | "fullResultCount" | "fullResultQuery">> {
   const parsedQuestion = parseQuestion(question);
   const matchingPosts = posts.filter((post) => {
     return matchesQuestion(post, parsedQuestion);
@@ -207,12 +266,16 @@ async function answerQuestion(question: string, posts: Post[], currentUser: Curr
           const matchesCategory = !parsedQuestion.category || artist.category === parsedQuestion.category || postMatchesByOwnerId.has(artist.ownerId || 0);
           const matchesPrice = parsedQuestion.maxPrice == null || artist.minPrice == null || artist.minPrice <= parsedQuestion.maxPrice;
           const searchableText = [artist.name, artist.handle, artist.service, artist.category, artist.location].join(" ").toLowerCase();
-          return matchesCategory && matchesPrice && parsedQuestion.searchTerms.every((term) => searchableText.includes(term));
-        })
-        .slice(0, 3);
+          return matchesCategory && matchesPrice && parsedQuestion.searchTerms.every((term) => textMatchesTerm(searchableText, term));
+        });
 
       if (nearbyMatches.length > 0) {
-        return { text: `Here are ${nearbyMatches.length} nearby artist${nearbyMatches.length === 1 ? "" : "s"} within 50 km.`, matches: nearbyMatches };
+        return {
+          text: `Here are ${Math.min(nearbyMatches.length, 3)} nearby artist${nearbyMatches.length === 1 ? "" : "s"} within 50 km.`,
+          matches: nearbyMatches.slice(0, 3),
+          fullResultCount: nearbyMatches.length > 3 ? nearbyMatches.length : undefined,
+          fullResultQuery: question,
+        };
       }
     } catch {
       return { text: "I could not load nearby artists right now. Try a location search instead.", quickReplies: fallbackSuggestions };
@@ -226,15 +289,22 @@ async function answerQuestion(question: string, posts: Post[], currentUser: Curr
     };
   }
 
-  const matches = getArtistMatches(matchingPosts).slice(0, 3);
+  const allArtistMatches = getArtistMatches(matchingPosts);
+  const matches = allArtistMatches.slice(0, 3);
   const suffix = matchingPosts.length > matches.length ? ` I found ${matchingPosts.length} matching looks in total.` : "";
-  return { text: `Here are ${matches.length} matching artist${matches.length === 1 ? "" : "s"}.${suffix}`, matches };
+  return {
+    text: `Here are ${matches.length} matching artist${matches.length === 1 ? "" : "s"}.${suffix}`,
+    matches,
+    fullResultCount: allArtistMatches.length > 3 ? allArtistMatches.length : undefined,
+    fullResultQuery: question,
+  };
 }
 
-function AssistantPanel({ posts, currentUser, onNavigate }: AssistantPanelProps) {
+function AssistantPanel({ posts, currentUser, onNavigate, onSearch }: AssistantPanelProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [draft, setDraft] = useState("");
   const [isThinking, setIsThinking] = useState(false);
+  const [voiceStatus, setVoiceStatus] = useState("");
   const [recentSearches, setRecentSearches] = useState<string[]>(() => {
     try {
       const storedSearches = window.localStorage.getItem(recentSearchesKey);
@@ -246,6 +316,14 @@ function AssistantPanel({ posts, currentUser, onNavigate }: AssistantPanelProps)
   const [messages, setMessages] = useState<ChatMessage[]>([
     { id: 1, author: "assistant", text: "Hi, I can help you find beauty services by artist, category, location, or budget." },
   ]);
+  const [savedArtistIds, setSavedArtistIds] = useState<string[]>(() => {
+    try {
+      const storedArtists = window.localStorage.getItem(savedArtistsKey);
+      return storedArtists ? (JSON.parse(storedArtists) as string[]) : [];
+    } catch {
+      return [];
+    }
+  });
 
   const visiblePrompts = useMemo(() => {
     return [...recentSearches, ...assistantSuggestions.filter((suggestion) => !recentSearches.includes(suggestion))].slice(0, 4);
@@ -260,6 +338,49 @@ function AssistantPanel({ posts, currentUser, onNavigate }: AssistantPanelProps)
   const browseFeed = () => {
     setIsOpen(false);
     onNavigate("/");
+  };
+
+  const openFullResults = (query: string) => {
+    if (parseQuestion(query).wantsNearby) {
+      setIsOpen(false);
+      onNavigate("/discover");
+      return;
+    }
+
+    onSearch(query);
+    browseFeed();
+  };
+
+  const toggleSavedArtist = (artist: ArtistMatch) => {
+    const artistId = artist.ownerId ? `owner-${artist.ownerId}` : artist.id;
+    const nextSavedArtistIds = savedArtistIds.includes(artistId)
+      ? savedArtistIds.filter((savedArtistId) => savedArtistId !== artistId)
+      : [artistId, ...savedArtistIds];
+    setSavedArtistIds(nextSavedArtistIds);
+    window.localStorage.setItem(savedArtistsKey, JSON.stringify(nextSavedArtistIds));
+  };
+
+  const startVoiceSearch = () => {
+    const recognitionConstructor = (window as unknown as Record<string, SpeechRecognitionConstructor | undefined>)[speechRecognitionName];
+    if (!recognitionConstructor) {
+      setVoiceStatus("Voice search is not supported in this browser.");
+      return;
+    }
+
+    const recognition = new recognitionConstructor();
+    recognition.continuous = false;
+    recognition.interimResults = false;
+    recognition.lang = "en-ZA";
+    setVoiceStatus("Listening...");
+    recognition.onresult = (event) => {
+      const transcript = event.results[0][0].transcript.trim();
+      setDraft(transcript);
+      setVoiceStatus("");
+      void ask(transcript);
+    };
+    recognition.onerror = () => setVoiceStatus("I could not hear that clearly.");
+    recognition.onend = () => setVoiceStatus((status) => status === "Listening..." ? "" : status);
+    recognition.start();
   };
 
   const ask = async (nextQuestion = draft) => {
@@ -324,6 +445,11 @@ function AssistantPanel({ posts, currentUser, onNavigate }: AssistantPanelProps)
                       );
                       return (
                         <article className="assistant-artist-card" key={artist.id}>
+                          {(() => {
+                            const savedArtistId = artist.ownerId ? `owner-${artist.ownerId}` : artist.id;
+                            const isSaved = savedArtistIds.includes(savedArtistId);
+                            return (
+                              <>
                           <button
                             className="assistant-artist-card-main"
                             type="button"
@@ -349,6 +475,10 @@ function AssistantPanel({ posts, currentUser, onNavigate }: AssistantPanelProps)
                           <div className="assistant-artist-actions">
                             <button type="button" disabled={!artist.ownerId} onClick={() => openProfile(artist)}>Profile</button>
                             <button type="button" disabled={!artist.ownerId} onClick={() => openBooking(artist)}>Book</button>
+                            <button type="button" className={isSaved ? "saved" : ""} onClick={() => toggleSavedArtist(artist)}>
+                              <IconBookmark size={13} fill={isSaved ? "currentColor" : undefined} />
+                              {isSaved ? "Saved" : "Save"}
+                            </button>
                             {messageHref ? (
                               <a href={messageHref} target="_blank" rel="noreferrer" aria-label={`Message ${artist.name} on WhatsApp`} onClick={() => setIsOpen(false)}>
                                 <IconWhatsApp size={14} /> Message
@@ -357,6 +487,9 @@ function AssistantPanel({ posts, currentUser, onNavigate }: AssistantPanelProps)
                               <button type="button" disabled>Message</button>
                             )}
                           </div>
+                              </>
+                            );
+                          })()}
                         </article>
                       );
                     })}
@@ -368,6 +501,11 @@ function AssistantPanel({ posts, currentUser, onNavigate }: AssistantPanelProps)
                       <button type="button" key={reply} onClick={() => void ask(reply)}>{reply}</button>
                     ))}
                   </div>
+                )}
+                {message.fullResultCount && message.fullResultQuery && (
+                  <button className="assistant-full-results" type="button" onClick={() => openFullResults(message.fullResultQuery!)}>
+                    View all {message.fullResultCount} artists
+                  </button>
                 )}
               </div>
             ))}
@@ -385,10 +523,14 @@ function AssistantPanel({ posts, currentUser, onNavigate }: AssistantPanelProps)
               placeholder="Try: makeup near Sandton under R800"
               aria-label="Ask Glam SA assistant"
             />
+            <button className="icon-btn assistant-voice-btn" type="button" onClick={startVoiceSearch} aria-label="Start voice search">
+              <IconMic size={15} />
+            </button>
             <button className="icon-btn" type="submit" disabled={!draft.trim() || isThinking} aria-label="Send question">
               <IconSend size={16} />
             </button>
           </form>
+          {voiceStatus && <div className="assistant-voice-status" role="status">{voiceStatus}</div>}
           <button className="assistant-feed-link" type="button" onClick={browseFeed}>
             Browse the full feed
           </button>
