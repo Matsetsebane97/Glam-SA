@@ -31,6 +31,7 @@ class Post(models.Model):
     latitude = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)
     longitude = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)
     service = models.CharField(max_length=120)
+    category = models.CharField(max_length=80, blank=True)
     price = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     duration_minutes = models.PositiveIntegerField(default=60)
     caption = models.TextField(blank=True)
@@ -53,6 +54,7 @@ class Post(models.Model):
             "handle": self.handle,
             "location": self.location,
             "service": self.service,
+            "category": self.category,
             "price": str(self.price),
             "durationMinutes": self.duration_minutes,
             "caption": self.caption,

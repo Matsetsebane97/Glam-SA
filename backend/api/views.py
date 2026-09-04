@@ -269,6 +269,7 @@ def posts(request):
             latitude=profile.latitude if profile else None,
             longitude=profile.longitude if profile else None,
             service=payload["service"],
+            category=payload.get("category", "").strip(),
             price=price,
             duration_minutes=duration_minutes,
             caption=payload.get("caption", ""),

@@ -10,7 +10,7 @@ import {
   IconWhatsApp,
 } from "./Icons";
 import type { CurrentUser, Post } from "../types";
-import { formatDistance } from "../utils/geo";
+import { formatDistance, formatDuration } from "../utils/geo";
 import { whatsappUrl } from "../utils/whatsapp";
 import { createBooking, getAvailability, getServices, sendMessage, setPostLike } from "../api";
 import type { AvailabilitySlot, ServiceOffering } from "../types";
@@ -294,7 +294,7 @@ function PostCard({ post, currentUser, onNavigate }: PostCardProps) {
             </p>
             <div className="booking-summary">
               <strong>R {post.price}</strong>
-              <span>Estimated time: {post.durationMinutes} minutes</span>
+              <span>Estimated time: {formatDuration(post.durationMinutes)}</span>
             </div>
 
             <label className="inquiry-message-label">Your booking message
@@ -305,7 +305,7 @@ function PostCard({ post, currentUser, onNavigate }: PostCardProps) {
                 <label className="inquiry-message-label">
                   Service
                   <select value={selectedServiceId} onChange={(event) => setSelectedServiceId(event.target.value)}>
-                    {services.map((service) => <option key={service.id} value={service.id}>{service.name} · R {service.price} · {service.durationMinutes} min</option>)}
+                    {services.map((service) => <option key={service.id} value={service.id}>{service.name} · R {service.price} · {formatDuration(service.durationMinutes)}</option>)}
                   </select>
                 </label>
                 <label className="inquiry-message-label">

@@ -17,6 +17,14 @@ export function formatDistance(km: number): string {
   return `${Math.round(km)} km away`;
 }
 
+export function formatDuration(minutes: number): string {
+  if (minutes > 60) {
+    const hours = minutes / 60;
+    return Number.isInteger(hours) ? `${hours} hours` : `${hours.toFixed(1)} hours`;
+  }
+  return `${minutes} minutes`;
+}
+
 export type MapBounds = {
   north: number;
   south: number;

@@ -1,15 +1,18 @@
 import { useEffect, useState, useRef } from "react";
 import type { FormEvent, DragEvent } from "react";
+import { fallbackCategories } from "../constants";
 import { IconCamera, IconCheck, IconClose, IconUpload } from "./Icons";
 
 type UploadSectionProps = {
   userName: string;
   handle: string;
+  categories: string[];
   onUploaded: () => void;
 };
 
-function UploadSection({ userName, handle, onUploaded }: UploadSectionProps) {
+function UploadSection({ userName, handle, categories, onUploaded }: UploadSectionProps) {
   const [service, setService] = useState("");
+  const [category, setCategory] = useState("");
   const [price, setPrice] = useState("");
   const [durationMinutes, setDurationMinutes] = useState("60");
   const [caption, setCaption] = useState("");
@@ -20,6 +23,9 @@ function UploadSection({ userName, handle, onUploaded }: UploadSectionProps) {
   const [isDragging, setIsDragging] = useState(false);
   const [showSuccessPopup, setShowSuccessPopup] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const visibleCategories = categories.filter((item) => item !== "For you").length > 0
+    ? categories.filter((item) => item !== "For you")
+    : fallbackCategories;
 
   useEffect(() => {
     if (!media) {
@@ -52,6 +58,7 @@ function UploadSection({ userName, handle, onUploaded }: UploadSectionProps) {
 
   const resetForm = () => {
     setService("");
+    setCategory("");
     setPrice("");
     setDurationMinutes("60");
     setCaption("");
@@ -69,7 +76,12 @@ function UploadSection({ userName, handle, onUploaded }: UploadSectionProps) {
     }
 
     if (!service) {
-      setMessage("Please select a specialty or style category.");
+      setMessage("Please enter a service name.");
+      return;
+    }
+
+    if (!category) {
+      setMessage("Please select a category.");
       return;
     }
 
@@ -84,6 +96,7 @@ function UploadSection({ userName, handle, onUploaded }: UploadSectionProps) {
     formData.append("creator", userName);
     formData.append("handle", handle);
     formData.append("service", service);
+    formData.append("category", category);
     formData.append("price", price);
     formData.append("durationMinutes", durationMinutes);
     formData.append("caption", caption);
@@ -176,6 +189,13 @@ function UploadSection({ userName, handle, onUploaded }: UploadSectionProps) {
           <div className="form-field-group">
             <div className="booking-fields-title">Booking details</div>
             <div className="upload-booking-fields" aria-label="Booking details">
+              <label className="studio-label">
+                <span>Category</span>
+                <select className="studio-input" value={category} onChange={(event) => setCategory(event.target.value)} required>
+                  <option value="" disabled>Select a category</option>
+                  {visibleCategories.map((item) => <option key={item} value={item}>{item}</option>)}
+                </select>
+              </label>
               <label className="studio-label upload-service-field">
                 <span>Service name</span>
                 <input className="studio-input" value={service} onChange={(event) => setService(event.target.value)} placeholder="e.g. Knotless braids" required />

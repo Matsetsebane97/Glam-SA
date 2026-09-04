@@ -4,12 +4,13 @@ import { IconUpload } from "../components/Icons";
 import type { CurrentUser } from "../types";
 
 type UploadPageProps = {
+  categories: string[];
   currentUser: CurrentUser | null;
   onNavigate: (path: string) => void;
   onUploaded: () => void;
 };
 
-function UploadPage({ currentUser, onNavigate, onUploaded }: UploadPageProps) {
+function UploadPage({ categories, currentUser, onNavigate, onUploaded }: UploadPageProps) {
   return (
     <section className="page-content upload-page">
       <button className="btn-ghost back-link" type="button" onClick={() => onNavigate("/")}>
@@ -41,6 +42,7 @@ function UploadPage({ currentUser, onNavigate, onUploaded }: UploadPageProps) {
         <UploadSection
           userName={currentUser.name}
           handle={currentUser.handle}
+          categories={categories}
           onUploaded={onUploaded}
         />
       ) : (

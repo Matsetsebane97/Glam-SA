@@ -3,6 +3,7 @@ import type { FormEvent } from "react";
 import { addAvailability, deleteAvailability, deleteService, getAvailability, getServices, saveService, updateProfile } from "../api";
 import { IconPin, IconUser } from "../components/Icons";
 import type { AvailabilitySlot, CurrentUser, ServiceOffering } from "../types";
+import { formatDuration } from "../utils/geo";
 
 type SettingsPageProps = {
   currentUser: CurrentUser | null;
@@ -155,7 +156,7 @@ function SettingsPage({ currentUser, onNavigate, onSaved }: SettingsPageProps) {
             </div>
             <button className="btn-primary" type="submit">Add service</button>
             <ul className="settings-list">
-              {services.map((service) => <li key={service.id}><span><strong>{service.name}</strong><small>R {service.price} · {service.durationMinutes} min</small></span><button className="btn-outline-sm danger-action" type="button" onClick={() => void deleteService(service.id).then(() => setServices((current) => current.filter((item) => item.id !== service.id))).catch((error) => setScheduleMessage(error.message))}>Remove</button></li>)}
+              {services.map((service) => <li key={service.id}><span><strong>{service.name}</strong><small>R {service.price} · {formatDuration(service.durationMinutes)}</small></span><button className="btn-outline-sm danger-action" type="button" onClick={() => void deleteService(service.id).then(() => setServices((current) => current.filter((item) => item.id !== service.id))).catch((error) => setScheduleMessage(error.message))}>Remove</button></li>)}
             </ul>
           </form>
 
