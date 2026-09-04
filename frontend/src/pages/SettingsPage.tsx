@@ -77,7 +77,7 @@ function SettingsPage({ currentUser, onNavigate, onSaved }: SettingsPageProps) {
           </label>
           <label className="studio-label">
             <span><IconPin size={14} /> Location</span>
-            <input className="studio-input" value={locationLabel} onChange={(event) => setLocationLabel(event.target.value)} maxLength={120} autoComplete="address-level2" placeholder="e.g. Sandton, Johannesburg" />
+            <input className="studio-input" value={locationLabel} onChange={(event) => setLocationLabel(event.target.value)} maxLength={120} autoComplete="address-level2" placeholder="e.g. Gauteng, Johannesburg, Sandton" />
           </label>
         </div>
         {message && <div className="profile-error" role="alert">{message}</div>}
