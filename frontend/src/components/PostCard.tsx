@@ -195,10 +195,6 @@ function PostCard({ post, currentUser, onNavigate }: PostCardProps) {
           </div>
         )}
 
-        <div className="media-service-badge">
-          <span>{post.service}</span>
-        </div>
-
         {/* Double-tap Heart Animation */}
         {heartBurst && (
           <div className="heart-burst-overlay">
@@ -261,6 +257,10 @@ function PostCard({ post, currentUser, onNavigate }: PostCardProps) {
       )}
 
       <footer className="post-footer">
+        <div className="post-style-meta">
+          <span><strong>Style:</strong> {post.service}</span>
+          <span><strong>Category:</strong> {post.category}</span>
+        </div>
         <time className="post-time" dateTime={post.createdAt}>
           {new Date(post.createdAt).toLocaleDateString("en-ZA", {
             day: "numeric",
