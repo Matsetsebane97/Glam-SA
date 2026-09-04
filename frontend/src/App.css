@@ -1104,6 +1104,10 @@ body {
 .assistant-messages { display: flex; flex: 1; flex-direction: column; gap: 10px; padding: 16px; overflow-y: auto; background: #f8f9f6; }
 .assistant-message { max-width: 88%; padding: 10px 12px; border-radius: 12px 12px 12px 3px; background: #ffffff; color: var(--ink-secondary); font-size: 12px; line-height: 1.45; }
 .assistant-message.user { align-self: flex-end; border-radius: 12px 12px 3px 12px; background: var(--accent-gold); color: #ffffff; }
+.assistant-match-list { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 9px; }
+.assistant-artist-link, .assistant-artist-name { padding: 5px 8px; border: 1px solid var(--border-subtle); border-radius: 6px; background: #f8f9f6; color: var(--ink-primary); font-size: 11px; font-weight: 700; }
+.assistant-artist-link { cursor: pointer; }
+.assistant-artist-link:hover { border-color: var(--accent-gold); color: var(--accent-gold); }
 .assistant-compose { display: flex; gap: 8px; padding: 12px; border-top: 1px solid var(--border-subtle); }
 .assistant-compose input { min-width: 0; flex: 1; padding: 10px 11px; border: 1px solid var(--border-subtle); border-radius: 8px; outline: none; font-size: 12px; }
 .assistant-compose input:focus { border-color: var(--accent-gold); }

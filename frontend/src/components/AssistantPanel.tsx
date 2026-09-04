@@ -11,6 +11,7 @@ type ChatMessage = {
   id: number;
   author: "assistant" | "user";
   text: string;
+  matches?: Post[];
 };
 
 const categoryAliases: Record<string, string> = {
@@ -31,7 +32,7 @@ const categoryAliases: Record<string, string> = {
   tattoos: "Tattoos",
 };
 
-function answerQuestion(question: string, posts: Post[]) {
+function answerQuestion(question: string, posts: Post[]): Pick<ChatMessage, "text" | "matches"> {
   const normalizedQuestion = question.toLowerCase();
   const categoryToken = normalizedQuestion.match(/\b(braids?|hair|nails?|manicure|pedicure|barber(?:ing|s)?|makeup|facials?|skincare|tattoos?)\b/);
   const priceMatch = normalizedQuestion.match(/(?:under|below|less than)\s*r?\s*(\d+(?:\.\d+)?)/);
@@ -47,12 +48,12 @@ function answerQuestion(question: string, posts: Post[]) {
   });
 
   if (matchingPosts.length === 0) {
-    return "I could not find a matching look yet. Try a broader location, category, or budget.";
+    return { text: "I could not find a matching look yet. Try a broader location, category, or budget." };
   }
 
-  const matches = matchingPosts.slice(0, 3).map((post) => `${post.service} by ${post.creator} (R${post.price})`).join("; ");
+  const matches = matchingPosts.slice(0, 3);
   const suffix = matchingPosts.length > 3 ? ` I found ${matchingPosts.length} in total.` : "";
-  return `Here are some matches: ${matches}.${suffix}`;
+  return { text: `Here are ${matches.length} matching look${matches.length === 1 ? "" : "s"}.${suffix}`, matches };
 }
 
 function AssistantPanel({ posts, onNavigate }: AssistantPanelProps) {
@@ -68,7 +69,7 @@ function AssistantPanel({ posts, onNavigate }: AssistantPanelProps) {
     setMessages((currentMessages) => [
       ...currentMessages,
       { id: Date.now(), author: "user", text: question },
-      { id: Date.now() + 1, author: "assistant", text: answerQuestion(question, posts) },
+      { id: Date.now() + 1, author: "assistant", ...answerQuestion(question, posts) },
     ]);
     setDraft("");
   };
@@ -89,7 +90,25 @@ function AssistantPanel({ posts, onNavigate }: AssistantPanelProps) {
           <div className="assistant-messages" aria-live="polite">
             {messages.map((message) => (
               <div className={`assistant-message ${message.author}`} key={message.id}>
-                {message.text}
+                <span>{message.text}</span>
+                {message.matches && (
+                  <div className="assistant-match-list">
+                    {message.matches.map((post) => (
+                      post.ownerId ? (
+                        <button
+                          className="assistant-artist-link"
+                          type="button"
+                          key={post.id}
+                          onClick={() => { setIsOpen(false); onNavigate(`/profile/${post.ownerId}`); }}
+                        >
+                          {post.creator}
+                        </button>
+                      ) : (
+                        <span className="assistant-artist-name" key={post.id}>{post.creator}</span>
+                      )
+                    ))}
+                  </div>
+                )}
               </div>
             ))}
           </div>
