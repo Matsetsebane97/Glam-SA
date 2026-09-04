@@ -1,9 +1,12 @@
-import { useState } from "react";
-import { IconClose, IconMessage, IconSend } from "./Icons";
-import type { Post } from "../types";
+import { useMemo, useState } from "react";
+import { getNearbyArtists } from "../api";
+import { IconChevronRight, IconClose, IconMessage, IconPin, IconSend, IconWhatsApp } from "./Icons";
+import type { CurrentUser, NearbyArtist, Post } from "../types";
+import { whatsappUrl } from "../utils/whatsapp";
 
 type AssistantPanelProps = {
   posts: Post[];
+  currentUser: CurrentUser | null;
   onNavigate: (path: string) => void;
 };
 
@@ -12,12 +15,21 @@ type ChatMessage = {
   author: "assistant" | "user";
   text: string;
   matches?: ArtistMatch[];
+  quickReplies?: string[];
 };
 
 type ArtistMatch = {
   id: string;
   ownerId?: number;
   name: string;
+  handle: string;
+  service?: string;
+  category?: string;
+  location?: string;
+  whatsappNumber?: string;
+  distanceKm?: number;
+  minPrice?: number;
+  maxPrice?: number;
   resultCount: number;
 };
 
@@ -39,15 +51,83 @@ const categoryAliases: Record<string, string> = {
   tattoos: "Tattoos",
 };
 
+const assistantSuggestions = ["Hair near me", "Nails under R500", "Makeup in Sandton", "Find artist Naledi"];
+const fallbackSuggestions = ["Try a broader budget", "Search another area", "Browse the full feed"];
+const recentSearchesKey = "glamAssistantRecentSearches";
+const searchStopWords = new Set(["a", "an", "artist", "artists", "beauty", "find", "for", "in", "look", "looks", "me", "near", "nearby", "show", "the", "under", "below", "less", "than"]);
+
+type ParsedQuestion = {
+  category?: string;
+  location?: string;
+  maxPrice?: number;
+  searchTerms: string[];
+  wantsNearby: boolean;
+};
+
+function parseQuestion(question: string): ParsedQuestion {
+  const normalizedQuestion = question.trim().toLowerCase();
+  const categoryToken = normalizedQuestion.match(/\b(braids?|hair|nails?|manicure|pedicure|barber(?:ing|s)?|makeup|facials?|skincare|tattoos?)\b/);
+  const priceMatch = normalizedQuestion.match(/(?:under|below|less than)\s*r?\s*(\d+(?:\.\d+)?)/);
+  const locationMatch = normalizedQuestion.match(/\bnear\s+(?!me\b)([a-z][a-z\s-]*?)(?=\s+(?:under|below|less than)\b|$)/);
+  const category = categoryToken ? categoryAliases[categoryToken[1]] : undefined;
+  const wantsNearby = /\b(near me|nearby|close to me|around me)\b/.test(normalizedQuestion);
+  const searchTerms = normalizedQuestion
+    .replace(categoryToken?.[0] || "", "")
+    .replace(priceMatch?.[0] || "", "")
+    .replace(locationMatch?.[0] || "", "")
+    .replace(/\b(near me|nearby|close to me|around me)\b/g, "")
+    .split(/\s+/)
+    .map((term) => term.trim())
+    .filter((term) => term && !searchStopWords.has(term));
+
+  return {
+    category,
+    location: locationMatch?.[1].trim(),
+    maxPrice: priceMatch ? Number(priceMatch[1]) : undefined,
+    searchTerms,
+    wantsNearby,
+  };
+}
+
+function priceFromPost(post: Post) {
+  const price = Number(post.price);
+  return Number.isFinite(price) ? price : undefined;
+}
+
+function formatPrice(price?: number) {
+  if (price == null) return "";
+  return `R${price % 1 === 0 ? price.toFixed(0) : price.toFixed(2)}`;
+}
+
+function formatPriceRange(artist: ArtistMatch) {
+  if (artist.minPrice == null) return "";
+  if (artist.maxPrice != null && artist.maxPrice !== artist.minPrice) {
+    return `${formatPrice(artist.minPrice)}-${formatPrice(artist.maxPrice)}`;
+  }
+  return formatPrice(artist.minPrice);
+}
+
+function formatDistance(distanceKm?: number) {
+  if (distanceKm == null) return "";
+  return distanceKm < 1 ? `${Math.round(distanceKm * 1000)} m away` : `${distanceKm.toFixed(1)} km away`;
+}
+
 function getArtistMatches(posts: Post[]): ArtistMatch[] {
   const artistsByKey = new Map<string, ArtistMatch>();
 
   posts.forEach((post) => {
     const key = post.ownerId ? `owner-${post.ownerId}` : `handle-${post.handle.toLowerCase()}`;
     const existingArtist = artistsByKey.get(key);
+    const price = priceFromPost(post);
 
     if (existingArtist) {
-      artistsByKey.set(key, { ...existingArtist, resultCount: existingArtist.resultCount + 1 });
+      artistsByKey.set(key, {
+        ...existingArtist,
+        whatsappNumber: existingArtist.whatsappNumber || post.whatsappNumber,
+        minPrice: price == null ? existingArtist.minPrice : Math.min(existingArtist.minPrice ?? price, price),
+        maxPrice: price == null ? existingArtist.maxPrice : Math.max(existingArtist.maxPrice ?? price, price),
+        resultCount: existingArtist.resultCount + 1,
+      });
       return;
     }
 
@@ -55,6 +135,13 @@ function getArtistMatches(posts: Post[]): ArtistMatch[] {
       id: key,
       ownerId: post.ownerId,
       name: post.creator,
+      handle: post.handle,
+      service: post.service,
+      category: post.category,
+      location: post.location,
+      whatsappNumber: post.whatsappNumber,
+      minPrice: price,
+      maxPrice: price,
       resultCount: 1,
     });
   });
@@ -62,23 +149,81 @@ function getArtistMatches(posts: Post[]): ArtistMatch[] {
   return Array.from(artistsByKey.values());
 }
 
-function answerQuestion(question: string, posts: Post[]): Pick<ChatMessage, "text" | "matches"> {
-  const normalizedQuestion = question.toLowerCase();
-  const categoryToken = normalizedQuestion.match(/\b(braids?|hair|nails?|manicure|pedicure|barber(?:ing|s)?|makeup|facials?|skincare|tattoos?)\b/);
-  const priceMatch = normalizedQuestion.match(/(?:under|below|less than)\s*r?\s*(\d+(?:\.\d+)?)/);
-  const locationMatch = normalizedQuestion.match(/\bnear\s+([a-z][a-z\s-]*?)(?=\s+(?:under|below|less than)\b|$)/);
-  const category = categoryToken ? categoryAliases[categoryToken[1]] : undefined;
-  const location = locationMatch?.[1].trim();
-  const maxPrice = priceMatch ? Number(priceMatch[1]) : undefined;
+function matchesQuestion(post: Post, parsedQuestion: ParsedQuestion) {
+  const matchesCategory = !parsedQuestion.category || post.category.toLowerCase() === parsedQuestion.category.toLowerCase();
+  const matchesLocation = !parsedQuestion.location || post.location.toLowerCase().includes(parsedQuestion.location);
+  const matchesPrice = parsedQuestion.maxPrice == null || Number(post.price) <= parsedQuestion.maxPrice;
+  const searchableText = [post.creator, post.handle, post.location, post.service, post.category, post.caption]
+    .join(" ")
+    .toLowerCase();
+  const matchesSearch = parsedQuestion.searchTerms.every((term) => searchableText.includes(term));
+
+  return matchesCategory && matchesLocation && matchesPrice && matchesSearch;
+}
+
+function mergeNearbyArtist(artist: NearbyArtist, postMatch?: ArtistMatch): ArtistMatch {
+  return {
+    id: `owner-${artist.id}`,
+    ownerId: artist.id,
+    name: artist.name,
+    handle: artist.handle,
+    service: postMatch?.service,
+    category: postMatch?.category,
+    location: artist.locationLabel || postMatch?.location,
+    whatsappNumber: artist.whatsappNumber || postMatch?.whatsappNumber,
+    distanceKm: artist.distanceKm,
+    minPrice: postMatch?.minPrice,
+    maxPrice: postMatch?.maxPrice,
+    resultCount: postMatch?.resultCount || artist.postCount,
+  };
+}
+
+async function answerQuestion(question: string, posts: Post[], currentUser: CurrentUser | null): Promise<Pick<ChatMessage, "text" | "matches" | "quickReplies">> {
+  const parsedQuestion = parseQuestion(question);
   const matchingPosts = posts.filter((post) => {
-    const matchesCategory = !category || post.category.toLowerCase() === category.toLowerCase();
-    const matchesLocation = !location || post.location.toLowerCase().includes(location);
-    const matchesPrice = maxPrice == null || Number(post.price) <= maxPrice;
-    return matchesCategory && matchesLocation && matchesPrice;
+    return matchesQuestion(post, parsedQuestion);
   });
 
+  if (parsedQuestion.wantsNearby) {
+    if (currentUser?.latitude == null || currentUser.longitude == null) {
+      return {
+        text: "I need your profile location before I can show artists near you.",
+        quickReplies: ["Makeup in Sandton", "Nails under R500", "Browse the full feed"],
+      };
+    }
+
+    try {
+      const nearbyArtists = await getNearbyArtists({
+        latitude: currentUser.latitude,
+        longitude: currentUser.longitude,
+        radius: 50,
+      });
+      const postMatchesByOwnerId = new Map(
+        getArtistMatches(matchingPosts).flatMap((artist) => artist.ownerId ? [[artist.ownerId, artist]] : []),
+      );
+      const nearbyMatches = nearbyArtists
+        .map((artist) => mergeNearbyArtist(artist, postMatchesByOwnerId.get(artist.id)))
+        .filter((artist) => {
+          const matchesCategory = !parsedQuestion.category || artist.category === parsedQuestion.category || postMatchesByOwnerId.has(artist.ownerId || 0);
+          const matchesPrice = parsedQuestion.maxPrice == null || artist.minPrice == null || artist.minPrice <= parsedQuestion.maxPrice;
+          const searchableText = [artist.name, artist.handle, artist.service, artist.category, artist.location].join(" ").toLowerCase();
+          return matchesCategory && matchesPrice && parsedQuestion.searchTerms.every((term) => searchableText.includes(term));
+        })
+        .slice(0, 3);
+
+      if (nearbyMatches.length > 0) {
+        return { text: `Here are ${nearbyMatches.length} nearby artist${nearbyMatches.length === 1 ? "" : "s"} within 50 km.`, matches: nearbyMatches };
+      }
+    } catch {
+      return { text: "I could not load nearby artists right now. Try a location search instead.", quickReplies: fallbackSuggestions };
+    }
+  }
+
   if (matchingPosts.length === 0) {
-    return { text: "I could not find a matching look yet. Try a broader location, category, or budget." };
+    return {
+      text: "I could not find a matching artist yet. Try a broader location, category, or budget.",
+      quickReplies: fallbackSuggestions,
+    };
   }
 
   const matches = getArtistMatches(matchingPosts).slice(0, 3);
@@ -86,22 +231,70 @@ function answerQuestion(question: string, posts: Post[]): Pick<ChatMessage, "tex
   return { text: `Here are ${matches.length} matching artist${matches.length === 1 ? "" : "s"}.${suffix}`, matches };
 }
 
-function AssistantPanel({ posts, onNavigate }: AssistantPanelProps) {
+function AssistantPanel({ posts, currentUser, onNavigate }: AssistantPanelProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [draft, setDraft] = useState("");
+  const [isThinking, setIsThinking] = useState(false);
+  const [recentSearches, setRecentSearches] = useState<string[]>(() => {
+    try {
+      const storedSearches = window.localStorage.getItem(recentSearchesKey);
+      return storedSearches ? (JSON.parse(storedSearches) as string[]).slice(0, 3) : [];
+    } catch {
+      return [];
+    }
+  });
   const [messages, setMessages] = useState<ChatMessage[]>([
-    { id: 1, author: "assistant", text: "Hi, I can help you find beauty services by category, location, or budget." },
+    { id: 1, author: "assistant", text: "Hi, I can help you find beauty services by artist, category, location, or budget." },
   ]);
 
-  const ask = () => {
-    const question = draft.trim();
+  const visiblePrompts = useMemo(() => {
+    return [...recentSearches, ...assistantSuggestions.filter((suggestion) => !recentSearches.includes(suggestion))].slice(0, 4);
+  }, [recentSearches]);
+
+  const saveRecentSearch = (question: string) => {
+    const nextSearches = [question, ...recentSearches.filter((search) => search.toLowerCase() !== question.toLowerCase())].slice(0, 3);
+    setRecentSearches(nextSearches);
+    window.localStorage.setItem(recentSearchesKey, JSON.stringify(nextSearches));
+  };
+
+  const browseFeed = () => {
+    setIsOpen(false);
+    onNavigate("/");
+  };
+
+  const ask = async (nextQuestion = draft) => {
+    const question = nextQuestion.trim();
     if (!question) return;
+    if (question === "Browse the full feed") {
+      browseFeed();
+      return;
+    }
+    saveRecentSearch(question);
     setMessages((currentMessages) => [
       ...currentMessages,
       { id: Date.now(), author: "user", text: question },
-      { id: Date.now() + 1, author: "assistant", ...answerQuestion(question, posts) },
     ]);
     setDraft("");
+    setIsThinking(true);
+
+    const answer = await answerQuestion(question, posts, currentUser);
+    setMessages((currentMessages) => [
+      ...currentMessages,
+      { id: Date.now() + 1, author: "assistant", ...answer },
+    ]);
+    setIsThinking(false);
+  };
+
+  const openProfile = (artist: ArtistMatch) => {
+    if (!artist.ownerId) return;
+    setIsOpen(false);
+    onNavigate(`/profile/${artist.ownerId}`);
+  };
+
+  const openBooking = (artist: ArtistMatch) => {
+    if (!artist.ownerId) return;
+    setIsOpen(false);
+    onNavigate(`/profile/${artist.ownerId}`);
   };
 
   return (
@@ -123,25 +316,66 @@ function AssistantPanel({ posts, onNavigate }: AssistantPanelProps) {
                 <span>{message.text}</span>
                 {message.matches && (
                   <div className="assistant-match-list">
-                    {message.matches.map((artist) => (
-                      artist.ownerId ? (
-                        <button
-                          className="assistant-artist-link"
-                          type="button"
-                          key={artist.id}
-                          title={`${artist.resultCount} matching look${artist.resultCount === 1 ? "" : "s"}`}
-                          aria-label={`View ${artist.name}'s profile`}
-                          onClick={() => { setIsOpen(false); onNavigate(`/profile/${artist.ownerId}`); }}
-                        >
-                          {artist.name}
-                        </button>
-                      ) : (
-                        <span className="assistant-artist-name" key={artist.id}>{artist.name}</span>
-                      )
+                    {message.matches.map((artist) => {
+                      const priceRange = formatPriceRange(artist);
+                      const messageHref = whatsappUrl(
+                        artist.whatsappNumber,
+                        `Hi ${artist.name}, I found you on Glam SA and want to inquire about booking a session!`,
+                      );
+                      return (
+                        <article className="assistant-artist-card" key={artist.id}>
+                          <button
+                            className="assistant-artist-card-main"
+                            type="button"
+                            disabled={!artist.ownerId}
+                            aria-label={artist.ownerId ? `View ${artist.name}'s profile` : `${artist.name} profile unavailable`}
+                            onClick={() => openProfile(artist)}
+                          >
+                            <span className="assistant-artist-avatar">{artist.name.charAt(0).toUpperCase()}</span>
+                            <span className="assistant-artist-copy">
+                              <span className="assistant-artist-title-row">
+                                <strong>{artist.name}</strong>
+                                {artist.ownerId && <IconChevronRight size={14} />}
+                              </span>
+                              <span>{[artist.service || artist.category, priceRange].filter(Boolean).join(" - ") || `${artist.resultCount} matching look${artist.resultCount === 1 ? "" : "s"}`}</span>
+                              {(artist.location || artist.distanceKm != null) && (
+                                <span className="assistant-artist-location">
+                                  <IconPin size={11} />
+                                  {[artist.location, formatDistance(artist.distanceKm)].filter(Boolean).join(" - ")}
+                                </span>
+                              )}
+                            </span>
+                          </button>
+                          <div className="assistant-artist-actions">
+                            <button type="button" disabled={!artist.ownerId} onClick={() => openProfile(artist)}>Profile</button>
+                            <button type="button" disabled={!artist.ownerId} onClick={() => openBooking(artist)}>Book</button>
+                            {messageHref ? (
+                              <a href={messageHref} target="_blank" rel="noreferrer" aria-label={`Message ${artist.name} on WhatsApp`} onClick={() => setIsOpen(false)}>
+                                <IconWhatsApp size={14} /> Message
+                              </a>
+                            ) : (
+                              <button type="button" disabled>Message</button>
+                            )}
+                          </div>
+                        </article>
+                      );
+                    })}
+                  </div>
+                )}
+                {message.quickReplies && (
+                  <div className="assistant-quick-replies">
+                    {message.quickReplies.map((reply) => (
+                      <button type="button" key={reply} onClick={() => void ask(reply)}>{reply}</button>
                     ))}
                   </div>
                 )}
               </div>
+            ))}
+            {isThinking && <div className="assistant-message"><span>Finding artists...</span></div>}
+          </div>
+          <div className="assistant-suggestions" aria-label="Suggested assistant searches">
+            {visiblePrompts.map((suggestion) => (
+              <button type="button" key={suggestion} onClick={() => void ask(suggestion)}>{suggestion}</button>
             ))}
           </div>
           <form className="assistant-compose" onSubmit={(event) => { event.preventDefault(); ask(); }}>
@@ -151,11 +385,11 @@ function AssistantPanel({ posts, onNavigate }: AssistantPanelProps) {
               placeholder="Try: makeup near Sandton under R800"
               aria-label="Ask Glam SA assistant"
             />
-            <button className="icon-btn" type="submit" disabled={!draft.trim()} aria-label="Send question">
+            <button className="icon-btn" type="submit" disabled={!draft.trim() || isThinking} aria-label="Send question">
               <IconSend size={16} />
             </button>
           </form>
-          <button className="assistant-feed-link" type="button" onClick={() => { setIsOpen(false); onNavigate("/"); }}>
+          <button className="assistant-feed-link" type="button" onClick={browseFeed}>
             Browse the full feed
           </button>
         </section>

@@ -262,7 +262,7 @@ function App() {
       </main>
       <RightRail currentUser={currentUser} onNavigate={navigate} />
       <MobileNav pathname={pathname} currentUser={currentUser} onNavigate={navigate} />
-      <AssistantPanel posts={posts} onNavigate={navigate} />
+      <AssistantPanel posts={posts} currentUser={currentUser} onNavigate={navigate} />
     </div>
   );
 }
