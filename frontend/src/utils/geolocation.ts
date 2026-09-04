@@ -29,17 +29,22 @@ async function reverseGeocode(latitude: number, longitude: number): Promise<stri
     const data = (await response.json()) as {
       address?: {
         suburb?: string;
+        neighbourhood?: string;
         city?: string;
         town?: string;
+        municipality?: string;
         state?: string;
       };
     };
     const address = data.address;
     if (!address) return formatCoordinates(latitude, longitude);
 
-    const locality = address.suburb || address.city || address.town;
-    if (locality && address.state) return `${locality}, ${address.state}`;
-    if (locality) return locality;
+    const city = address.city || address.town || address.municipality;
+    const suburb = address.suburb || address.neighbourhood;
+    const parts = [address.state, city, suburb].filter(
+      (part, index, values): part is string => Boolean(part) && values.indexOf(part) === index,
+    );
+    if (parts.length > 0) return parts.join(", ");
     return formatCoordinates(latitude, longitude);
   } catch {
     return formatCoordinates(latitude, longitude);
