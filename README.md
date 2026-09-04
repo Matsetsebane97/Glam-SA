@@ -73,6 +73,17 @@ The included `render.yaml` deploys the Vite build and Django API as one web serv
 
 Render supplies `DATABASE_URL` and `SECRET_KEY`. The service runs migrations and collects static files during each build.
 
+### Django admin
+
+The live admin is available at `/admin/` on the Render service URL. Add these secret environment variables in Render before deploying:
+
+```env
+GLAM_ADMIN_USERNAME=your-admin-username
+GLAM_ADMIN_PASSWORD=your-secure-password
+```
+
+The start command runs `ensure_admin` after migrations, creating or updating the administrator automatically.
+
 ### Cloudinary media storage
 
 Create a Cloudinary account, then add these environment variables to the Render web service:
