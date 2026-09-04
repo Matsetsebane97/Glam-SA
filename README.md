@@ -73,19 +73,19 @@ The included `render.yaml` deploys the Vite build and Django API as one web serv
 
 Render supplies `DATABASE_URL` and `SECRET_KEY`. The service runs migrations and collects static files during each build.
 
-### Supabase media storage
+### Cloudinary media storage
 
-Create a Storage bucket named `media` in Supabase, then add these environment variables to the Render web service:
+Create a Cloudinary account, then add these environment variables to the Render web service:
 
 ```env
-SUPABASE_URL=https://your-project.supabase.co
-SUPABASE_SERVICE_ROLE_KEY=your-server-only-service-role-key
-SUPABASE_STORAGE_BUCKET=media
+CLOUDINARY_CLOUD_NAME=your-cloud-name
+CLOUDINARY_API_KEY=your-api-key
+CLOUDINARY_API_SECRET=your-api-secret
 ```
 
-Keep `SUPABASE_SERVICE_ROLE_KEY` private and use the Supabase service-role key only on the Django backend. New uploads are stored in Supabase and returned as signed URLs; local uploads continue using Django media storage when these variables are absent.
+Keep `CLOUDINARY_API_SECRET` private and use it only on the Django backend. New uploads are stored in Cloudinary and returned as permanent HTTPS URLs.
 
-For the live Render service, both `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` are required. Production uploads are rejected when storage is not configured instead of being written to Render's temporary filesystem. Files uploaded locally before Supabase was configured must be uploaded again or migrated into the Supabase bucket.
+For the live Render service, all three Cloudinary variables are required. Production uploads are rejected when storage is not configured instead of being written to Render's temporary filesystem. Files uploaded locally or to the previous Supabase bucket must be uploaded again or migrated into Cloudinary.
 
 This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
 

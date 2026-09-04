@@ -24,12 +24,12 @@ services:
         fromDatabase:
           name: glam-sa-db
           property: connectionString
-      - key: SUPABASE_URL
+      - key: CLOUDINARY_CLOUD_NAME
         sync: false
-      - key: SUPABASE_SERVICE_ROLE_KEY
+      - key: CLOUDINARY_API_KEY
         sync: false
-      - key: SUPABASE_STORAGE_BUCKET
-        value: media
+      - key: CLOUDINARY_API_SECRET
+        sync: false
 
 databases:
   - name: glam-sa-db

@@ -193,7 +193,7 @@ def posts(request):
                 return JsonResponse({"error": "Files must be smaller than 50 MB."}, status=400)
             if not is_configured() and not settings.DEBUG:
                 return JsonResponse(
-                    {"error": "Media storage is not configured on the server."},
+                    {"error": "Cloudinary media storage is not configured on the server."},
                     status=503,
                 )
         else:
