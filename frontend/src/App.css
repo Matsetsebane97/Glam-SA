@@ -1537,7 +1537,7 @@ body {
 /* 7. Post Card & Feed Architecture */
 .post-masonry-feed {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 24px;
 }
 
@@ -2193,11 +2193,12 @@ body {
 
 .artist-card-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 16px;
 }
 
 .artist-portfolio-card {
+  min-height: 188px;
   padding: 18px;
   background: #ffffff;
   border: 1px solid var(--border-subtle);
@@ -2886,6 +2887,9 @@ body {
     padding: 20px 16px;
   }
   .post-masonry-feed {
+    grid-template-columns: 1fr;
+  }
+  .artist-card-grid {
     grid-template-columns: 1fr;
   }
 }
