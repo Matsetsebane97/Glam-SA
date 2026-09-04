@@ -1898,6 +1898,12 @@ body {
   opacity: 0.9;
 }
 
+.btn-whatsapp.is-unavailable,
+.btn-whatsapp-sm[aria-disabled="true"] {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
 /* 9. Right Rail & Sidebar Components */
 .right-rail {
   position: sticky;

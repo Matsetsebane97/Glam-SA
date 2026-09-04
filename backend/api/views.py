@@ -176,6 +176,7 @@ def user_profile(request, user_id):
         "name": user.get_full_name() or user.username,
         "handle": f"@{user.username.split('@')[0]}",
         "accountType": profile.account_type if profile else "creator",
+        "whatsappNumber": profile.whatsapp_number if profile else "",
         "locationLabel": profile.location_label if profile else "",
         "posts": [post.as_dict() for post in user.posts.all()],
     })
@@ -366,6 +367,7 @@ def nearby_artists(request):
             "latitude": float(profile.latitude),
             "longitude": float(profile.longitude),
             "locationLabel": profile.location_label,
+            "whatsappNumber": profile.whatsapp_number,
             "distanceKm": round(distance, 1),
             "postCount": post_count,
         })

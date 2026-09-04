@@ -11,6 +11,7 @@ import {
 } from "./Icons";
 import type { CurrentUser, Post } from "../types";
 import { formatDistance } from "../utils/geo";
+import { whatsappUrl } from "../utils/whatsapp";
 import { sendMessage, setPostLike } from "../api";
 
 type PostCardProps = {
@@ -30,6 +31,10 @@ function PostCard({ post, currentUser, onNavigate }: PostCardProps) {
   const [inquiryText, setInquiryText] = useState(`Hi ${post.creator}, I would love to book this ${post.service} look.`);
   const [inquiryStatus, setInquiryStatus] = useState("");
   const [isSendingInquiry, setIsSendingInquiry] = useState(false);
+  const whatsappLink = whatsappUrl(
+    post.whatsappNumber,
+    `Hi ${post.creator}, I saw your ${post.service} style on Glam SA and would love to inquire about booking a session!`,
+  );
 
   const toggleLike = async () => {
     if (isUpdatingLike) return;
@@ -256,15 +261,17 @@ function PostCard({ post, currentUser, onNavigate }: PostCardProps) {
             )}
 
             <div className="inquiry-actions">
-              <a
-                href={`https://wa.me/?text=${encodeURIComponent(`Hi ${post.creator}, I saw your ${post.service} style on Glam SA and would love to inquire about booking a session!`)}`}
-                target="_blank"
-                rel="noreferrer"
-                className="btn-whatsapp"
-              >
-                <IconWhatsApp size={18} />
-                <span>Chat on WhatsApp</span>
-              </a>
+              {whatsappLink ? (
+                <a href={whatsappLink} target="_blank" rel="noreferrer" className="btn-whatsapp">
+                  <IconWhatsApp size={18} />
+                  <span>Chat on WhatsApp</span>
+                </a>
+              ) : (
+                <span className="btn-whatsapp is-unavailable" title="This artist has not added a WhatsApp number">
+                  <IconWhatsApp size={18} />
+                  <span>WhatsApp unavailable</span>
+                </span>
+              )}
 
               <button
                 type="button"

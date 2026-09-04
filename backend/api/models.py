@@ -43,6 +43,7 @@ class Post(models.Model):
 
     def as_dict(self, distance_km=None):
         media_url = self.media_file.url if self.media_file else self.image_url
+        owner_profile = getattr(self.owner, "profile", None) if self.owner_id else None
         payload = {
             "id": self.id,
             "ownerId": self.owner_id,
@@ -56,6 +57,7 @@ class Post(models.Model):
             "mediaType": self.media_type,
             "createdAt": self.created_at.isoformat(),
             "likesCount": self.likes_count,
+            "whatsappNumber": owner_profile.whatsapp_number if owner_profile else "",
         }
         if self.latitude is not None and self.longitude is not None:
             payload["latitude"] = float(self.latitude)

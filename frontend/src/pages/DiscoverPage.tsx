@@ -5,6 +5,7 @@ import NearbyMap from "../components/NearbyMap";
 import { IconCompass, IconNavigation, IconPin, IconVerified, IconWhatsApp } from "../components/Icons";
 import type { Coordinates, CurrentUser, NearbyArtist } from "../types";
 import { formatDistance } from "../utils/geo";
+import { whatsappUrl } from "../utils/whatsapp";
 import { requestUserLocation } from "../utils/geolocation";
 import DirectionsConfirmModal from "../components/DirectionsConfirmModal";
 
@@ -192,12 +193,16 @@ function DiscoverPage({ currentUser, onNavigate }: DiscoverPageProps) {
                       <span>Take me there</span>
                     </a>
                     <a
-                      href={`https://wa.me/?text=${encodeURIComponent(`Hi ${artist.name}, I found you on Glam SA and want to inquire about booking a session!`)}`}
+                      href={whatsappUrl(artist.whatsappNumber, `Hi ${artist.name}, I found you on Glam SA and want to inquire about booking a session!`) || undefined}
                       target="_blank"
                       rel="noreferrer"
                       className="btn-whatsapp-sm"
                       title="Contact on WhatsApp"
-                      onClick={(event) => event.stopPropagation()}
+                      aria-disabled={!artist.whatsappNumber}
+                      onClick={(event) => {
+                        event.stopPropagation();
+                        if (!artist.whatsappNumber) event.preventDefault();
+                      }}
                     >
                       <IconWhatsApp size={15} />
                       <span>Contact</span>

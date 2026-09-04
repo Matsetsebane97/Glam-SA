@@ -3,6 +3,7 @@ export type Post = {
   id: number;
   ownerId?: number;
   likesCount: number;
+  whatsappNumber?: string;
   creator: string;
   handle: string;
   location: string;
@@ -57,6 +58,7 @@ export type NearbyArtist = {
   latitude: number;
   longitude: number;
   locationLabel: string;
+  whatsappNumber?: string;
   distanceKm: number;
   postCount: number;
 };
