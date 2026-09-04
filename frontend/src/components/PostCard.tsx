@@ -37,6 +37,7 @@ function PostCard({ post, currentUser, onNavigate }: PostCardProps) {
   const [selectedServiceId, setSelectedServiceId] = useState("");
   const [selectedSlotId, setSelectedSlotId] = useState("");
   const [bookingStatus, setBookingStatus] = useState("");
+  const [authNotice, setAuthNotice] = useState("");
   const styleImageUrl = post.mediaType.startsWith("image/") ? (post.mediaUrl || post.imageUrl) : post.imageUrl;
   const whatsappLink = whatsappUrl(
     post.whatsappNumber,
@@ -59,6 +60,10 @@ function PostCard({ post, currentUser, onNavigate }: PostCardProps) {
   }, [post.ownerId, post.service, showInquire]);
 
   const toggleLike = async () => {
+    if (!currentUser) {
+      setAuthNotice("Sign in to like posts.");
+      return;
+    }
     if (isUpdatingLike) return;
     const nextIsLiked = !isLiked;
     const previousCount = likesCount;
@@ -75,6 +80,24 @@ function PostCard({ post, currentUser, onNavigate }: PostCardProps) {
       setIsLiked(!nextIsLiked);
       setLikesCount(previousCount);
     } finally { setIsUpdatingLike(false); }
+  };
+
+  const toggleSave = () => {
+    if (!currentUser) {
+      setAuthNotice("Sign in to save posts.");
+      return;
+    }
+    setIsSaved((current) => !current);
+    setAuthNotice("");
+  };
+
+  const openBooking = () => {
+    if (!currentUser) {
+      setAuthNotice("Sign in to book this look.");
+      return;
+    }
+    setAuthNotice("");
+    setShowInquire(true);
   };
 
   const submitInquiry = async () => {
@@ -163,7 +186,7 @@ function PostCard({ post, currentUser, onNavigate }: PostCardProps) {
         <button
           className="btn-book-action"
           type="button"
-          onClick={() => setShowInquire(true)}
+          onClick={openBooking}
         >
           Book Look
         </button>
@@ -220,7 +243,7 @@ function PostCard({ post, currentUser, onNavigate }: PostCardProps) {
             className="action-btn"
             aria-label="Inquire or message artist"
             type="button"
-            onClick={() => setShowInquire(true)}
+            onClick={openBooking}
           >
             <IconMessage size={20} />
             <span className="action-label">Inquire</span>
@@ -239,13 +262,20 @@ function PostCard({ post, currentUser, onNavigate }: PostCardProps) {
 
         <button
           className={`action-btn bookmark-btn ${isSaved ? "active" : ""}`}
-          onClick={() => setIsSaved(!isSaved)}
+          onClick={toggleSave}
           aria-label="Save look"
           type="button"
         >
           <IconBookmark size={20} fill={isSaved ? "#E5BE76" : "none"} />
         </button>
       </div>
+
+      {authNotice && (
+        <div className="post-auth-notice" role="status">
+          <span>{authNotice}</span>
+          <button type="button" onClick={() => onNavigate("/login")}>Sign in</button>
+        </div>
+      )}
 
       {/* Caption & Timestamp */}
       {post.caption && (

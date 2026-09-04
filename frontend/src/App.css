@@ -1815,6 +1815,31 @@ body {
   color: var(--ink-primary);
 }
 
+.post-auth-notice {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 0 18px 12px;
+  padding: 10px 12px;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  background: #fbfaf6;
+  color: var(--ink-secondary);
+  font-size: 12px;
+}
+
+.post-auth-notice button {
+  flex: 0 0 auto;
+  padding: 6px 10px;
+  border: 1px solid var(--ink-primary);
+  border-radius: 999px;
+  background: var(--ink-primary);
+  color: #fffdf8;
+  font-size: 11px;
+  font-weight: 800;
+}
+
 .action-copied {
   display: inline-flex;
   align-items: center;
