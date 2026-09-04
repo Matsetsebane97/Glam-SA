@@ -85,11 +85,11 @@ function RightRail({ currentUser, onNavigate }: RightRailProps) {
       {/* Brand Footer */}
       <footer className="rail-footer">
         <div className="footer-links">
-          <span>About</span>
+          <button type="button" onClick={() => onNavigate("/about")}>About</button>
           <span>·</span>
-          <span>Terms</span>
+          <button type="button" onClick={() => onNavigate("/terms")}>Terms</button>
           <span>·</span>
-          <span>Privacy</span>
+          <button type="button" onClick={() => onNavigate("/privacy")}>Privacy</button>
         </div>
         <p className="footer-copy">© 2026 Glam SA</p>
       </footer>

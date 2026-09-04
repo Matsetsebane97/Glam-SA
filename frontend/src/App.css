@@ -33,6 +33,19 @@
 
 .profile-page { gap: 24px; }
 .settings-page { gap: 24px; }
+.info-page { gap: 24px; max-width: 860px; }
+.info-back { align-self: flex-start; }
+.info-hero { padding: 34px; border: 1px solid var(--border-subtle); border-radius: var(--radius-lg); background: #f8fafc; }
+.info-hero h1 { max-width: 680px; margin-top: 8px; font-size: 36px; }
+.info-hero p { max-width: 650px; margin-top: 12px; color: var(--ink-secondary); font-size: 16px; line-height: 1.7; }
+.info-sections { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+.info-section { padding: 22px; border: 1px solid var(--border-subtle); border-radius: var(--radius-md); background: var(--bg-surface); }
+.info-section-icon { display: grid; place-items: center; width: 40px; height: 40px; margin-bottom: 16px; border-radius: 50%; background: var(--accent-gold-bg); color: var(--accent-secondary); }
+.info-section h2, .info-copy h2 { font-size: 18px; }
+.info-section p, .info-copy p { margin-top: 8px; color: var(--ink-secondary); font-size: 14px; line-height: 1.7; }
+.info-copy { max-width: 700px; padding: 4px 2px; }
+.info-copy h2:not(:first-child) { margin-top: 26px; }
+.info-updated { color: var(--ink-muted); font-size: 12px; }
 .settings-heading { display: flex; align-items: end; justify-content: space-between; gap: 24px; padding-bottom: 4px; }
 .settings-heading h1 { font-size: 30px; }
 .settings-heading p { margin-top: 7px; color: var(--ink-muted); font-size: 14px; }
@@ -1023,6 +1036,9 @@ body {
 .portfolio-lightbox-content figcaption span { color: rgba(255, 255, 255, .72); font-size: 13px; }
 
 @media (max-width: 700px) {
+  .info-hero { padding: 24px 20px; }
+  .info-hero h1 { font-size: 29px; }
+  .info-sections { grid-template-columns: 1fr; }
   .settings-heading { align-items: flex-start; flex-direction: column; }
   .settings-heading .btn-ghost { width: 100%; }
   .settings-form { grid-template-columns: 1fr; padding: 20px; }
@@ -2014,6 +2030,17 @@ body {
 .footer-links {
   display: flex;
   gap: 6px;
+}
+
+.footer-links button {
+  padding: 0;
+  color: inherit;
+  font-size: inherit;
+}
+
+.footer-links button:hover {
+  color: var(--ink-primary);
+  text-decoration: underline;
 }
 
 /* 10. Interactive Map & Discover Page */

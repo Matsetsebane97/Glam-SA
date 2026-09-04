@@ -13,6 +13,7 @@ import UploadPage from "./pages/UploadPage";
 import ProfilePage from "./pages/ProfilePage";
 import MessagesPage from "./pages/MessagesPage";
 import SettingsPage from "./pages/SettingsPage";
+import InfoPage from "./pages/InfoPage";
 import type { CurrentUser, Post } from "./types";
 
 function App() {
@@ -169,6 +170,10 @@ function App() {
 
     if (pathname === "/settings") {
       return <SettingsPage currentUser={currentUser} onNavigate={navigate} onSaved={handleProfileUpdated} />;
+    }
+
+    if (pathname === "/about" || pathname === "/terms" || pathname === "/privacy") {
+      return <InfoPage page={pathname.slice(1) as "about" | "terms" | "privacy"} onNavigate={navigate} />;
     }
 
     return (
