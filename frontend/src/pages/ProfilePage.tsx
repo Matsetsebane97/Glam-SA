@@ -18,6 +18,7 @@ type EditDraft = {
 
 function ProfilePage({ profileId, currentUser, onNavigate, onLogout }: ProfilePageProps) {
   const isOwnProfile = profileId == null;
+  const canManageProfile = Boolean(currentUser && (isOwnProfile || profileId === currentUser.id));
   const [profile, setProfile] = useState<CurrentUser | null>(isOwnProfile ? currentUser : null);
   const [posts, setPosts] = useState<Post[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -153,7 +154,7 @@ function ProfilePage({ profileId, currentUser, onNavigate, onLogout }: ProfilePa
             </p>
           )}
         </div>
-        {isOwnProfile && (
+        {canManageProfile && (
           <div className="profile-hero-actions">
             <button className="btn-primary" type="button" onClick={() => onNavigate("/upload")}>
               <IconUpload size={17} /> Share a look
@@ -182,7 +183,7 @@ function ProfilePage({ profileId, currentUser, onNavigate, onLogout }: ProfilePa
           <IconGrid size={32} />
           <h3>{isOwnProfile ? "Your portfolio is ready for its first look" : "This portfolio is waiting for its first look"}</h3>
           <p>{isOwnProfile ? "Share your latest hair, makeup, nail, or barbering work." : "There is no public work to show yet."}</p>
-          {isOwnProfile && (
+          {canManageProfile && (
             <button className="btn-primary" type="button" onClick={() => onNavigate("/upload")}>
               <IconUpload size={17} /> Share your first look
             </button>
@@ -248,7 +249,7 @@ function ProfilePage({ profileId, currentUser, onNavigate, onLogout }: ProfilePa
                   {post.caption && <p className="profile-work-caption">{post.caption}</p>}
 
                   {/* Editing and deletion are intentionally unavailable on public profiles. */}
-                  {isOwnProfile && (
+                  {canManageProfile && (
                     <div className="profile-work-actions">
                       <button className="btn-outline-sm" type="button" onClick={() => beginEditing(post)}>
                         <IconEdit size={14} /> Edit
