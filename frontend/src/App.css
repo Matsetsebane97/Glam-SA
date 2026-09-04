@@ -46,22 +46,27 @@
 .profile-work-heading { display: flex; align-items: end; justify-content: space-between; }
 .profile-work-heading h2 { font-size: 24px; }
 .profile-work-count { color: var(--ink-muted); font-size: 13px; }
-.profile-work-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; }
-.profile-work-card { overflow: hidden; border: 1px solid var(--border-subtle); border-radius: var(--radius-lg); background: #ffffff; box-shadow: var(--shadow-xs); }
-.profile-work-media { position: relative; aspect-ratio: 1 / 1; overflow: hidden; background: var(--bg-muted); }
+.profile-work-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px; }
+.profile-work-card { overflow: hidden; border: 1px solid rgba(44, 49, 39, .1); border-radius: 18px; background: #ffffff; box-shadow: 0 10px 24px rgba(36, 39, 31, .06); transition: transform 180ms ease, box-shadow 180ms ease; }
+.profile-work-card:hover { transform: translateY(-3px); box-shadow: 0 16px 30px rgba(36, 39, 31, .11); }
+.profile-work-card.is-manageable { border-color: rgba(196, 145, 55, .28); }
+.profile-work-media { position: relative; aspect-ratio: 1 / 1; overflow: hidden; background: #e8e9e1; }
 .profile-work-media img, .profile-work-media video { width: 100%; height: 100%; object-fit: cover; }
 .profile-image-viewer { position: relative; display: block; width: 100%; height: 100%; padding: 0; border: 0; background: transparent; cursor: zoom-in; }
 .profile-image-viewer img { display: block; transition: transform 240ms ease; }
 .profile-image-viewer:hover img { transform: scale(1.04); }
-.profile-image-viewer-label { position: absolute; right: 12px; bottom: 12px; padding: 6px 9px; border-radius: 999px; background: rgba(20, 20, 20, .72); color: #ffffff; font-size: 11px; opacity: 0; transition: opacity 180ms ease; }
+.profile-image-viewer-label { position: absolute; right: 14px; bottom: 14px; padding: 7px 10px; border: 1px solid rgba(255, 255, 255, .24); border-radius: 999px; background: rgba(20, 20, 20, .68); color: #ffffff; font-size: 11px; font-weight: 700; opacity: 0; transition: opacity 180ms ease; }
 .profile-image-viewer:hover .profile-image-viewer-label, .profile-image-viewer:focus-visible .profile-image-viewer-label { opacity: 1; }
-.profile-work-media .media-service-badge { position: absolute; left: 12px; bottom: 12px; }
-.profile-work-details, .profile-edit-form { padding: 10px 12px; }
+.profile-work-media-topline { position: absolute; z-index: 1; top: 14px; left: 14px; right: 14px; display: flex; justify-content: space-between; gap: 8px; pointer-events: none; }
+.profile-work-media-label { padding: 6px 9px; border: 1px solid rgba(255, 255, 255, .24); border-radius: 999px; background: rgba(20, 20, 20, .46); color: #ffffff; font-size: 10px; font-weight: 700; letter-spacing: .02em; }
+.profile-work-media .media-service-badge { position: absolute; left: 14px; bottom: 14px; }
+.profile-work-details, .profile-edit-form { padding: 17px 18px 18px; }
 .profile-work-title-row { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; }
-.profile-work-title-row h3 { font-size: 17px; }
+.profile-work-title-row h3 { margin-top: 3px; font-size: 19px; letter-spacing: -.01em; }
+.profile-work-kicker { color: var(--accent-gold); font-size: 10px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; }
 .profile-work-title-row time { color: var(--ink-muted); font-size: 11px; white-space: nowrap; }
-.profile-work-caption { margin-top: 10px; color: var(--ink-secondary); font-size: 13px; line-height: 1.5; }
-.profile-work-actions, .profile-edit-actions { display: flex; gap: 8px; margin-top: 16px; }
+.profile-work-caption { display: -webkit-box; overflow: hidden; margin-top: 11px; color: var(--ink-secondary); font-size: 13px; line-height: 1.55; -webkit-box-orient: vertical; -webkit-line-clamp: 3; }
+.profile-work-actions, .profile-edit-actions { display: flex; gap: 8px; margin: 18px -18px -18px; padding: 12px 18px; border-top: 1px solid rgba(44, 49, 39, .08); background: #fbfaf6; }
 .profile-work-actions .btn-outline-sm { gap: 6px; }
 .danger-action { color: var(--accent-rose); border-color: #fecdd3; }
 .danger-action:hover { background: var(--accent-rose-bg); border-color: #fda4af; }

@@ -194,7 +194,7 @@ function ProfilePage({ profileId, currentUser, onNavigate, onLogout }: ProfilePa
       {!isLoading && posts.length > 0 && (
         <div className="profile-work-grid">
           {posts.map((post) => (
-            <article className="profile-work-card" key={post.id}>
+            <article className={`profile-work-card${canManageProfile ? " is-manageable" : ""}`} key={post.id}>
               <div className="profile-work-media">
                 {post.mediaUrl && post.mediaType.startsWith("video/") ? (
                   <video src={post.mediaUrl} controls preload="metadata" aria-label={post.service} />
@@ -211,6 +211,10 @@ function ProfilePage({ profileId, currentUser, onNavigate, onLogout }: ProfilePa
                 ) : (
                   <div className="media-placeholder"><span>{post.service}</span></div>
                 )}
+                <div className="profile-work-media-topline">
+                  <span className="profile-work-media-label">Portfolio look</span>
+                  {post.mediaType.startsWith("video/") && <span className="profile-work-media-label">Video</span>}
+                </div>
                 <span className="media-service-badge">{post.service}</span>
               </div>
 
@@ -240,7 +244,10 @@ function ProfilePage({ profileId, currentUser, onNavigate, onLogout }: ProfilePa
               ) : (
                 <div className="profile-work-details">
                   <div className="profile-work-title-row">
-                    <h3>{post.service}</h3>
+                    <div>
+                      <span className="profile-work-kicker">Featured work</span>
+                      <h3>{post.service}</h3>
+                    </div>
                     <time dateTime={post.createdAt}>
                       {new Date(post.createdAt).toLocaleDateString("en-ZA", { day: "numeric", month: "short", year: "numeric" })}
                     </time>
