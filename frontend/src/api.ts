@@ -41,6 +41,23 @@ export const logout = async (): Promise<void> => {
   if (!response.ok) throw new Error("Unable to log out.");
 };
 
+export const updateProfile = async (payload: {
+  name: string;
+  whatsappNumber: string;
+  locationLabel: string;
+}): Promise<CurrentUser> => {
+  const response = await fetch("/api/auth/profile/", {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  });
+  const data = (await response.json().catch(() => ({}))) as CurrentUser & { error?: string };
+  if (!response.ok || !data.name || !data.handle) {
+    throw new Error(data.error || "Unable to update your profile.");
+  }
+  return data;
+};
+
 export const getCategories = async (): Promise<string[]> => {
   const response = await fetch("/api/categories/");
   if (!response.ok) throw new Error("Unable to load categories.");

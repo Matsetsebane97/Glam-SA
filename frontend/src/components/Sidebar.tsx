@@ -101,6 +101,7 @@ function Sidebar({ activeNav, currentUser, onNavigate, onLogout }: SidebarProps)
             >
               {currentUser ? "Account" : "Join"}
             </button>
+              {currentUser && <button className="btn-outline-sm profile-btn" type="button" onClick={() => onNavigate("/settings")}>Settings</button>}
             {currentUser && <button className="btn-outline-sm sidebar-logout-btn" type="button" onClick={onLogout}>Log out</button>}
           </div>
         </div>

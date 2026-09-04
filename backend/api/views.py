@@ -124,6 +124,43 @@ def current_user(request):
     return JsonResponse(payload)
 
 
+@csrf_exempt
+def update_profile(request):
+    if request.method != "PATCH":
+        return JsonResponse({"error": "Method not allowed."}, status=405)
+    if not request.user.is_authenticated:
+        return JsonResponse({"error": "Log in to update your profile."}, status=401)
+
+    try:
+        payload = json.loads(request.body)
+    except json.JSONDecodeError:
+        return JsonResponse({"error": "Request body must be valid JSON."}, status=400)
+
+    name = str(payload.get("name", "")).strip()
+    if not name:
+        return JsonResponse({"error": "Your name or brand name is required."}, status=400)
+    if len(name) > 150:
+        return JsonResponse({"error": "Your name must be 150 characters or fewer."}, status=400)
+
+    profile = getattr(request.user, "profile", None)
+    if profile is None:
+        return JsonResponse({"error": "Your profile could not be found."}, status=404)
+
+    request.user.first_name = name
+    request.user.save(update_fields=["first_name"])
+    profile.whatsapp_number = str(payload.get("whatsappNumber") or "").strip()[:30]
+    profile.location_label = str(payload.get("locationLabel") or "").strip()[:120]
+    profile.save(update_fields=["whatsapp_number", "location_label"])
+
+    response = {
+        "id": request.user.id,
+        "name": request.user.get_full_name() or request.user.username,
+        "handle": f"@{request.user.username.split('@')[0]}",
+    }
+    response.update(profile.as_dict())
+    return JsonResponse(response)
+
+
 def user_profile(request, user_id):
     if request.method != "GET":
         return JsonResponse({"error": "Method not allowed."}, status=405)

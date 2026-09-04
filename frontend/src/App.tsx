@@ -12,6 +12,7 @@ import LoginPage from "./pages/LoginPage";
 import UploadPage from "./pages/UploadPage";
 import ProfilePage from "./pages/ProfilePage";
 import MessagesPage from "./pages/MessagesPage";
+import SettingsPage from "./pages/SettingsPage";
 import type { CurrentUser, Post } from "./types";
 
 function App() {
@@ -128,6 +129,11 @@ function App() {
     navigate("/");
   };
 
+  const handleProfileUpdated = (updatedUser: CurrentUser) => {
+    setCurrentUser(updatedUser);
+    navigate("/profile");
+  };
+
   if (pathname === "/login") {
     return <LoginPage onNavigate={navigate} />;
   }
@@ -159,6 +165,10 @@ function App() {
 
     if (pathname === "/messages") {
       return <MessagesPage currentUser={currentUser} onNavigate={navigate} />;
+    }
+
+    if (pathname === "/settings") {
+      return <SettingsPage currentUser={currentUser} onNavigate={navigate} onSaved={handleProfileUpdated} />;
     }
 
     return (

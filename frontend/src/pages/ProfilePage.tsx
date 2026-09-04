@@ -159,6 +159,9 @@ function ProfilePage({ profileId, currentUser, onNavigate, onLogout }: ProfilePa
             <button className="btn-primary" type="button" onClick={() => onNavigate("/upload")}>
               <IconUpload size={17} /> Share a look
             </button>
+            <button className="btn-ghost" type="button" onClick={() => onNavigate("/settings")}>
+              Settings
+            </button>
             <button className="btn-ghost profile-logout-btn" type="button" onClick={onLogout}>
               Log out
             </button>
