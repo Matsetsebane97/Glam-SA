@@ -1015,10 +1015,13 @@ body {
   .profile-hero-actions { width: 100%; }
   .profile-hero-actions > button { flex: 1; }
   .profile-work-grid { grid-template-columns: 1fr; }
-  .profile-work-title-row { align-items: flex-start; flex-direction: column; gap: 4px; }
+  .profile-work-details, .profile-edit-form { text-align: center; }
+  .profile-work-title-row { align-items: center; flex-direction: column; gap: 4px; }
   .profile-work-title-row h3 { overflow-wrap: anywhere; }
+  .profile-work-location { justify-content: center; }
   .profile-work-actions, .profile-edit-actions { flex-wrap: wrap; }
   .profile-work-actions .btn-outline-sm, .profile-edit-actions > button { flex: 1 1 120px; }
+  .profile-work-actions { justify-content: center; }
   .portfolio-lightbox { padding: 20px; }
 }
 
