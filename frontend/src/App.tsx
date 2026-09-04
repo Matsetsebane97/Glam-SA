@@ -102,10 +102,10 @@ function App() {
   const normalizedQuery = query.trim().toLowerCase();
   // Search is intentionally applied after the nearby/category filters are loaded.
   const visiblePosts = posts.filter((post) => {
-    const matchesCategory = activeCategory === "For you" || post.service.toLowerCase() === activeCategory.toLowerCase();
+    const matchesCategory = activeCategory === "For you" || post.category.toLowerCase() === activeCategory.toLowerCase();
     const matchesSearch =
       normalizedQuery.length === 0 ||
-      [post.creator, post.handle, post.location, post.service, post.caption].some((value) =>
+      [post.creator, post.handle, post.location, post.service, post.category, post.caption].some((value) =>
         value.toLowerCase().includes(normalizedQuery),
       );
 
