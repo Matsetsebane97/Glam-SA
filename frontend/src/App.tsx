@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { getCategories, getCurrentUser, getPosts, logout } from "./api";
 import "./App.css";
 import MobileNav from "./components/MobileNav";
+import AssistantPanel from "./components/AssistantPanel";
 import RightRail from "./components/RightRail";
 import Sidebar from "./components/Sidebar";
 import Topbar from "./components/Topbar";
@@ -15,6 +16,43 @@ import MessagesPage from "./pages/MessagesPage";
 import SettingsPage from "./pages/SettingsPage";
 import InfoPage from "./pages/InfoPage";
 import type { CurrentUser, Post } from "./types";
+
+const categoryAliases: Record<string, string> = {
+  braid: "Hair",
+  braids: "Hair",
+  hair: "Hair",
+  nails: "Nails",
+  manicure: "Nails",
+  pedicure: "Nails",
+  barber: "Barbering",
+  barbers: "Barbering",
+  barbering: "Barbering",
+  makeup: "Makeup",
+  skincare: "Skincare",
+  facial: "Skincare",
+  facials: "Skincare",
+  tattoo: "Tattoos",
+  tattoos: "Tattoos",
+};
+
+const searchStopWords = new Set(["a", "an", "and", "for", "in", "near", "the", "under", "below", "less", "than"]);
+
+function parseSmartQuery(query: string) {
+  const normalizedQuery = query.trim().toLowerCase();
+  const categoryToken = normalizedQuery.match(/\b(braids?|hair|nails?|manicure|pedicure|barber(?:ing|s)?|makeup|skincare|facials?|tattoos?)\b/);
+  const priceMatch = normalizedQuery.match(/(?:under|below|less than)\s*r?\s*(\d+(?:\.\d+)?)/);
+  const nearMatch = normalizedQuery.match(/\bnear\s+([a-z][a-z\s-]*?)(?=\s+(?:under|below|less than)\b|$)/);
+  const category = categoryToken ? categoryAliases[categoryToken[1]] : undefined;
+  const location = nearMatch?.[1].trim();
+  const searchTerms = normalizedQuery
+    .replace(categoryToken?.[0] || "", "")
+    .replace(priceMatch?.[0] || "", "")
+    .replace(nearMatch?.[0] || "", "")
+    .split(/\s+/)
+    .filter((term) => term && !searchStopWords.has(term));
+
+  return { category, location, maxPrice: priceMatch ? Number(priceMatch[1]) : undefined, searchTerms };
+}
 
 function App() {
   const currentDate = new Intl.DateTimeFormat("en-ZA", {
@@ -100,17 +138,29 @@ function App() {
   }, [nearbyOnly, hasLocation, currentUser]);
 
   const normalizedQuery = query.trim().toLowerCase();
+  const smartQuery = parseSmartQuery(query);
   // Search is intentionally applied after the nearby/category filters are loaded.
   const visiblePosts = posts.filter((post) => {
-    const matchesCategory = activeCategory === "For you" || post.category.toLowerCase() === activeCategory.toLowerCase();
+    const selectedCategory = smartQuery.category || (activeCategory === "For you" ? undefined : activeCategory);
+    const matchesCategory = !selectedCategory || post.category.toLowerCase() === selectedCategory.toLowerCase();
+    const matchesLocation = !smartQuery.location || post.location.toLowerCase().includes(smartQuery.location);
+    const matchesPrice = smartQuery.maxPrice == null || Number(post.price) <= smartQuery.maxPrice;
+    const searchableText = [post.creator, post.handle, post.location, post.service, post.category, post.caption]
+      .join(" ")
+      .toLowerCase();
     const matchesSearch =
-      normalizedQuery.length === 0 ||
-      [post.creator, post.handle, post.location, post.service, post.category, post.caption].some((value) =>
-        value.toLowerCase().includes(normalizedQuery),
-      );
+      normalizedQuery.length === 0 || smartQuery.searchTerms.every((term) => searchableText.includes(term));
 
-    return matchesCategory && matchesSearch;
+    return matchesCategory && matchesLocation && matchesPrice && matchesSearch;
   });
+
+  const searchSummary = query.trim()
+    ? [
+        smartQuery.category,
+        smartQuery.location && `near ${smartQuery.location}`,
+        smartQuery.maxPrice != null && `under R${smartQuery.maxPrice}`,
+      ].filter(Boolean).join(" · ") || "Matching looks and artists"
+    : "";
 
   const emptyCopy = query
     ? "No community posts match your search yet."
@@ -195,6 +245,7 @@ function App() {
         nearbyOnly={nearbyOnly}
         posts={visiblePosts}
         currentUser={currentUser}
+        searchSummary={searchSummary}
         onNavigate={navigate}
         onSelectCategory={setActiveCategory}
         onToggleNearby={() => setNearbyOnly((value) => !value)}
@@ -211,6 +262,7 @@ function App() {
       </main>
       <RightRail currentUser={currentUser} onNavigate={navigate} />
       <MobileNav pathname={pathname} currentUser={currentUser} onNavigate={navigate} />
+      <AssistantPanel posts={posts} onNavigate={navigate} />
     </div>
   );
 }

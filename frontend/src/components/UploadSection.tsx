@@ -1,5 +1,6 @@
 import { useEffect, useState, useRef } from "react";
 import type { FormEvent, DragEvent } from "react";
+import { suggestCategory } from "../api";
 import { fallbackCategories } from "../constants";
 import { IconCamera, IconCheck, IconClose, IconUpload } from "./Icons";
 
@@ -22,6 +23,8 @@ function UploadSection({ userName, handle, categories, onUploaded }: UploadSecti
   const [previewUrl, setPreviewUrl] = useState("");
   const [isDragging, setIsDragging] = useState(false);
   const [showSuccessPopup, setShowSuccessPopup] = useState(false);
+  const [suggestedCategory, setSuggestedCategory] = useState<string | null>(null);
+  const [isSuggestingCategory, setIsSuggestingCategory] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const visibleCategories = categories.filter((item) => item !== "For you").length > 0
     ? categories.filter((item) => item !== "For you")
@@ -37,6 +40,34 @@ function UploadSection({ userName, handle, categories, onUploaded }: UploadSecti
     setPreviewUrl(nextPreviewUrl);
     return () => URL.revokeObjectURL(nextPreviewUrl);
   }, [media]);
+
+  useEffect(() => {
+    const serviceName = service.trim();
+    if (serviceName.length < 3) {
+      setSuggestedCategory(null);
+      return undefined;
+    }
+
+    let isCurrent = true;
+    const timer = window.setTimeout(() => {
+      setIsSuggestingCategory(true);
+      void suggestCategory(serviceName)
+        .then(({ category: predictedCategory }) => {
+          if (isCurrent && predictedCategory) setSuggestedCategory(predictedCategory);
+        })
+        .catch(() => {
+          if (isCurrent) setSuggestedCategory(null);
+        })
+        .finally(() => {
+          if (isCurrent) setIsSuggestingCategory(false);
+        });
+    }, 350);
+
+    return () => {
+      isCurrent = false;
+      window.clearTimeout(timer);
+    };
+  }, [service]);
 
   const handleDragOver = (e: DragEvent<HTMLDivElement>) => {
     e.preventDefault();
@@ -59,6 +90,7 @@ function UploadSection({ userName, handle, categories, onUploaded }: UploadSecti
   const resetForm = () => {
     setService("");
     setCategory("");
+    setSuggestedCategory(null);
     setPrice("");
     setDurationMinutes("60");
     setCaption("");
@@ -195,6 +227,11 @@ function UploadSection({ userName, handle, categories, onUploaded }: UploadSecti
                   <option value="" disabled>Select a category</option>
                   {visibleCategories.map((item) => <option key={item} value={item}>{item}</option>)}
                 </select>
+                {suggestedCategory && suggestedCategory !== category && (
+                  <button className="category-suggestion" type="button" onClick={() => { setCategory(suggestedCategory); setSuggestedCategory(null); }}>
+                    {isSuggestingCategory ? "Checking..." : `Suggest ${suggestedCategory}`}
+                  </button>
+                )}
               </label>
               <label className="studio-label upload-service-field">
                 <span>Service name</span>

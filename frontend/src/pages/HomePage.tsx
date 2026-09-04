@@ -14,6 +14,7 @@ type HomePageProps = {
   isLoading: boolean;
   nearbyOnly: boolean;
   posts: Post[];
+  searchSummary: string;
   currentUser: CurrentUser | null;
   onNavigate: (path: string) => void;
   onSelectCategory: (category: string) => void;
@@ -34,6 +35,7 @@ function HomePage({
   onSelectCategory,
   onToggleNearby,
   currentUser,
+  searchSummary,
 }: HomePageProps) {
   return (
     <div className="page-content home-page">
@@ -89,7 +91,9 @@ function HomePage({
             {nearbyOnly ? "Talent Around You" : activeCategory === "For you" ? "All Styles" : activeCategory}
           </h2>
           <p>
-            {nearbyOnly
+            {searchSummary
+              ? `Smart search: ${searchSummary}`
+              : nearbyOnly
               ? "Showing creators within 50 km of your location"
               : "Latest looks shared by South African beauty artists"}
           </p>

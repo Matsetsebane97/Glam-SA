@@ -66,6 +66,16 @@ export const getCategories = async (): Promise<string[]> => {
   return data.categories;
 };
 
+export const suggestCategory = async (service: string): Promise<{ category: string | null; confidence: number }> => {
+  const response = await fetch("/api/categories/suggest/", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ service }),
+  });
+  if (!response.ok) throw new Error("Unable to suggest a category.");
+  return (await response.json()) as { category: string | null; confidence: number };
+};
+
 export const getPosts = async (query?: PostQuery): Promise<Post[]> => {
   const params = new URLSearchParams();
   if (query?.latitude != null) params.set("latitude", String(query.latitude));

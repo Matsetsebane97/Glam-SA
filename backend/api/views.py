@@ -13,6 +13,7 @@ from django.utils import timezone
 from django.views.decorators.csrf import csrf_exempt
 
 from .geo import haversine_km, parse_optional_coordinate
+from .category_model import classifier
 from .models import AvailabilitySlot, Booking, Message, Post, ServiceOffering, UserProfile
 from .storage import is_configured, upload_media
 
@@ -190,6 +191,24 @@ def health(request):
 
 def categories(request):
     return JsonResponse({"categories": CATEGORIES})
+
+
+@csrf_exempt
+def suggest_category(request):
+    if request.method != "POST":
+        return JsonResponse({"error": "Method not allowed."}, status=405)
+
+    try:
+        payload = json.loads(request.body)
+    except json.JSONDecodeError:
+        return JsonResponse({"error": "Request body must be valid JSON."}, status=400)
+
+    service = str(payload.get("service", "")).strip()
+    if len(service) < 3:
+        return JsonResponse({"category": None, "confidence": 0})
+
+    category, confidence = classifier.predict(service)
+    return JsonResponse({"category": category, "confidence": confidence})
 
 
 def _posts_with_distance(latitude, longitude, radius_km):

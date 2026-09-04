@@ -14,6 +14,7 @@ urlpatterns = [
     path("auth/profile/", views.update_profile),
     path("users/<int:user_id>/", views.user_profile),
     path("categories/", views.categories),
+    path("categories/suggest/", views.suggest_category),
     path("posts/", views.posts),
     path("posts/mine/", views.my_posts),
     path("posts/<int:post_id>/", views.post_detail),
