@@ -2934,3 +2934,22 @@ body {
 
 .auth-card { border: 0; border-top: 3px solid var(--ink-primary); border-radius: 4px; box-shadow: 0 14px 34px rgba(17, 19, 15, .08); }
 .auth-card .form-header { padding-bottom: 4px; border-bottom: 1px solid #eeeeeb; }
+
+/* Keep every authenticated page on the same content rail. */
+.page-content {
+  width: min(100%, 1040px);
+  max-width: none;
+  margin-inline: auto;
+  padding: 30px 34px 52px;
+}
+
+.upload-page {
+  max-width: none;
+}
+
+@media (max-width: 820px) {
+  .page-content {
+    width: 100%;
+    padding: 20px 16px 28px;
+  }
+}
