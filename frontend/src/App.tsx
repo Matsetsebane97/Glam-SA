@@ -55,11 +55,7 @@ function parseSmartQuery(query: string) {
 }
 
 function App() {
-  const currentDate = new Intl.DateTimeFormat("en-ZA", {
-    weekday: "long",
-    day: "numeric",
-    month: "long",
-  }).format(new Date());
+
 
   const [activeCategory, setActiveCategory] = useState("For you");
   const [nearbyOnly, setNearbyOnly] = useState(false);
@@ -237,7 +233,7 @@ function App() {
       <HomePage
         activeCategory={activeCategory}
         categories={categories}
-        currentDate={currentDate}
+
         emptyCopy={emptyCopy}
         error={error}
         hasLocation={hasLocation}
