@@ -24,11 +24,13 @@ class UserProfile(models.Model):
             "whatsappNumber": self.whatsapp_number,
             "profilePhotoUrl": self.profile_photo_url,
             "bio": self.bio,
-            "serviceCategories": [category for category in self.service_categories.split(",") if category],
+            "serviceCategories": [c for c in self.service_categories.split(",") if c],
             "travelRadiusKm": self.travel_radius_km,
             "latitude": float(self.latitude),
             "longitude": float(self.longitude),
             "locationLabel": self.location_label,
+        }
+
     class Meta:
         ordering = ["created_at"]
 
@@ -60,7 +62,7 @@ class AvailabilitySlot(models.Model):
 
 
 class Booking(models.Model):
-    # Existing fields unchanged
+    # Existing fields unchanged (add your fields here as needed)
 
     class Meta:
         ordering = ["-created_at"]
@@ -73,6 +75,7 @@ class SearchSynonym(models.Model):
 
     def __str__(self):
         return self.term
+
     STATUS_CHOICES = [
         ("requested", "Requested"),
         ("confirmed", "Confirmed"),
@@ -82,7 +85,7 @@ class SearchSynonym(models.Model):
 
     client = models.ForeignKey(User, on_delete=models.CASCADE, related_name="bookings_made")
     creator = models.ForeignKey(User, on_delete=models.CASCADE, related_name="bookings_received")
-    post = models.ForeignKey(Post, on_delete=models.SET_NULL, null=True, blank=True, related_name="bookings")
+    post = models.ForeignKey('Post', on_delete=models.SET_NULL, null=True, blank=True, related_name="bookings")
     service_name = models.CharField(max_length=120)
     price = models.DecimalField(max_digits=10, decimal_places=2)
     starts_at = models.DateTimeField()
