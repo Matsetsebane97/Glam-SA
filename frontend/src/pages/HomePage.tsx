@@ -40,39 +40,7 @@ function HomePage({
   return (
     <div className="page-content home-page">
       {/* Editorial Hero */}
-      <section className="hero-banner">
-        <div className="hero-content">
-          <div className="hero-badge">
-            <span>{currentDate} · SOUTH AFRICAN BEAUTY DIRECTORY</span>
-          </div>
-          <h1 className="hero-title">
-            Where artistry meets <em>signature style</em>
-          </h1>
-          <p className="hero-subtitle">
-            Discover hair stylists, makeup artists, nail technicians, tatoo artists and barbers across South Africa.
-          </p>
-
-          <div className="hero-button-row">
-            <button
-              className="btn-primary"
-              type="button"
-              onClick={() => onNavigate("/upload")}
-            >
-              <IconUpload size={18} />
-              <span>Share Your Work</span>
-            </button>
-
-            <button
-              className="btn-ghost"
-              type="button"
-              onClick={() => onNavigate("/discover")}
-            >
-              <IconCompass size={18} />
-              <span>Find Artists on Map</span>
-            </button>
-          </div>
-        </div>
-      </section>
+      {/* Hero banner removed – streamlined home page */}
 
       {/* Category Pills Slider */}
       <section className="category-section">
