@@ -1,4 +1,4 @@
-"""HTTP handlers for authentication, discovery, portfolios, and messaging."""
+"""HTTP handlers for authentication, discovery, portfolios, messaging, and search functionality."""
 
 import json
 from decimal import Decimal, InvalidOperation

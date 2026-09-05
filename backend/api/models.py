@@ -1,6 +1,7 @@
 """Database models for creator profiles, portfolio posts, and messages."""
 
 from django.db import models
+from django.contrib.postgres.fields import ArrayField
 from django.contrib.auth.models import User
 
 
@@ -120,6 +121,19 @@ class AvailabilitySlot(models.Model):
 
 
 class Booking(models.Model):
+    # Existing fields unchanged
+
+    class Meta:
+        ordering = ["-created_at"]
+
+
+class SearchSynonym(models.Model):
+    """Store synonyms for search terms, e.g., "hairstyle" ↔ "haircut"."""
+    term = models.CharField(max_length=80, unique=True)
+    synonyms = ArrayField(models.CharField(max_length=80), default=list, blank=True)
+
+    def __str__(self):
+        return self.term
     STATUS_CHOICES = [
         ("requested", "Requested"),
         ("confirmed", "Confirmed"),
