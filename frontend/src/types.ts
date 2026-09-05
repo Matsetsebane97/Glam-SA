@@ -27,12 +27,16 @@ export type CurrentUser = {
   handle: string;
   accountType?: "creator" | "client";
   whatsappNumber?: string;
+  profilePhotoUrl?: string;
+  bio?: string;
+  serviceCategories?: string[];
+  travelRadiusKm?: number;
   latitude?: number;
   longitude?: number;
   locationLabel?: string;
 };
 
-export type UserProfile = Pick<CurrentUser, "id" | "name" | "handle" | "accountType" | "locationLabel"> & {
+export type UserProfile = Pick<CurrentUser, "id" | "name" | "handle" | "accountType" | "profilePhotoUrl" | "bio" | "serviceCategories" | "travelRadiusKm" | "locationLabel"> & {
   posts: Post[];
 };
 

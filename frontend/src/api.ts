@@ -8,6 +8,10 @@ type CurrentUserResponse = {
   handle?: string;
   accountType?: "creator" | "client";
   whatsappNumber?: string;
+  profilePhotoUrl?: string;
+  bio?: string;
+  serviceCategories?: string[];
+  travelRadiusKm?: number;
   latitude?: number;
   longitude?: number;
   locationLabel?: string;
@@ -30,6 +34,10 @@ export const getCurrentUser = async (): Promise<CurrentUser | null> => {
     handle: data.handle,
     accountType: data.accountType,
     whatsappNumber: data.whatsappNumber,
+    profilePhotoUrl: data.profilePhotoUrl,
+    bio: data.bio,
+    serviceCategories: data.serviceCategories,
+    travelRadiusKm: data.travelRadiusKm,
     latitude: data.latitude,
     longitude: data.longitude,
     locationLabel: data.locationLabel,

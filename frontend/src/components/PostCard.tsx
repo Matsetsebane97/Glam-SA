@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import {
   IconBookmark,
   IconCheck,
+  IconClose,
   IconHeart,
   IconMessage,
   IconPin,
@@ -38,6 +39,7 @@ function PostCard({ post, currentUser, onNavigate }: PostCardProps) {
   const [selectedSlotId, setSelectedSlotId] = useState("");
   const [bookingStatus, setBookingStatus] = useState("");
   const [authNotice, setAuthNotice] = useState("");
+  const [showBookingAuthPopup, setShowBookingAuthPopup] = useState(false);
   const styleImageUrl = post.mediaType.startsWith("image/") ? (post.mediaUrl || post.imageUrl) : post.imageUrl;
   const whatsappLink = whatsappUrl(
     post.whatsappNumber,
@@ -93,7 +95,8 @@ function PostCard({ post, currentUser, onNavigate }: PostCardProps) {
 
   const openBooking = () => {
     if (!currentUser) {
-      setAuthNotice("Sign in to book this look.");
+      setAuthNotice("");
+      setShowBookingAuthPopup(true);
       return;
     }
     setAuthNotice("");
@@ -274,6 +277,31 @@ function PostCard({ post, currentUser, onNavigate }: PostCardProps) {
         <div className="post-auth-notice" role="status">
           <span>{authNotice}</span>
           <button type="button" onClick={() => onNavigate("/login")}>Sign in</button>
+        </div>
+      )}
+
+      {showBookingAuthPopup && (
+        <div className="booking-auth-backdrop" role="dialog" aria-modal="true" aria-label="Create an account to book" onClick={() => setShowBookingAuthPopup(false)}>
+          <section className="booking-auth-popup" onClick={(event) => event.stopPropagation()}>
+            <button className="booking-auth-close" type="button" onClick={() => setShowBookingAuthPopup(false)} aria-label="Close popup">
+              <IconClose size={17} />
+            </button>
+            <div className="booking-auth-icon">
+              <IconMessage size={22} />
+            </div>
+            <h2>Create an account to book</h2>
+            <p>
+              Booking requests are available after sign in so artists can see your name, contact details, and manage the appointment safely.
+            </p>
+            <div className="booking-auth-actions">
+              <button className="btn-primary" type="button" onClick={() => onNavigate("/login")}>
+                Sign in / Join
+              </button>
+              <button className="btn-ghost" type="button" onClick={() => setShowBookingAuthPopup(false)}>
+                Keep browsing
+              </button>
+            </div>
+          </section>
         </div>
       )}
 

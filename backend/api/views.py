@@ -51,6 +51,10 @@ def signup(request):
     location_label = payload.get("locationLabel", "").strip()
     account_type = payload.get("accountType", "creator").strip().lower()
     whatsapp_number = payload.get("whatsappNumber", "").strip()
+    profile_photo_url = str(payload.get("profilePhotoUrl") or "").strip()
+    bio = str(payload.get("bio") or "").strip()
+    service_categories = payload.get("serviceCategories") or []
+    travel_radius_km = payload.get("travelRadiusKm", 15)
 
     if not name or not email or len(password) < 8:
         return JsonResponse({"error": "Name, email, and an 8-character password are required."}, status=400)
@@ -58,6 +62,28 @@ def signup(request):
         return JsonResponse({"error": "Choose whether you are signing up as a creator or client."}, status=400)
     if account_type == "creator" and not whatsapp_number:
         return JsonResponse({"error": "A WhatsApp number is required for creator accounts."}, status=400)
+    if profile_photo_url and not profile_photo_url.startswith("data:image/"):
+        return JsonResponse({"error": "Profile photo must be an image file."}, status=400)
+    if profile_photo_url and len(profile_photo_url) > 2_000_000:
+        return JsonResponse({"error": "Profile photo must be smaller than 2 MB."}, status=400)
+    if len(bio) > 600:
+        return JsonResponse({"error": "Creator bio must be 600 characters or fewer."}, status=400)
+    if not isinstance(service_categories, list):
+        return JsonResponse({"error": "Choose valid service categories."}, status=400)
+    allowed_categories = [category for category in CATEGORIES if category != "For you"]
+    normalized_categories = []
+    for category in service_categories:
+        category_name = str(category).strip()
+        if category_name not in allowed_categories:
+            return JsonResponse({"error": "Choose valid service categories."}, status=400)
+        if category_name not in normalized_categories:
+            normalized_categories.append(category_name)
+    try:
+        travel_radius_km = int(travel_radius_km)
+    except (TypeError, ValueError):
+        return JsonResponse({"error": "Travel radius must be a valid number."}, status=400)
+    if travel_radius_km < 0 or travel_radius_km > 250:
+        return JsonResponse({"error": "Travel radius must be between 0 and 250 km."}, status=400)
 
     latitude, latitude_error = _parse_coordinate(payload.get("latitude"), "latitude")
     if latitude_error:
@@ -77,6 +103,10 @@ def signup(request):
         user=user,
         account_type=account_type,
         whatsapp_number=whatsapp_number,
+        profile_photo_url=profile_photo_url[:2_000_000],
+        bio=bio[:600] if account_type == "creator" else "",
+        service_categories=",".join(normalized_categories) if account_type == "creator" else "",
+        travel_radius_km=travel_radius_km if account_type == "creator" else 0,
         latitude=latitude,
         longitude=longitude,
         location_label=location_label,
@@ -180,6 +210,10 @@ def user_profile(request, user_id):
         "handle": f"@{user.username.split('@')[0]}",
         "accountType": profile.account_type if profile else "creator",
         "whatsappNumber": profile.whatsapp_number if profile else "",
+        "profilePhotoUrl": profile.profile_photo_url if profile else "",
+        "bio": profile.bio if profile else "",
+        "serviceCategories": [category for category in profile.service_categories.split(",") if category] if profile else [],
+        "travelRadiusKm": profile.travel_radius_km if profile else 0,
         "locationLabel": profile.location_label if profile else "",
         "posts": [post.as_dict() for post in user.posts.all()],
     })

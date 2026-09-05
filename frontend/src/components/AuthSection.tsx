@@ -1,6 +1,6 @@
 // Handles sign-in and sign-up form state shared by the auth page.
 import { useState } from "react";
-import type { FormEvent } from "react";
+import type { ChangeEvent, FormEvent } from "react";
 import { IconCheck, IconPin } from "./Icons";
 import { requestUserLocation, type GeolocationResult } from "../utils/geolocation";
 
@@ -10,6 +10,9 @@ type AuthSectionProps = {
   onSuccess?: () => void;
 };
 
+const creatorCategories = ["Hair", "Nails", "Barbering", "Makeup", "Skincare", "Tattoos"];
+const maxProfilePhotoBytes = 2 * 1024 * 1024;
+
 function AuthSection({ onSuccess }: AuthSectionProps) {
   const [mode, setMode] = useState<AuthMode>("login");
   const [name, setName] = useState("");
@@ -17,6 +20,10 @@ function AuthSection({ onSuccess }: AuthSectionProps) {
   const [password, setPassword] = useState("");
   const [accountType, setAccountType] = useState<"creator" | "client">("creator");
   const [whatsappNumber, setWhatsappNumber] = useState("");
+  const [profilePhotoUrl, setProfilePhotoUrl] = useState("");
+  const [bio, setBio] = useState("");
+  const [serviceCategories, setServiceCategories] = useState<string[]>([]);
+  const [travelRadiusKm, setTravelRadiusKm] = useState(15);
   const [location, setLocation] = useState<GeolocationResult | null>(null);
   const [isLocating, setIsLocating] = useState(false);
   const [message, setMessage] = useState("");
@@ -26,6 +33,38 @@ function AuthSection({ onSuccess }: AuthSectionProps) {
     setMode(nextMode);
     setMessage("");
     if (nextMode === "login") setLocation(null);
+  };
+
+  const handleProfilePhotoChange = (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    setMessage("");
+    if (!file) {
+      setProfilePhotoUrl("");
+      return;
+    }
+    if (!file.type.startsWith("image/")) {
+      setMessage("Choose an image file for your profile photo.");
+      event.target.value = "";
+      return;
+    }
+    if (file.size > maxProfilePhotoBytes) {
+      setMessage("Profile photo must be smaller than 2 MB.");
+      event.target.value = "";
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = () => setProfilePhotoUrl(String(reader.result || ""));
+    reader.onerror = () => setMessage("Could not read that profile photo.");
+    reader.readAsDataURL(file);
+  };
+
+  const toggleServiceCategory = (category: string) => {
+    setServiceCategories((currentCategories) =>
+      currentCategories.includes(category)
+        ? currentCategories.filter((currentCategory) => currentCategory !== category)
+        : [...currentCategories, category],
+    );
   };
 
   const captureLocation = async () => {
@@ -50,6 +89,10 @@ function AuthSection({ onSuccess }: AuthSectionProps) {
       setMessage("Please enable GPS location so clients and artists nearby can connect with you.");
       return;
     }
+    if (mode === "signup" && accountType === "creator" && serviceCategories.length === 0) {
+      setMessage("Choose at least one service category for your creator profile.");
+      return;
+    }
 
     setIsSubmitting(true);
 
@@ -62,6 +105,10 @@ function AuthSection({ onSuccess }: AuthSectionProps) {
               password,
               accountType,
               whatsappNumber,
+              profilePhotoUrl,
+              bio,
+              serviceCategories,
+              travelRadiusKm,
               latitude: location!.latitude,
               longitude: location!.longitude,
               locationLabel: location!.locationLabel,
@@ -165,6 +212,73 @@ function AuthSection({ onSuccess }: AuthSectionProps) {
               <button type="button" className={accountType === "creator" ? "active" : ""} onClick={() => setAccountType("creator")}>Creator</button>
               <button type="button" className={accountType === "client" ? "active" : ""} onClick={() => setAccountType("client")}>Client</button>
             </div>
+          </div>
+        )}
+
+        {mode === "signup" && accountType === "creator" && (
+          <div className="auth-creator-details">
+            <label className="studio-label auth-photo-field">
+              <span>Profile Photo</span>
+              <div className="auth-photo-input-row">
+                <div className="auth-photo-preview">
+                  {profilePhotoUrl ? (
+                    <img src={profilePhotoUrl} alt="Profile preview" />
+                  ) : (
+                    <span>{name.trim().charAt(0).toUpperCase() || "G"}</span>
+                  )}
+                </div>
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleProfilePhotoChange}
+                  className="studio-input"
+                />
+              </div>
+              <small className="field-help">Use a clear face, salon, or brand photo under 2 MB.</small>
+            </label>
+
+            <label className="studio-label">
+              <span>Creator Bio</span>
+              <textarea
+                value={bio}
+                onChange={(event) => setBio(event.target.value)}
+                placeholder="Tell clients what you specialize in, where you work, and what makes your service different."
+                maxLength={600}
+                rows={4}
+                className="studio-input auth-bio-input"
+              />
+              <small className="field-help">{bio.length}/600 characters</small>
+            </label>
+
+            <div className="studio-label auth-category-field">
+              <span>Service Categories</span>
+              <div className="auth-category-grid" role="group" aria-label="Creator service categories">
+                {creatorCategories.map((category) => (
+                  <button
+                    type="button"
+                    key={category}
+                    className={serviceCategories.includes(category) ? "selected" : ""}
+                    onClick={() => toggleServiceCategory(category)}
+                  >
+                    {category}
+                  </button>
+                ))}
+              </div>
+              <small className="field-help">Choose every category clients can book you for.</small>
+            </div>
+
+            <label className="studio-label">
+              <span>Travel Radius</span>
+              <input
+                type="number"
+                min={0}
+                max={250}
+                value={travelRadiusKm}
+                onChange={(event) => setTravelRadiusKm(Number(event.target.value))}
+                className="studio-input"
+              />
+              <small className="field-help">How far you can travel for clients, in kilometres.</small>
+            </label>
           </div>
         )}
 

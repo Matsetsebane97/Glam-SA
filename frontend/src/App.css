@@ -1937,6 +1937,96 @@ body {
   box-shadow: var(--shadow-lg);
 }
 
+.booking-auth-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 120;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  background: rgba(17, 19, 15, .58);
+  backdrop-filter: blur(6px);
+  animation: fadeIn .15s ease;
+}
+
+.booking-auth-popup {
+  position: relative;
+  display: grid;
+  justify-items: center;
+  gap: 12px;
+  width: min(390px, 100%);
+  padding: 30px 26px 24px;
+  border: 1px solid var(--border-subtle);
+  border-radius: 14px;
+  background: #ffffff;
+  color: var(--ink-primary);
+  box-shadow: 0 24px 70px rgba(17, 19, 15, .22);
+  text-align: center;
+}
+
+.booking-auth-close {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border: 1px solid var(--border-subtle);
+  border-radius: 50%;
+  background: #fbfaf6;
+  color: var(--ink-muted);
+}
+
+.booking-auth-close:hover {
+  color: var(--ink-primary);
+  background: #eeeeeb;
+}
+
+.booking-auth-icon {
+  display: grid;
+  place-items: center;
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #c26f3e, #238676);
+  color: #ffffff;
+  box-shadow: 0 12px 28px rgba(35, 134, 118, .24);
+}
+
+.booking-auth-popup h2 {
+  font-size: 24px;
+  line-height: 1.1;
+}
+
+.booking-auth-popup p {
+  max-width: 310px;
+  color: var(--ink-secondary);
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.booking-auth-actions {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 10px;
+  width: 100%;
+  margin-top: 6px;
+}
+
+.booking-auth-actions .btn-primary,
+.booking-auth-actions .btn-ghost {
+  min-height: 42px;
+  padding: 0 15px;
+  font-size: 12px;
+}
+
+@media (max-width: 460px) {
+  .booking-auth-actions {
+    grid-template-columns: 1fr;
+  }
+}
+
 .inquiry-header {
   display: flex;
   align-items: flex-start;
@@ -2838,6 +2928,85 @@ body {
   gap: 14px;
 }
 
+.auth-creator-details {
+  display: grid;
+  gap: 14px;
+  padding: 14px;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  background: #fbfaf6;
+}
+
+.auth-photo-field {
+  gap: 9px;
+}
+
+.auth-photo-input-row {
+  display: grid;
+  grid-template-columns: 58px minmax(0, 1fr);
+  align-items: center;
+  gap: 12px;
+}
+
+.auth-photo-input-row input[type="file"] {
+  padding: 11px;
+  line-height: 1.2;
+}
+
+.auth-photo-preview {
+  display: grid;
+  place-items: center;
+  width: 58px;
+  height: 58px;
+  overflow: hidden;
+  border: 1px solid var(--border-subtle);
+  border-radius: 50%;
+  background: var(--ink-primary);
+  color: #ffffff;
+  font-size: 22px;
+  font-weight: 800;
+}
+
+.auth-photo-preview img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.auth-bio-input {
+  min-height: 104px;
+  resize: vertical;
+}
+
+.auth-category-field {
+  display: grid;
+  gap: 8px;
+}
+
+.auth-category-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.auth-category-grid button {
+  min-height: 34px;
+  padding: 0 12px;
+  border: 1px solid var(--border-subtle);
+  border-radius: 999px;
+  background: #ffffff;
+  color: var(--ink-secondary);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.auth-category-grid button:hover,
+.auth-category-grid button.selected {
+  border-color: #238676;
+  background: #dff3eb;
+  color: #155e53;
+}
+
 .auth-location-box {
   padding: 12px;
   border-radius: var(--radius-sm);
@@ -2912,6 +3081,12 @@ body {
   padding: 12px 18px;
   font-size: 14px;
   margin-top: 4px;
+}
+
+@media (max-width: 520px) {
+  .auth-photo-input-row {
+    grid-template-columns: 1fr;
+  }
 }
 
 /* 13. Mobile Bottom Navigation Dock */

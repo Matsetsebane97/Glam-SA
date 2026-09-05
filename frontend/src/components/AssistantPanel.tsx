@@ -408,6 +408,7 @@ function AssistantPanel({ posts, currentUser, onNavigate, onSearch }: AssistantP
   });
   const [activeBookingArtistId, setActiveBookingArtistId] = useState<string | null>(null);
   const [bookingPanels, setBookingPanels] = useState<Record<string, BookingPanelState>>({});
+  const [showBookingAuthPopup, setShowBookingAuthPopup] = useState(false);
 
   const visiblePrompts = useMemo(() => {
     return [...recentSearches, ...assistantSuggestions.filter((suggestion) => !recentSearches.includes(suggestion))].slice(0, 4);
@@ -518,17 +519,7 @@ function AssistantPanel({ posts, currentUser, onNavigate, onSearch }: AssistantP
   const openBooking = (artist: ArtistMatch) => {
     if (!artist.ownerId) return;
     if (!currentUser) {
-      setMessages((currentMessages) => [
-        ...currentMessages,
-        {
-          id: Date.now(),
-          author: "assistant",
-          text: "Sign in first, then I can help you request a real booking time from this artist.",
-          quickReplies: ["Browse the full feed"],
-        },
-      ]);
-      setIsOpen(false);
-      onNavigate("/login");
+      setShowBookingAuthPopup(true);
       return;
     }
 
@@ -796,6 +787,30 @@ function AssistantPanel({ posts, currentUser, onNavigate, onSearch }: AssistantP
             Browse the full feed
           </button>
         </section>
+      )}
+      {showBookingAuthPopup && (
+        <div className="booking-auth-backdrop" role="dialog" aria-modal="true" aria-label="Create an account to book" onClick={() => setShowBookingAuthPopup(false)}>
+          <section className="booking-auth-popup" onClick={(event) => event.stopPropagation()}>
+            <button className="booking-auth-close" type="button" onClick={() => setShowBookingAuthPopup(false)} aria-label="Close popup">
+              <IconClose size={17} />
+            </button>
+            <div className="booking-auth-icon">
+              <IconMessage size={22} />
+            </div>
+            <h2>Create an account to book</h2>
+            <p>
+              Booking requests are available after sign in so artists can confirm who you are and manage the appointment from Glam SA.
+            </p>
+            <div className="booking-auth-actions">
+              <button className="btn-primary" type="button" onClick={() => { setShowBookingAuthPopup(false); setIsOpen(false); onNavigate("/login"); }}>
+                Sign in / Join
+              </button>
+              <button className="btn-ghost" type="button" onClick={() => setShowBookingAuthPopup(false)}>
+                Keep browsing
+              </button>
+            </div>
+          </section>
+        </div>
       )}
       {!isOpen && (
         <button className="assistant-launcher" type="button" onClick={() => setIsOpen(true)} aria-label="Open Glam SA assistant">

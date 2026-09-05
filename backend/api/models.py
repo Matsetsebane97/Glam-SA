@@ -8,6 +8,10 @@ class UserProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="profile")
     account_type = models.CharField(max_length=20, default="creator")
     whatsapp_number = models.CharField(max_length=30, blank=True)
+    profile_photo_url = models.TextField(blank=True)
+    bio = models.TextField(blank=True, max_length=600)
+    service_categories = models.CharField(max_length=180, blank=True)
+    travel_radius_km = models.PositiveIntegerField(default=15)
     latitude = models.DecimalField(max_digits=9, decimal_places=6)
     longitude = models.DecimalField(max_digits=9, decimal_places=6)
     location_label = models.CharField(max_length=120, blank=True)
@@ -17,6 +21,10 @@ class UserProfile(models.Model):
         return {
             "accountType": self.account_type,
             "whatsappNumber": self.whatsapp_number,
+            "profilePhotoUrl": self.profile_photo_url,
+            "bio": self.bio,
+            "serviceCategories": [category for category in self.service_categories.split(",") if category],
+            "travelRadiusKm": self.travel_radius_km,
             "latitude": float(self.latitude),
             "longitude": float(self.longitude),
             "locationLabel": self.location_label,
