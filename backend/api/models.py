@@ -29,67 +29,6 @@ class UserProfile(models.Model):
             "latitude": float(self.latitude),
             "longitude": float(self.longitude),
             "locationLabel": self.location_label,
-        }
-
-
-class Post(models.Model):
-    owner = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True, related_name="posts")
-    creator = models.CharField(max_length=120)
-    handle = models.CharField(max_length=80)
-    location = models.CharField(max_length=120, blank=True)
-    latitude = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)
-    longitude = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)
-    service = models.CharField(max_length=120)
-    category = models.CharField(max_length=80, blank=True)
-    price = models.DecimalField(max_digits=10, decimal_places=2, default=0)
-    duration_minutes = models.PositiveIntegerField(default=60)
-    caption = models.TextField(blank=True)
-    image_url = models.URLField(blank=True)
-    media_file = models.FileField(upload_to="work/", blank=True)
-    media_type = models.CharField(max_length=20, blank=True)
-    likes_count = models.PositiveIntegerField(default=0)
-    created_at = models.DateTimeField(auto_now_add=True)
-
-    class Meta:
-        ordering = ["-created_at"]
-
-    def as_dict(self, distance_km=None):
-        media_url = self.media_file.url if self.media_file else self.image_url
-        owner_profile = getattr(self.owner, "profile", None) if self.owner_id else None
-        payload = {
-            "id": self.id,
-            "ownerId": self.owner_id,
-            "creator": self.creator,
-            "handle": self.handle,
-            "location": self.location,
-            "service": self.service,
-            "category": self.category,
-            "price": str(self.price),
-            "durationMinutes": self.duration_minutes,
-            "caption": self.caption,
-            "imageUrl": self.image_url,
-            "mediaUrl": media_url,
-            "mediaType": self.media_type,
-            "createdAt": self.created_at.isoformat(),
-            "likesCount": self.likes_count,
-            "whatsappNumber": owner_profile.whatsapp_number if owner_profile else "",
-        }
-        if self.latitude is not None and self.longitude is not None:
-            payload["latitude"] = float(self.latitude)
-            payload["longitude"] = float(self.longitude)
-        if distance_km is not None:
-            payload["distanceKm"] = round(distance_km, 1)
-        return payload
-
-
-class Message(models.Model):
-    sender = models.ForeignKey(User, on_delete=models.CASCADE, related_name="sent_messages")
-    recipient = models.ForeignKey(User, on_delete=models.CASCADE, related_name="received_messages")
-    post = models.ForeignKey(Post, on_delete=models.SET_NULL, null=True, blank=True, related_name="messages")
-    body = models.TextField(max_length=2000)
-    created_at = models.DateTimeField(auto_now_add=True)
-    is_read = models.BooleanField(default=False)
-
     class Meta:
         ordering = ["created_at"]
 

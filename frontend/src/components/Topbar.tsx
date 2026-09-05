@@ -1,5 +1,6 @@
 // Global search and account controls displayed above each page.
 import { useEffect, useState } from "react";
+import { useTheme } from "../theme/ThemeContext";
 import { getConversations } from "../api";
 import { brandLogoUrl } from "../constants";
 import { IconBell, IconClose, IconSearch } from "./Icons";
@@ -13,6 +14,7 @@ type TopbarProps = {
 };
 
 function Topbar({ currentUser, query, onQueryChange, onNavigate }: TopbarProps) {
+  const { theme, toggleTheme } = useTheme();
   const [showNotifications, setShowNotifications] = useState(false);
   const [notifications, setNotifications] = useState<Conversation[]>([]);
   const [isLoadingNotifications, setIsLoadingNotifications] = useState(false);
@@ -67,6 +69,10 @@ function Topbar({ currentUser, query, onQueryChange, onNavigate }: TopbarProps) 
       </div>
 
       <div className="topbar-actions">
+        {/* Dark mode toggle */}
+        <button className="icon-btn" aria-label="Toggle dark mode" type="button" onClick={() => toggleTheme()}>
+          {theme === 'light' ? '🌙' : '☀️'}
+        </button>
         <div className="notification-wrapper">
           <button
             className="icon-btn"

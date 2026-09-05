@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { ThemeProvider } from "./theme/ThemeContext";
 import { getCategories, getCurrentUser, getPosts, logout } from "./api";
 import "./App.css";
 import MobileNav from "./components/MobileNav";
@@ -250,16 +251,18 @@ function App() {
   };
 
   return (
-    <div className="app-shell">
-      <Sidebar activeNav={navForPath(pathname)} currentUser={currentUser} onNavigate={navigate} onLogout={() => void handleLogout()} />
-      <main className="feed-main">
-        <Topbar currentUser={currentUser} query={query} onQueryChange={setQuery} onNavigate={navigate} />
-        {renderPage()}
-      </main>
-      <RightRail currentUser={currentUser} onNavigate={navigate} />
-      <MobileNav pathname={pathname} currentUser={currentUser} onNavigate={navigate} />
-      <AssistantPanel posts={posts} currentUser={currentUser} onNavigate={navigate} onSearch={setQuery} />
-    </div>
+    <ThemeProvider>
+      <div className="app-shell">
+        <Sidebar activeNav={navForPath(pathname)} currentUser={currentUser} onNavigate={navigate} onLogout={() => void handleLogout()} />
+        <main className="feed-main">
+          <Topbar currentUser={currentUser} query={query} onQueryChange={setQuery} onNavigate={navigate} />
+          {renderPage()}
+        </main>
+        <RightRail currentUser={currentUser} onNavigate={navigate} />
+        <MobileNav pathname={pathname} currentUser={currentUser} onNavigate={navigate} />
+        <AssistantPanel posts={posts} currentUser={currentUser} onNavigate={navigate} onSearch={setQuery} />
+      </div>
+    </ThemeProvider>
   );
 }
 
