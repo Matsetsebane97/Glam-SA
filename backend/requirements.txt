@@ -5,3 +5,4 @@ gunicorn>=23.0
 whitenoise>=6.9
 cloudinary>=1.44
 django-cors-headers>=3.13
+django-cloudinary-storage>=0.3.0
