@@ -1,13 +1,13 @@
 // Main feed page combining stories, filters, and community posts.
 import CategoryTabs from "../components/CategoryTabs";
 import PostCard from "../components/PostCard";
-import { IconCompass, IconPin, IconUpload } from "../components/Icons";
+import { IconPin } from "../components/Icons";
 import type { CurrentUser, Post } from "../types";
 
 type HomePageProps = {
   activeCategory: string;
   categories: string[];
-  currentDate: string;
+
   emptyCopy: string;
   error: string;
   hasLocation: boolean;
@@ -24,7 +24,7 @@ type HomePageProps = {
 function HomePage({
   activeCategory,
   categories,
-  currentDate,
+
   emptyCopy,
   error,
   hasLocation,
