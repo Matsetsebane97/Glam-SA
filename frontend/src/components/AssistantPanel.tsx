@@ -1,7 +1,8 @@
 import { useMemo, useState } from "react";
-import { getNearbyArtists } from "../api";
+import { createBooking, getAvailability, getNearbyArtists, getServices } from "../api";
 import { IconBookmark, IconChevronRight, IconClose, IconMessage, IconMic, IconPin, IconSend, IconWhatsApp } from "./Icons";
-import type { CurrentUser, NearbyArtist, Post } from "../types";
+import type { AvailabilitySlot, CurrentUser, NearbyArtist, Post, ServiceOffering } from "../types";
+import { formatDuration } from "../utils/geo";
 import { whatsappUrl } from "../utils/whatsapp";
 
 type AssistantPanelProps = {
@@ -24,6 +25,9 @@ type ChatMessage = {
 type ArtistMatch = {
   id: string;
   ownerId?: number;
+  postId?: number;
+  preferredWeekday?: number;
+  preferredDateLabel?: string;
   name: string;
   handle: string;
   service?: string;
@@ -34,6 +38,17 @@ type ArtistMatch = {
   minPrice?: number;
   maxPrice?: number;
   resultCount: number;
+};
+
+type BookingPanelState = {
+  isLoading: boolean;
+  isSubmitting: boolean;
+  services: ServiceOffering[];
+  slots: AvailabilitySlot[];
+  selectedServiceId: string;
+  selectedSlotId: string;
+  notes: string;
+  status: string;
 };
 
 const categoryAliases: Record<string, string> = {
@@ -58,8 +73,17 @@ const assistantSuggestions = ["Hair near me", "Nails under R500", "Makeup in San
 const fallbackSuggestions = ["Try a broader budget", "Search another area", "Browse the full feed"];
 const recentSearchesKey = "glamAssistantRecentSearches";
 const savedArtistsKey = "glamAssistantSavedArtists";
-const searchStopWords = new Set(["a", "an", "artist", "artists", "beauty", "find", "for", "in", "look", "looks", "me", "near", "nearby", "show", "the", "under", "below", "less", "than"]);
+const searchStopWords = new Set(["a", "an", "appointment", "artist", "artists", "beauty", "book", "booking", "find", "for", "in", "look", "looks", "me", "near", "nearby", "next", "please", "session", "show", "the", "than", "this", "to", "under", "below", "less"]);
 const speechRecognitionName = "webkitSpeechRecognition";
+const weekdayAliases: Record<string, number> = {
+  sunday: 0,
+  monday: 1,
+  tuesday: 2,
+  wednesday: 3,
+  thursday: 4,
+  friday: 5,
+  saturday: 6,
+};
 
 type SpeechRecognitionConstructor = new () => {
   continuous: boolean;
@@ -77,6 +101,8 @@ type ParsedQuestion = {
   maxPrice?: number;
   searchTerms: string[];
   wantsNearby: boolean;
+  preferredWeekday?: number;
+  preferredDateLabel?: string;
 };
 
 function parseQuestion(question: string): ParsedQuestion {
@@ -84,12 +110,15 @@ function parseQuestion(question: string): ParsedQuestion {
   const categoryToken = normalizedQuestion.match(/\b(braids?|hair|nails?|manicure|pedicure|barber(?:ing|s)?|makeup|facials?|skincare|tattoos?)\b/);
   const priceMatch = normalizedQuestion.match(/(?:under|below|less than)\s*r?\s*(\d+(?:\.\d+)?)/);
   const locationMatch = normalizedQuestion.match(/\bnear\s+(?!me\b)([a-z][a-z\s-]*?)(?=\s+(?:under|below|less than)\b|$)/);
+  const weekdayMatch = normalizedQuestion.match(/\b(sunday|monday|tuesday|wednesday|thursday|friday|saturday)\b/);
   const category = categoryToken ? categoryAliases[categoryToken[1]] : getFuzzyCategory(normalizedQuestion);
   const wantsNearby = /\b(near me|nearby|close to me|around me)\b/.test(normalizedQuestion);
   const searchTerms = normalizedQuestion
     .replace(categoryToken?.[0] || "", "")
     .replace(priceMatch?.[0] || "", "")
     .replace(locationMatch?.[0] || "", "")
+    .replace(weekdayMatch?.[0] || "", "")
+    .replace(/\b(today|tomorrow|weekend)\b/g, "")
     .replace(/\b(near me|nearby|close to me|around me)\b/g, "")
     .split(/\s+/)
     .map((term) => term.trim())
@@ -101,6 +130,8 @@ function parseQuestion(question: string): ParsedQuestion {
     maxPrice: priceMatch ? Number(priceMatch[1]) : undefined,
     searchTerms,
     wantsNearby,
+    preferredWeekday: weekdayMatch ? weekdayAliases[weekdayMatch[1]] : undefined,
+    preferredDateLabel: weekdayMatch?.[1],
   };
 }
 
@@ -171,6 +202,54 @@ function formatDistance(distanceKm?: number) {
   return distanceKm < 1 ? `${Math.round(distanceKm * 1000)} m away` : `${distanceKm.toFixed(1)} km away`;
 }
 
+function formatSlot(slot: AvailabilitySlot) {
+  return new Date(slot.startsAt).toLocaleString("en-ZA", {
+    weekday: "short",
+    day: "numeric",
+    month: "short",
+    hour: "numeric",
+    minute: "2-digit",
+  });
+}
+
+function createBookingNote(artist: ArtistMatch) {
+  const serviceText = artist.service || artist.category || "a beauty service";
+  return `Hi ${artist.name}, I found you on Glam SA and would like to request a booking for ${serviceText}.`;
+}
+
+function selectBestService(services: ServiceOffering[], artist: ArtistMatch) {
+  const activeServices = services.filter((service) => service.isActive);
+  const normalizedService = artist.service?.toLowerCase();
+  const normalizedCategory = artist.category?.toLowerCase();
+  const match = activeServices.find((service) => {
+    const normalizedName = service.name.toLowerCase();
+    return Boolean(
+      normalizedService &&
+        (normalizedName.includes(normalizedService) || normalizedService.includes(normalizedName)),
+    ) || Boolean(normalizedCategory && normalizedName.includes(normalizedCategory));
+  });
+
+  return match || activeServices[0];
+}
+
+function sortSlotsByPreference(slots: AvailabilitySlot[], preferredWeekday?: number) {
+  if (preferredWeekday == null) return slots;
+  return [...slots].sort((leftSlot, rightSlot) => {
+    const leftMatches = new Date(leftSlot.startsAt).getDay() === preferredWeekday;
+    const rightMatches = new Date(rightSlot.startsAt).getDay() === preferredWeekday;
+    if (leftMatches === rightMatches) return leftSlot.startsAt.localeCompare(rightSlot.startsAt);
+    return leftMatches ? -1 : 1;
+  });
+}
+
+function withBookingPreference(artists: ArtistMatch[], parsedQuestion: ParsedQuestion) {
+  return artists.map((artist) => ({
+    ...artist,
+    preferredWeekday: parsedQuestion.preferredWeekday,
+    preferredDateLabel: parsedQuestion.preferredDateLabel,
+  }));
+}
+
 function getArtistMatches(posts: Post[]): ArtistMatch[] {
   const artistsByKey = new Map<string, ArtistMatch>();
 
@@ -182,6 +261,7 @@ function getArtistMatches(posts: Post[]): ArtistMatch[] {
     if (existingArtist) {
       artistsByKey.set(key, {
         ...existingArtist,
+        postId: existingArtist.postId || post.id,
         whatsappNumber: existingArtist.whatsappNumber || post.whatsappNumber,
         minPrice: price == null ? existingArtist.minPrice : Math.min(existingArtist.minPrice ?? price, price),
         maxPrice: price == null ? existingArtist.maxPrice : Math.max(existingArtist.maxPrice ?? price, price),
@@ -193,6 +273,7 @@ function getArtistMatches(posts: Post[]): ArtistMatch[] {
     artistsByKey.set(key, {
       id: key,
       ownerId: post.ownerId,
+      postId: post.id,
       name: post.creator,
       handle: post.handle,
       service: post.service,
@@ -227,6 +308,7 @@ function mergeNearbyArtist(artist: NearbyArtist, postMatch?: ArtistMatch): Artis
     name: artist.name,
     handle: artist.handle,
     service: postMatch?.service,
+    postId: postMatch?.postId,
     category: postMatch?.category,
     location: artist.locationLabel || postMatch?.location,
     whatsappNumber: artist.whatsappNumber || postMatch?.whatsappNumber,
@@ -272,7 +354,7 @@ async function answerQuestion(question: string, posts: Post[], currentUser: Curr
       if (nearbyMatches.length > 0) {
         return {
           text: `Here are ${Math.min(nearbyMatches.length, 3)} nearby artist${nearbyMatches.length === 1 ? "" : "s"} within 50 km.`,
-          matches: nearbyMatches.slice(0, 3),
+          matches: withBookingPreference(nearbyMatches.slice(0, 3), parsedQuestion),
           fullResultCount: nearbyMatches.length > 3 ? nearbyMatches.length : undefined,
           fullResultQuery: question,
         };
@@ -290,7 +372,7 @@ async function answerQuestion(question: string, posts: Post[], currentUser: Curr
   }
 
   const allArtistMatches = getArtistMatches(matchingPosts);
-  const matches = allArtistMatches.slice(0, 3);
+  const matches = withBookingPreference(allArtistMatches.slice(0, 3), parsedQuestion);
   const suffix = matchingPosts.length > matches.length ? ` I found ${matchingPosts.length} matching looks in total.` : "";
   return {
     text: `Here are ${matches.length} matching artist${matches.length === 1 ? "" : "s"}.${suffix}`,
@@ -324,6 +406,8 @@ function AssistantPanel({ posts, currentUser, onNavigate, onSearch }: AssistantP
       return [];
     }
   });
+  const [activeBookingArtistId, setActiveBookingArtistId] = useState<string | null>(null);
+  const [bookingPanels, setBookingPanels] = useState<Record<string, BookingPanelState>>({});
 
   const visiblePrompts = useMemo(() => {
     return [...recentSearches, ...assistantSuggestions.filter((suggestion) => !recentSearches.includes(suggestion))].slice(0, 4);
@@ -358,6 +442,25 @@ function AssistantPanel({ posts, currentUser, onNavigate, onSearch }: AssistantP
       : [artistId, ...savedArtistIds];
     setSavedArtistIds(nextSavedArtistIds);
     window.localStorage.setItem(savedArtistsKey, JSON.stringify(nextSavedArtistIds));
+  };
+
+  const updateBookingPanel = (artistId: string, update: Partial<BookingPanelState>) => {
+    setBookingPanels((currentPanels) => ({
+      ...currentPanels,
+      [artistId]: {
+        ...(currentPanels[artistId] || {
+          isLoading: false,
+          isSubmitting: false,
+          services: [],
+          slots: [],
+          selectedServiceId: "",
+          selectedSlotId: "",
+          notes: "",
+          status: "",
+        }),
+        ...update,
+      },
+    }));
   };
 
   const startVoiceSearch = () => {
@@ -414,8 +517,98 @@ function AssistantPanel({ posts, currentUser, onNavigate, onSearch }: AssistantP
 
   const openBooking = (artist: ArtistMatch) => {
     if (!artist.ownerId) return;
-    setIsOpen(false);
-    onNavigate(`/profile/${artist.ownerId}`);
+    if (!currentUser) {
+      setMessages((currentMessages) => [
+        ...currentMessages,
+        {
+          id: Date.now(),
+          author: "assistant",
+          text: "Sign in first, then I can help you request a real booking time from this artist.",
+          quickReplies: ["Browse the full feed"],
+        },
+      ]);
+      setIsOpen(false);
+      onNavigate("/login");
+      return;
+    }
+
+    if (activeBookingArtistId === artist.id) {
+      setActiveBookingArtistId(null);
+      return;
+    }
+
+    setActiveBookingArtistId(artist.id);
+    updateBookingPanel(artist.id, {
+      isLoading: true,
+      status: "",
+      notes: bookingPanels[artist.id]?.notes || createBookingNote(artist),
+    });
+
+    void Promise.all([getServices(artist.ownerId), getAvailability(artist.ownerId)])
+      .then(([nextServices, nextSlots]) => {
+        const activeServices = nextServices.filter((service) => service.isActive);
+        const availableSlots = sortSlotsByPreference(
+          nextSlots.filter((slot) => slot.isAvailable),
+          artist.preferredWeekday,
+        );
+        const bestService = selectBestService(activeServices, artist);
+        const hasPreferredSlot = artist.preferredWeekday == null || availableSlots.some((slot) => new Date(slot.startsAt).getDay() === artist.preferredWeekday);
+        updateBookingPanel(artist.id, {
+          isLoading: false,
+          services: activeServices,
+          slots: availableSlots,
+          selectedServiceId: String(bestService?.id || ""),
+          selectedSlotId: String(availableSlots[0]?.id || ""),
+          status: activeServices.length && availableSlots.length
+            ? hasPreferredSlot ? "" : `No ${artist.preferredDateLabel} slot yet, so I selected the next open time.`
+            : "This artist needs an active service and open time before bookings can be requested.",
+        });
+      })
+      .catch(() => {
+        updateBookingPanel(artist.id, {
+          isLoading: false,
+          status: "Booking times are not available right now. You can still open the profile or send a message.",
+        });
+      });
+  };
+
+  const submitAssistantBooking = async (artist: ArtistMatch) => {
+    const bookingPanel = bookingPanels[artist.id];
+    if (!artist.ownerId || !bookingPanel) return;
+    if (!currentUser) {
+      setIsOpen(false);
+      onNavigate("/login");
+      return;
+    }
+    if (currentUser.id === artist.ownerId) {
+      updateBookingPanel(artist.id, { status: "You cannot book your own service." });
+      return;
+    }
+    if (!bookingPanel.selectedServiceId || !bookingPanel.selectedSlotId) {
+      updateBookingPanel(artist.id, { status: "Choose a service and available time first." });
+      return;
+    }
+
+    updateBookingPanel(artist.id, { isSubmitting: true, status: "" });
+    try {
+      const booking = await createBooking({
+        serviceId: Number(bookingPanel.selectedServiceId),
+        slotId: Number(bookingPanel.selectedSlotId),
+        postId: artist.postId,
+        notes: bookingPanel.notes,
+      });
+      updateBookingPanel(artist.id, {
+        isSubmitting: false,
+        selectedSlotId: "",
+        slots: bookingPanel.slots.filter((slot) => slot.id !== Number(bookingPanel.selectedSlotId)),
+        status: `Booking requested for ${formatSlot({ id: 0, startsAt: booking.startsAt, endsAt: booking.endsAt, isAvailable: false })}.`,
+      });
+    } catch (error) {
+      updateBookingPanel(artist.id, {
+        isSubmitting: false,
+        status: error instanceof Error ? error.message : "Unable to request booking.",
+      });
+    }
   };
 
   return (
@@ -439,6 +632,8 @@ function AssistantPanel({ posts, currentUser, onNavigate, onSearch }: AssistantP
                   <div className="assistant-match-list">
                     {message.matches.map((artist) => {
                       const priceRange = formatPriceRange(artist);
+                      const bookingPanel = bookingPanels[artist.id];
+                      const showBookingPanel = activeBookingArtistId === artist.id && bookingPanel;
                       const messageHref = whatsappUrl(
                         artist.whatsappNumber,
                         `Hi ${artist.name}, I found you on Glam SA and want to inquire about booking a session!`,
@@ -487,6 +682,72 @@ function AssistantPanel({ posts, currentUser, onNavigate, onSearch }: AssistantP
                               <button type="button" disabled>Message</button>
                             )}
                           </div>
+                          {showBookingPanel && (
+                            <div className="assistant-booking-panel">
+                              {bookingPanel.isLoading ? (
+                                <p className="assistant-booking-status">Checking services and open times...</p>
+                              ) : (
+                                <>
+                                  {bookingPanel.services.length > 0 && (
+                                    <label className="assistant-booking-field">
+                                      <span>Service</span>
+                                      <select
+                                        value={bookingPanel.selectedServiceId}
+                                        onChange={(event) => updateBookingPanel(artist.id, { selectedServiceId: event.target.value, status: "" })}
+                                      >
+                                        {bookingPanel.services.map((service) => (
+                                          <option key={service.id} value={service.id}>
+                                            {service.name} - R {service.price} - {formatDuration(service.durationMinutes)}
+                                          </option>
+                                        ))}
+                                      </select>
+                                    </label>
+                                  )}
+                                  {bookingPanel.slots.length > 0 && (
+                                    <label className="assistant-booking-field">
+                                      <span>Available time</span>
+                                      <select
+                                        value={bookingPanel.selectedSlotId}
+                                        onChange={(event) => updateBookingPanel(artist.id, { selectedSlotId: event.target.value, status: "" })}
+                                      >
+                                        {bookingPanel.slots.map((slot) => (
+                                          <option key={slot.id} value={slot.id}>
+                                            {formatSlot(slot)}
+                                          </option>
+                                        ))}
+                                      </select>
+                                    </label>
+                                  )}
+                                  <label className="assistant-booking-field">
+                                    <span>Note</span>
+                                    <textarea
+                                      rows={3}
+                                      value={bookingPanel.notes}
+                                      onChange={(event) => updateBookingPanel(artist.id, { notes: event.target.value })}
+                                    />
+                                  </label>
+                                  <div className="assistant-booking-actions">
+                                    <button
+                                      type="button"
+                                      className="btn-primary"
+                                      disabled={bookingPanel.isSubmitting || !bookingPanel.services.length || !bookingPanel.slots.length}
+                                      onClick={() => void submitAssistantBooking(artist)}
+                                    >
+                                      {bookingPanel.isSubmitting ? "Requesting..." : "Request booking"}
+                                    </button>
+                                    <button type="button" className="btn-ghost" onClick={() => openProfile(artist)}>
+                                      Profile
+                                    </button>
+                                  </div>
+                                  {bookingPanel.status && (
+                                    <p className="assistant-booking-status" role="status">
+                                      {bookingPanel.status}
+                                    </p>
+                                  )}
+                                </>
+                              )}
+                            </div>
+                          )}
                               </>
                             );
                           })()}
