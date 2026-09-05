@@ -39,8 +39,7 @@ function HomePage({
 }: HomePageProps) {
   return (
     <div className="page-content home-page">
-      {/* Editorial Hero */}
-      {/* Hero banner removed – streamlined home page */}
+
 
       {/* Category Pills Slider */}
       <section className="category-section">

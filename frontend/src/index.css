@@ -48,6 +48,42 @@
   --transition-fast: 0.15s ease;
   --transition-base: 0.2s ease;
   --transition-smooth: 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+} :root[data-theme='dark'] {
+  --bg-primary: #121212;
+  --bg-secondary: #1e1e1e;
+  --bg-surface: #181818;
+  --bg-surface-elevated: #212121;
+  --bg-muted: #2c2c2c;
+
+  --ink-primary: #e0e0e0;
+  --ink-secondary: #b0b0b0;
+  --ink-muted: #909090;
+  --ink-light: #c0c0c0;
+
+  --border-subtle: rgba(224, 224, 224, .1);
+  --border-medium: rgba(224, 224, 224, .2);
+  --border-strong: #e0e0e0;
+
+  --accent-primary: #c26f3e;
+  --accent-secondary: #7c4b3a;
+  --accent-gold: #c26f3e;
+  --accent-rose: #b44b49;
+  --accent-green: #15803d;
+}
+
+/* Glassmorphism utility */
+.glass-card {
+  background: var(--glass-bg, rgba(255, 255, 255, 0.08));
+  backdrop-filter: blur(12px);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-subtle);
+  box-shadow: var(--shadow-sm);
+  transition: var(--transition-base);
+}
+
+/* Updated typography token */
+:root {
+  --font-display: "Playfair Display", Georgia, serif;
 }
 
 *,
