@@ -6,8 +6,8 @@ from .models import AvailabilitySlot, Booking, Message, Post, ServiceOffering, U
 @admin.register(Post)
 class PostAdmin(admin.ModelAdmin):
     list_display = ("creator", "service", "category", "price", "duration_minutes", "likes_count", "created_at")
-    list_filter = ("category", "created_at")
-    search_fields = ("creator", "service", "category")
+    list_filter = ("category", "media_type", "created_at", "location")
+    search_fields = ("creator", "handle", "service", "category", "caption", "location")
     readonly_fields = ("created_at",)
     date_hierarchy = "created_at"
 
