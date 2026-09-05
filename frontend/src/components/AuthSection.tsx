@@ -123,7 +123,7 @@ function AuthSection({ onSuccess }: AuthSectionProps) {
             <input
               value={name}
               onChange={(event) => setName(event.target.value)}
-              placeholder="e.g. Naledi Sibeko or Luminous Glam Studio"
+              placeholder="e.g. Your name  or Salon Brand"
               autoComplete="name"
               required
               className="studio-input"
