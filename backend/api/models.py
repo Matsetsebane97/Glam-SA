@@ -32,7 +32,7 @@ class UserProfile(models.Model):
         }
 
     class Meta:
-        ordering = ["created_at"]
+        ordering = ["-id"]
 
 
 class ServiceOffering(models.Model):
@@ -61,12 +61,6 @@ class AvailabilitySlot(models.Model):
         ]
 
 
-class Booking(models.Model):
-    # Existing fields unchanged (add your fields here as needed)
-
-    class Meta:
-        ordering = ["-created_at"]
-
 
 class SearchSynonym(models.Model):
     """Store synonyms for search terms, e.g., "hairstyle" ↔ "haircut"."""
@@ -76,6 +70,8 @@ class SearchSynonym(models.Model):
     def __str__(self):
         return self.term
 
+
+class Booking(models.Model):
     STATUS_CHOICES = [
         ("requested", "Requested"),
         ("confirmed", "Confirmed"),
@@ -92,6 +88,30 @@ class SearchSynonym(models.Model):
     ends_at = models.DateTimeField()
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="requested")
     notes = models.TextField(blank=True, max_length=2000)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+
+
+class Message(models.Model):
+    sender = models.ForeignKey(User, on_delete=models.CASCADE, related_name="sent_messages")
+    recipient = models.ForeignKey(User, on_delete=models.CASCADE, related_name="received_messages")
+    post = models.ForeignKey('Post', on_delete=models.SET_NULL, null=True, blank=True, related_name="messages")
+    body = models.TextField(max_length=2000)
+    created_at = models.DateTimeField(auto_now_add=True)
+    is_read = models.BooleanField(default=False)
+
+    class Meta:
+        ordering = ["created_at"]
+
+class Post(models.Model):
+    creator = models.ForeignKey(User, on_delete=models.CASCADE, related_name="posts")
+    service = models.CharField(max_length=120)
+    category = models.CharField(max_length=120, blank=True)
+    price = models.DecimalField(max_digits=10, decimal_places=2)
+    duration_minutes = models.PositiveIntegerField(default=60)
+    likes_count = models.PositiveIntegerField(default=0)
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
