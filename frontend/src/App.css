@@ -90,7 +90,7 @@
 .profile-work-title-row h3 { margin-top: 3px; font-size: 19px; letter-spacing: -.01em; }
 .profile-work-kicker { color: var(--accent-gold); font-size: 10px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; }
 .profile-work-title-row time { color: var(--ink-muted); font-size: 11px; white-space: nowrap; }
-.profile-work-caption { display: -webkit-box; overflow: hidden; margin-top: 11px; color: var(--ink-secondary); font-size: 13px; line-height: 1.55; -webkit-box-orient: vertical; -webkit-line-clamp: 3; }
+.profile-work-caption { display: -webkit-box; overflow: hidden; margin-top: 11px; color: var(--ink-secondary); font-size: 13px; line-height: 1.55; -webkit-box-orient: vertical; -webkit-line-clamp: 3; line-clamp: 3; }
 .profile-work-actions, .profile-edit-actions { display: flex; gap: 8px; margin: 18px -18px -18px; padding: 12px 18px; border-top: 1px solid rgba(44, 49, 39, .08); background: #fbfaf6; }
 .profile-work-actions .btn-outline-sm { gap: 6px; }
 .danger-action { color: var(--accent-rose); border-color: #fecdd3; }

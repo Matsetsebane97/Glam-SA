@@ -23,6 +23,8 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "api",
     "corsheaders",
+    "cloudinary",
+    "cloudinary_storage",
 ]
 
 MIDDLEWARE = [
@@ -103,6 +105,7 @@ CLOUDINARY_CLOUD_NAME = os.getenv("CLOUDINARY_CLOUD_NAME", "")
 CLOUDINARY_API_KEY = os.getenv("CLOUDINARY_API_KEY", "")
 CLOUDINARY_API_SECRET = os.getenv("CLOUDINARY_API_SECRET", "")
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+DEFAULT_FILE_STORAGE = "cloudinary_storage.storage.MediaCloudinaryStorage"
 
 if not DEBUG:
     SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
