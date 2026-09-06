@@ -12,16 +12,14 @@ type UploadPageProps = {
 function UploadPage({ categories, currentUser, onNavigate, onUploaded }: UploadPageProps) {
   return (
     <section className="page-content upload-page">
-      <div className="upload-command-bar">
-        <button className="upload-back-button" type="button" onClick={() => onNavigate("/")}>
-          Back
+      <header className="upload-header">
+        <button className="back-link" type="button" onClick={() => onNavigate("/")}>
+          Back to feed
         </button>
-        <div className="upload-command-title">
-          <span>Upload</span>
-          <strong>New creator listing</strong>
-        </div>
-        <span className="upload-command-status">Draft</span>
-      </div>
+        <div className="eyebrow">Share a look</div>
+        <h1>New listing</h1>
+        <p>Add your work, set the booking details, then check how it will appear on the feed.</p>
+      </header>
 
       {currentUser?.accountType === "client" ? (
         <div className="login-prompt-card">
@@ -40,9 +38,7 @@ function UploadPage({ categories, currentUser, onNavigate, onUploaded }: UploadP
         />
       ) : (
         <div className="login-prompt-card">
-          <div className="location-prompt-icon-ring">
-          </div>
-          <h2>Creator Portfolio Access</h2>
+          <h2>Creator portfolio access</h2>
           <p>Sign in or join Glam SA to publish your styles, pin your salon on the radar map, and receive booking inquiries.</p>
           <div className="location-action-buttons">
             <button className="btn-primary" type="button" onClick={() => onNavigate("/login")}>
