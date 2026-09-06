@@ -1,7 +1,16 @@
 // Desktop navigation and the signed-in user's quick profile summary.
 import type { ReactNode } from "react";
 import { brandLogoUrl, navItems } from "../constants";
-import { IconCalendar, IconCompass, IconHome, IconMessage, IconUpload, IconVerified } from "./Icons";
+import {
+  IconCalendar,
+  IconCompass,
+  IconHome,
+  IconMessage,
+  IconSparkles,
+  IconUpload,
+  IconUser,
+  IconVerified,
+} from "./Icons";
 import type { CurrentUser, NavItem } from "../types";
 
 type SidebarProps = {
@@ -123,7 +132,15 @@ function Sidebar({ activeNav, currentUser, onNavigate, onLogout }: SidebarProps)
             {currentUser && (
               <div className="profile-role-row">
                 <span className={`user-role-badge ${currentUser.accountType || "creator"}`}>
-                  {currentUser.accountType === "client" ? "👤 Client" : "✨ Creator"}
+                  {currentUser.accountType === "client" ? (
+                    <>
+                      <IconUser size={12} /> Client
+                    </>
+                  ) : (
+                    <>
+                      <IconSparkles size={12} /> Creator
+                    </>
+                  )}
                 </span>
               </div>
             )}

@@ -1,5 +1,5 @@
-// Multi-step onboarding walkthrough for newly signed-up users.
 import { useEffect, useState } from "react";
+import { IconCamera, IconClose, IconCompass, IconHome, IconMessage, IconPin, IconSparkles, IconUpload } from "./Icons";
 import type { CurrentUser } from "../types";
 
 type OnboardingWalkthroughProps = {
@@ -10,7 +10,6 @@ type OnboardingWalkthroughProps = {
 
 type Step = {
   id: string;
-  emoji: string;
   eyebrow: string;
   title: string;
   description: string;
@@ -22,7 +21,6 @@ type Step = {
 const creatorSteps: Step[] = [
   {
     id: "welcome",
-    emoji: "✨",
     eyebrow: "Welcome to Glam SA",
     title: "Your beauty journey starts here",
     description:
@@ -31,7 +29,6 @@ const creatorSteps: Step[] = [
   },
   {
     id: "feed",
-    emoji: "🏠",
     eyebrow: "The Home Feed",
     title: "Discover stunning looks every day",
     description:
@@ -42,7 +39,6 @@ const creatorSteps: Step[] = [
   },
   {
     id: "upload",
-    emoji: "📸",
     eyebrow: "Share Your Work",
     title: "Post your first look",
     description:
@@ -53,7 +49,6 @@ const creatorSteps: Step[] = [
   },
   {
     id: "discover",
-    emoji: "📍",
     eyebrow: "Discover Page",
     title: "Get found by clients near you",
     description:
@@ -64,7 +59,6 @@ const creatorSteps: Step[] = [
   },
   {
     id: "assistant",
-    emoji: "🤖",
     eyebrow: "Glam Assistant",
     title: "Your AI beauty concierge",
     description:
@@ -73,7 +67,6 @@ const creatorSteps: Step[] = [
   },
   {
     id: "messages",
-    emoji: "💬",
     eyebrow: "Messages & Bookings",
     title: "Manage inquiries and bookings",
     description:
@@ -87,7 +80,6 @@ const creatorSteps: Step[] = [
 const clientSteps: Step[] = [
   {
     id: "welcome",
-    emoji: "✨",
     eyebrow: "Welcome to Glam SA",
     title: "Your beauty journey starts here",
     description:
@@ -96,7 +88,6 @@ const clientSteps: Step[] = [
   },
   {
     id: "feed",
-    emoji: "🏠",
     eyebrow: "The Home Feed",
     title: "Browse stunning looks",
     description:
@@ -107,7 +98,6 @@ const clientSteps: Step[] = [
   },
   {
     id: "discover",
-    emoji: "📍",
     eyebrow: "Discover Nearby Artists",
     title: "Find artists close to you",
     description:
@@ -118,7 +108,6 @@ const clientSteps: Step[] = [
   },
   {
     id: "assistant",
-    emoji: "🤖",
     eyebrow: "Glam Assistant",
     title: "Ask your AI beauty concierge",
     description:
@@ -127,7 +116,6 @@ const clientSteps: Step[] = [
   },
   {
     id: "messages",
-    emoji: "💬",
     eyebrow: "Messages & Bookings",
     title: "Chat and track your appointments",
     description:
@@ -206,7 +194,7 @@ function Illustration({ type }: { type: Step["illustration"] }) {
           {/* Artist pins */}
           <circle cx="140" cy="90" r="18" fill="#c26f3e" opacity="0.18" />
           <circle cx="140" cy="90" r="10" fill="#c26f3e" />
-          <text x="140" y="95" textAnchor="middle" fontSize="10" fill="#fff">📍</text>
+          <circle cx="140" cy="90" r="3.5" fill="#fff" />
           <circle cx="88" cy="58" r="7" fill="#24271f" />
           <circle cx="196" cy="112" r="7" fill="#7c4b3a" />
           <circle cx="62" cy="128" r="6" fill="#c26f3e" opacity="0.7" />
@@ -342,7 +330,7 @@ function OnboardingWalkthrough({ currentUser, onNavigate, onDismiss }: Onboardin
           onClick={handleDismiss}
           aria-label="Skip walkthrough"
         >
-          ✕
+          <IconClose size={18} />
         </button>
 
         {/* Illustration */}
@@ -353,7 +341,14 @@ function OnboardingWalkthrough({ currentUser, onNavigate, onDismiss }: Onboardin
         {/* Content */}
         <div className="onboarding-body" key={step.id}>
           <div className="onboarding-eyebrow">
-            <span className="onboarding-emoji">{step.emoji}</span>
+            <span className="onboarding-icon-badge">
+              {step.illustration === "welcome" && <IconSparkles size={15} />}
+              {step.illustration === "feed" && <IconHome size={15} />}
+              {step.illustration === "upload" && <IconCamera size={15} />}
+              {step.illustration === "discover" && <IconPin size={15} />}
+              {step.illustration === "assistant" && <IconSparkles size={15} />}
+              {step.illustration === "messages" && <IconMessage size={15} />}
+            </span>
             <span>{step.eyebrow}</span>
           </div>
           <h2 className="onboarding-title">{step.title}</h2>
@@ -376,12 +371,12 @@ function OnboardingWalkthrough({ currentUser, onNavigate, onDismiss }: Onboardin
               <>
                 {isCreator && (
                   <button type="button" className="btn-primary onboarding-finish-btn" onClick={handleFinish}>
-                    📸 Share your first look
+                    <IconUpload size={16} /> Share your first look
                   </button>
                 )}
                 {!isCreator && (
                   <button type="button" className="btn-primary onboarding-finish-btn" onClick={() => handleCta("/discover")}>
-                    📍 Discover artists near me
+                    <IconCompass size={16} /> Discover artists near me
                   </button>
                 )}
                 <button type="button" className="btn-ghost onboarding-skip" onClick={handleDismiss}>

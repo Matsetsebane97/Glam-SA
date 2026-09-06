@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import { useTheme } from "../theme/ThemeContext";
 import { getConversations } from "../api";
 import { brandLogoUrl } from "../constants";
-import { IconBell, IconClose, IconSearch } from "./Icons";
+import { IconBell, IconClose, IconMoon, IconSearch, IconSun } from "./Icons";
 import type { Conversation, CurrentUser } from "../types";
 
 type TopbarProps = {
@@ -106,7 +106,7 @@ function Topbar({ currentUser, query, onQueryChange, onNavigate }: TopbarProps) 
 
         {/* Dark mode toggle */}
         <button className="icon-btn" aria-label="Toggle dark mode" type="button" onClick={() => toggleTheme()}>
-          {theme === 'light' ? '🌙' : '☀️'}
+          {theme === 'light' ? <IconMoon size={18} /> : <IconSun size={18} />}
         </button>
 
         {/* Notifications */}

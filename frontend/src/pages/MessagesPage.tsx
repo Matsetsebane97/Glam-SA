@@ -8,6 +8,7 @@ import {
   IconClose,
   IconMessage,
   IconSend,
+  IconSparkles,
   IconVerified,
   IconWhatsApp,
 } from "../components/Icons";
@@ -334,21 +335,21 @@ function MessagesPage({ currentUser, onNavigate }: MessagesPageProps) {
                 className={`booking-pill-btn ${bookingFilter === "requested" ? "active" : ""}`}
                 onClick={() => setBookingFilter("requested")}
               >
-                ⏳ Pending ({bookings.filter((b) => b.status === "requested").length})
+                <IconClock size={12} /> Pending ({bookings.filter((b) => b.status === "requested").length})
               </button>
               <button
                 type="button"
                 className={`booking-pill-btn ${bookingFilter === "confirmed" ? "active" : ""}`}
                 onClick={() => setBookingFilter("confirmed")}
               >
-                ✅ Confirmed ({bookings.filter((b) => b.status === "confirmed").length})
+                <IconCheck size={12} /> Confirmed ({bookings.filter((b) => b.status === "confirmed").length})
               </button>
               <button
                 type="button"
                 className={`booking-pill-btn ${bookingFilter === "completed" ? "active" : ""}`}
                 onClick={() => setBookingFilter("completed")}
               >
-                Completed ({bookings.filter((b) => b.status === "completed").length})
+                <IconSparkles size={12} /> Completed ({bookings.filter((b) => b.status === "completed").length})
               </button>
               <button
                 type="button"
@@ -424,11 +425,31 @@ function MessagesPage({ currentUser, onNavigate }: MessagesPageProps) {
                         <span className="bcard-price">R {b.price}</span>
                       </div>
                       <span className={`booking-status-badge status-${b.status}`}>
-                        {b.status === "requested" && "⏳ Pending Approval"}
-                        {b.status === "confirmed" && "✅ Confirmed"}
-                        {b.status === "completed" && "🎉 Completed"}
-                        {b.status === "declined" && "❌ Declined"}
-                        {b.status === "cancelled" && "🚫 Cancelled"}
+                        {b.status === "requested" && (
+                          <>
+                            <IconClock size={12} /> Pending Approval
+                          </>
+                        )}
+                        {b.status === "confirmed" && (
+                          <>
+                            <IconCheck size={12} /> Confirmed
+                          </>
+                        )}
+                        {b.status === "completed" && (
+                          <>
+                            <IconSparkles size={12} /> Completed
+                          </>
+                        )}
+                        {b.status === "declined" && (
+                          <>
+                            <IconClose size={12} /> Declined
+                          </>
+                        )}
+                        {b.status === "cancelled" && (
+                          <>
+                            <IconClose size={12} /> Cancelled
+                          </>
+                        )}
                       </span>
                     </div>
 

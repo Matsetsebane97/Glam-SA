@@ -18,9 +18,11 @@ import {
   IconClose,
   IconWhatsApp,
   IconMessage,
+  IconMoon,
   IconVerified,
   IconPin,
   IconSparkles,
+  IconSun,
 } from "./Icons";
 
 export interface BookingModalProps {
@@ -277,7 +279,7 @@ export default function BookingModal({
     try {
       await sendMessage({
         recipientId: creatorId,
-        body: `💬 Inquiry regarding ${currentServiceName}: "${inquiryText.trim()}"`,
+        body: `Inquiry regarding ${currentServiceName}: "${inquiryText.trim()}"`,
         postId,
       });
       setInquirySent(true);
@@ -705,7 +707,9 @@ export default function BookingModal({
                     <div className="glam-time-periods-container">
                       {categorizedSlots.morning.length > 0 && (
                         <div className="glam-time-period-group">
-                          <span className="period-label">🌅 Morning</span>
+                          <span className="period-label">
+                            <IconSun size={14} /> Morning
+                          </span>
                           <div className="glam-time-chips-wrap">
                             {categorizedSlots.morning.map((slot) => {
                               const isSelected = String(slot.id) === selectedSlotId;
@@ -734,7 +738,9 @@ export default function BookingModal({
 
                       {categorizedSlots.afternoon.length > 0 && (
                         <div className="glam-time-period-group">
-                          <span className="period-label">☀️ Afternoon</span>
+                          <span className="period-label">
+                            <IconSun size={14} /> Afternoon
+                          </span>
                           <div className="glam-time-chips-wrap">
                             {categorizedSlots.afternoon.map((slot) => {
                               const isSelected = String(slot.id) === selectedSlotId;
@@ -763,7 +769,9 @@ export default function BookingModal({
 
                       {categorizedSlots.evening.length > 0 && (
                         <div className="glam-time-period-group">
-                          <span className="period-label">🌙 Evening</span>
+                          <span className="period-label">
+                            <IconMoon size={14} /> Evening
+                          </span>
                           <div className="glam-time-chips-wrap">
                             {categorizedSlots.evening.map((slot) => {
                               const isSelected = String(slot.id) === selectedSlotId;
@@ -914,7 +922,7 @@ export default function BookingModal({
 
                 {inquirySent && (
                   <p className="glam-inquiry-status-msg">
-                    ✓ Message sent! View responses in your Messages tab.
+                    <IconCheck size={14} /> Message sent! View responses in your Messages tab.
                   </p>
                 )}
 

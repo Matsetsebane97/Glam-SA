@@ -8,7 +8,7 @@ import {
   getAvailability,
   updateProfile,
 } from "../api";
-import { IconCalendar, IconClock, IconPin, IconTrash, IconUser } from "../components/Icons";
+import { IconCalendar, IconClock, IconPin, IconSparkles, IconTrash, IconUser, IconZap } from "../components/Icons";
 import type { AvailabilitySlot, CurrentUser } from "../types";
 
 type SettingsPageProps = {
@@ -208,7 +208,10 @@ function SettingsPage({ currentUser, onNavigate, onSaved }: SettingsPageProps) {
               className={`account-role-toggle-btn ${accountType === "creator" ? "active" : ""}`}
               onClick={() => setAccountType("creator")}
             >
-              <div className="role-btn-title">✨ Stylist / Creator</div>
+              <div className="role-btn-title">
+                <IconSparkles size={16} />
+                <span>Stylist / Creator</span>
+              </div>
               <div className="role-btn-desc">
                 Publish portfolio styles, appear on the radar map, set working hours, and receive client bookings.
               </div>
@@ -219,7 +222,10 @@ function SettingsPage({ currentUser, onNavigate, onSaved }: SettingsPageProps) {
               className={`account-role-toggle-btn ${accountType === "client" ? "active" : ""}`}
               onClick={() => setAccountType("client")}
             >
-              <div className="role-btn-title">👤 Client / Customer</div>
+              <div className="role-btn-title">
+                <IconUser size={16} />
+                <span>Client / Customer</span>
+              </div>
               <div className="role-btn-desc">
                 Discover styles, find nearby artists on the map, book appointments, and chat directly with stylists.
               </div>
@@ -319,7 +325,10 @@ function SettingsPage({ currentUser, onNavigate, onSaved }: SettingsPageProps) {
 
           <div className="availability-generator-card">
             <form onSubmit={handleGenerateSlots} className="availability-gen-form">
-              <h3>⚡ Quick Schedule Generator</h3>
+              <h3>
+                <IconZap size={18} />
+                <span>Quick Schedule Generator</span>
+              </h3>
               <p className="availability-gen-desc">
                 Select your working window and we'll automatically generate booking slots for clients on your profile.
               </p>

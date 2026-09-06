@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { createBooking, getAvailability, getNearbyArtists, getServices } from "../api";
-import { IconBookmark, IconChevronRight, IconClose, IconMessage, IconMic, IconPin, IconSend, IconWhatsApp } from "./Icons";
+import { IconBookmark, IconChevronRight, IconClose, IconMessage, IconMic, IconPin, IconSend, IconSparkles, IconWhatsApp } from "./Icons";
 import type { AvailabilitySlot, CurrentUser, NearbyArtist, Post, ServiceOffering } from "../types";
 import { formatDuration } from "../utils/geo";
 import { whatsappUrl } from "../utils/whatsapp";
@@ -608,7 +608,9 @@ function AssistantPanel({ posts, currentUser, onNavigate, onSearch }: AssistantP
         <section className="assistant-panel" aria-label="Glam SA assistant">
           <header className="assistant-header">
             <div className="assistant-header-identity">
-              <div className="assistant-header-avatar" aria-hidden="true">✨</div>
+              <div className="assistant-header-avatar" aria-hidden="true">
+                <IconSparkles size={16} />
+              </div>
               <div>
                 <strong>Glam Assistant</strong>
                 <span style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>

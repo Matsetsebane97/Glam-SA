@@ -816,7 +816,7 @@ function PostCard({
               onClick={() => setShowBookingAuthPopup(false)}
               aria-label="Close popup"
             >
-              ✕
+              <IconClose size={18} />
             </button>
             <div className="glam-auth-icon-wrap">
               <IconCalendar size={32} />

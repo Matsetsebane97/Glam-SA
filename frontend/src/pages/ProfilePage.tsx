@@ -7,6 +7,7 @@ import {
   IconEdit,
   IconGrid,
   IconPin,
+  IconSparkles,
   IconTrash,
   IconUpload,
   IconUser,
@@ -178,7 +179,15 @@ function ProfilePage({ profileId, currentUser, onNavigate, onLogout }: ProfilePa
           <div className="profile-title-row">
             <h1>{profile.name}</h1>
             <span className={`user-role-badge ${isClient ? "client" : "creator"}`}>
-              {isClient ? "👤 Client" : "✨ Creator"}
+              {isClient ? (
+                <>
+                  <IconUser size={12} /> Client
+                </>
+              ) : (
+                <>
+                  <IconSparkles size={12} /> Creator
+                </>
+              )}
             </span>
           </div>
           <p className="profile-hero-handle">{profile.handle}</p>

@@ -2,7 +2,7 @@
 import { useState } from "react";
 import type { Coordinates, NearbyArtist } from "../types";
 import { boundsFromCenter, osmTileUrl, toMapPercent } from "../utils/geo";
-import { IconNavigation, IconPin, IconVerified } from "./Icons";
+import { IconClose, IconNavigation, IconPin, IconVerified } from "./Icons";
 import DirectionsConfirmModal from "./DirectionsConfirmModal";
 
 type NearbyMapProps = {
@@ -100,8 +100,9 @@ function NearbyMap({ center, artists, radiusKm = 50, showYou = true, onSelectArt
             className="popup-close-btn"
             type="button"
             onClick={() => setActivePin(null)}
+            aria-label="Close popup"
           >
-            ✕
+            <IconClose size={14} />
           </button>
         </div>
       )}
