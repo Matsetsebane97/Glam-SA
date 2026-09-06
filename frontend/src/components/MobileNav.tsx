@@ -1,5 +1,5 @@
 // Mobile-only navigation bar for the primary application routes.
-import { IconCompass, IconHome, IconMessage, IconUpload, IconUser } from "./Icons";
+import { IconCalendar, IconCompass, IconHome, IconMessage, IconUpload, IconUser } from "./Icons";
 import type { CurrentUser } from "../types";
 
 type MobileNavProps = {
@@ -9,6 +9,8 @@ type MobileNavProps = {
 };
 
 export function MobileNav({ pathname, currentUser, onNavigate }: MobileNavProps) {
+  const isClient = currentUser?.accountType === "client";
+
   return (
     <nav className="mobile-nav-bar" aria-label="Mobile Navigation">
       {/* Feed */}
@@ -33,17 +35,31 @@ export function MobileNav({ pathname, currentUser, onNavigate }: MobileNavProps)
         <span>Discover</span>
       </button>
 
-      {/* Centre FAB — Share / Upload */}
-      <button
-        type="button"
-        className="mobile-nav-create-btn"
-        onClick={() => onNavigate("/upload")}
-        aria-label="Share a look"
-      >
-        <div className="mobile-nav-create-circle">
-          <IconUpload size={20} />
-        </div>
-      </button>
+      {/* Centre Action Button */}
+      {isClient ? (
+        <button
+          type="button"
+          className="mobile-nav-create-btn"
+          onClick={() => onNavigate("/messages")}
+          aria-label="My Appointments"
+          title="My Appointments"
+        >
+          <div className="mobile-nav-create-circle">
+            <IconCalendar size={20} />
+          </div>
+        </button>
+      ) : (
+        <button
+          type="button"
+          className="mobile-nav-create-btn"
+          onClick={() => onNavigate("/upload")}
+          aria-label="Share a look"
+        >
+          <div className="mobile-nav-create-circle">
+            <IconUpload size={20} />
+          </div>
+        </button>
+      )}
 
       {/* Messages */}
       <button

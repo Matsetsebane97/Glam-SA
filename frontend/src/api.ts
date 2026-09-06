@@ -57,6 +57,7 @@ export const updateProfile = async (payload: {
   name: string;
   whatsappNumber: string;
   locationLabel: string;
+  accountType?: "creator" | "client";
   emailNotifications?: boolean;
   whatsappNotifications?: boolean;
 }): Promise<CurrentUser> => {

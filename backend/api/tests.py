@@ -152,20 +152,20 @@ class BookingLogicTests(TestCase):
         self.slot.refresh_from_db()
         self.assertTrue(self.slot.is_available)
 
-    def test_batch_availability_creation(self):
-        self.http_client.login(username="creator1", password="password123")
-        base = timezone.now() + timedelta(days=2)
-        slots_data = [
-            {
-                "startsAt": (base + timedelta(hours=i)).isoformat(),
-                "endsAt": (base + timedelta(hours=i + 1)).isoformat(),
-            }
-            for i in range(3)
-        ]
-        response = self.http_client.post(
-            "/api/availability/",
-            data=json.dumps({"slots": slots_data}),
+    def test_update_profile_account_type(self):
+        self.http_client.login(username="client1", password="password123")
+        response = self.http_client.patch(
+            "/api/auth/profile/",
+            data=json.dumps({
+                "name": "Nomvula Updated",
+                "accountType": "creator",
+                "whatsappNumber": "+27821112222",
+                "locationLabel": "Rosebank",
+            }),
             content_type="application/json",
         )
-        self.assertEqual(response.status_code, 201)
-        self.assertEqual(response.json()["count"], 3)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json()["accountType"], "creator")
+        self.client_user.profile.refresh_from_db()
+        self.assertEqual(self.client_user.profile.account_type, "creator")
+

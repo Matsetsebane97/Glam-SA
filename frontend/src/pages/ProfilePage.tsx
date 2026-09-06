@@ -1,6 +1,17 @@
 import { useEffect, useState } from "react";
 import { deletePost, getMyPosts, getUserProfile, updatePost } from "../api";
-import { IconClose, IconEdit, IconGrid, IconPin, IconTrash, IconUpload, IconVerified } from "../components/Icons";
+import {
+  IconCalendar,
+  IconClose,
+  IconCompass,
+  IconEdit,
+  IconGrid,
+  IconPin,
+  IconTrash,
+  IconUpload,
+  IconUser,
+  IconVerified,
+} from "../components/Icons";
 import type { CurrentUser, Post } from "../types";
 
 type ProfilePageProps = {
@@ -29,6 +40,9 @@ function ProfilePage({ profileId, currentUser, onNavigate, onLogout }: ProfilePa
   const [deletingId, setDeletingId] = useState<number | null>(null);
   const [viewingPost, setViewingPost] = useState<Post | null>(null);
 
+  const isCreator = (profile?.accountType || "creator") === "creator";
+  const isClient = profile?.accountType === "client";
+
   // The owner endpoint supports editing; public profiles only need read-only data.
   useEffect(() => {
     setIsLoading(true);
@@ -36,6 +50,11 @@ function ProfilePage({ profileId, currentUser, onNavigate, onLogout }: ProfilePa
     if (isOwnProfile) {
       setProfile(currentUser);
       if (!currentUser) {
+        setIsLoading(false);
+        return;
+      }
+      if (currentUser.accountType === "client") {
+        setPosts([]);
         setIsLoading(false);
         return;
       }
@@ -119,9 +138,9 @@ function ProfilePage({ profileId, currentUser, onNavigate, onLogout }: ProfilePa
     return (
       <section className="page-content profile-page">
         <div className="profile-login-state">
-          <IconGrid size={34} />
-          <h1>Your creator profile</h1>
-          <p>Sign in to view and manage the looks you have shared with Glam SA.</p>
+          <IconUser size={34} />
+          <h1>Your Glam SA Profile</h1>
+          <p>Sign in to view your bookings, manage your details, or view your portfolio.</p>
           <button className="btn-primary" type="button" onClick={() => onNavigate("/login")}>
             Sign in to continue
           </button>
@@ -145,8 +164,23 @@ function ProfilePage({ profileId, currentUser, onNavigate, onLogout }: ProfilePa
           {profile.name.charAt(0).toUpperCase()}
         </div>
         <div className="profile-hero-copy">
-          <div className="eyebrow"><IconVerified size={13} /> Creator profile</div>
-          <h1>{profile.name}</h1>
+          <div className="eyebrow">
+            {isCreator ? (
+              <>
+                <IconVerified size={13} /> Creator Profile · Verified Stylist
+              </>
+            ) : (
+              <>
+                <IconUser size={13} /> Client Profile · Beauty Explorer
+              </>
+            )}
+          </div>
+          <div className="profile-title-row">
+            <h1>{profile.name}</h1>
+            <span className={`user-role-badge ${isClient ? "client" : "creator"}`}>
+              {isClient ? "👤 Client" : "✨ Creator"}
+            </span>
+          </div>
           <p className="profile-hero-handle">{profile.handle}</p>
           {profile.locationLabel && (
             <p className="profile-hero-location">
@@ -156,9 +190,15 @@ function ProfilePage({ profileId, currentUser, onNavigate, onLogout }: ProfilePa
         </div>
         {canManageProfile && (
           <div className="profile-hero-actions">
-            <button className="btn-primary" type="button" onClick={() => onNavigate("/upload")}>
-              <IconUpload size={17} /> Share a look
-            </button>
+            {isCreator ? (
+              <button className="btn-primary" type="button" onClick={() => onNavigate("/upload")}>
+                <IconUpload size={17} /> Share a look
+              </button>
+            ) : (
+              <button className="btn-primary" type="button" onClick={() => onNavigate("/discover")}>
+                <IconCompass size={17} /> Find Artists
+              </button>
+            )}
             <button className="btn-ghost" type="button" onClick={() => onNavigate("/settings")}>
               Settings
             </button>
@@ -169,30 +209,95 @@ function ProfilePage({ profileId, currentUser, onNavigate, onLogout }: ProfilePa
         )}
       </header>
 
-      <div className="profile-work-heading">
-        <div>
-          <div className="eyebrow"><IconGrid size={13} /> Portfolio</div>
-          <h2>{isOwnProfile ? "Your work" : `${profile.name}'s work`}</h2>
-        </div>
-        <span className="profile-work-count">
-          {posts.length} {posts.length === 1 ? "look" : "looks"}
-        </span>
-      </div>
+      {/* ─── CLIENT HUB VIEW (WHEN USER IS CLIENT) ─────────────────────────── */}
+      {isClient ? (
+        <div className="client-profile-hub">
+          <div className="client-hub-header">
+            <div className="eyebrow"><IconCalendar size={13} /> Client Hub</div>
+            <h2>{isOwnProfile ? "My Glam SA Activity" : "Community Member"}</h2>
+            <p className="client-hub-subtitle">
+              {isOwnProfile
+                ? "Manage your appointment requests, find verified artists nearby, and explore trending styles."
+                : `${profile.name} is a valued member of the Glam SA beauty community.`}
+            </p>
+          </div>
 
-      {error && <div className="profile-error" role="alert">{error}</div>}
-      {isLoading && <div className="empty-state"><p>Loading your portfolio...</p></div>}
-      {!isLoading && posts.length === 0 && (
-        <div className="empty-state">
-          <IconGrid size={32} />
-          <h3>{isOwnProfile ? "Your portfolio is ready for its first look" : "This portfolio is waiting for its first look"}</h3>
-          <p>{isOwnProfile ? "Share your latest hair, makeup, nail, or barbering work." : "There is no public work to show yet."}</p>
-          {canManageProfile && (
-            <button className="btn-primary" type="button" onClick={() => onNavigate("/upload")}>
-              <IconUpload size={17} /> Share your first look
-            </button>
+          {isOwnProfile && (
+            <div className="client-hub-cards-grid">
+              <div className="client-hub-card">
+                <div className="client-hub-card-icon">
+                  <IconCalendar size={28} />
+                </div>
+                <h3>Appointments Hub</h3>
+                <p>Track pending requests, confirmed bookings, and chat with your stylists.</p>
+                <button
+                  type="button"
+                  className="btn-primary btn-block"
+                  onClick={() => onNavigate("/messages")}
+                >
+                  View My Appointments
+                </button>
+              </div>
+
+              <div className="client-hub-card">
+                <div className="client-hub-card-icon">
+                  <IconCompass size={28} />
+                </div>
+                <h3>Radar & Map Discovery</h3>
+                <p>Find nearby hair stylists, nail artists, barbers, and salons ready to book.</p>
+                <button
+                  type="button"
+                  className="btn-outline-sm btn-block"
+                  onClick={() => onNavigate("/discover")}
+                >
+                  Open Radar Map
+                </button>
+              </div>
+
+              <div className="client-hub-card">
+                <div className="client-hub-card-icon">
+                  <IconUpload size={28} />
+                </div>
+                <h3>Are you a Stylist or Artist?</h3>
+                <p>Switch your account to Creator in settings to showcase your portfolio and receive bookings.</p>
+                <button
+                  type="button"
+                  className="btn-ghost btn-block"
+                  onClick={() => onNavigate("/settings")}
+                >
+                  Switch to Creator
+                </button>
+              </div>
+            </div>
           )}
         </div>
-      )}
+      ) : (
+        /* ─── CREATOR PORTFOLIO VIEW ────────────────────────────────────────── */
+        <>
+          <div className="profile-work-heading">
+            <div>
+              <div className="eyebrow"><IconGrid size={13} /> Portfolio</div>
+              <h2>{isOwnProfile ? "Your work" : `${profile.name}'s work`}</h2>
+            </div>
+            <span className="profile-work-count">
+              {posts.length} {posts.length === 1 ? "look" : "looks"}
+            </span>
+          </div>
+
+          {error && <div className="profile-error" role="alert">{error}</div>}
+          {isLoading && <div className="empty-state"><p>Loading your portfolio...</p></div>}
+          {!isLoading && posts.length === 0 && (
+            <div className="empty-state">
+              <IconGrid size={32} />
+              <h3>{isOwnProfile ? "Your portfolio is ready for its first look" : "This portfolio is waiting for its first look"}</h3>
+              <p>{isOwnProfile ? "Share your latest hair, makeup, nail, or barbering work." : "There is no public work to show yet."}</p>
+              {canManageProfile && (
+                <button className="btn-primary" type="button" onClick={() => onNavigate("/upload")}>
+                  <IconUpload size={17} /> Share your first look
+                </button>
+              )}
+            </div>
+          )}
 
       {!isLoading && posts.length > 0 && (
         <div className="profile-work-grid">
@@ -275,8 +380,10 @@ function ProfilePage({ profileId, currentUser, onNavigate, onLogout }: ProfilePa
           ))}
         </div>
       )}
+    </>
+  )}
 
-      {viewingPost && (viewingPost.mediaUrl || viewingPost.imageUrl) && (
+  {viewingPost && (viewingPost.mediaUrl || viewingPost.imageUrl) && (
         <div className="portfolio-lightbox" role="dialog" aria-modal="true" aria-label={`${viewingPost.service} portfolio image`} onClick={() => setViewingPost(null)}>
           <button className="portfolio-lightbox-close" type="button" onClick={() => setViewingPost(null)} aria-label="Close image viewer">
             <IconClose size={22} />

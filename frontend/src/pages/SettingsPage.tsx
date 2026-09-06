@@ -21,6 +21,9 @@ function SettingsPage({ currentUser, onNavigate, onSaved }: SettingsPageProps) {
   const [name, setName] = useState(currentUser?.name || "");
   const [whatsappNumber, setWhatsappNumber] = useState(currentUser?.whatsappNumber || "");
   const [locationLabel, setLocationLabel] = useState(currentUser?.locationLabel || "");
+  const [accountType, setAccountType] = useState<"creator" | "client">(
+    currentUser?.accountType || "creator"
+  );
   const [emailNotifications, setEmailNotifications] = useState(currentUser?.emailNotifications ?? true);
   const [whatsappNotifications, setWhatsappNotifications] = useState(currentUser?.whatsappNotifications ?? true);
   const [message, setMessage] = useState("");
@@ -34,7 +37,7 @@ function SettingsPage({ currentUser, onNavigate, onSaved }: SettingsPageProps) {
   const [deleteMessage, setDeleteMessage] = useState("");
 
   // Creator Availability Schedule Generator state
-  const isCreator = currentUser?.accountType === "creator";
+  const isCreator = accountType === "creator";
   const todayIso = new Date().toISOString().split("T")[0];
   const [slots, setSlots] = useState<AvailabilitySlot[]>([]);
   const [isLoadingSlots, setIsLoadingSlots] = useState(false);
@@ -79,6 +82,7 @@ function SettingsPage({ currentUser, onNavigate, onSaved }: SettingsPageProps) {
         name: name.trim(),
         whatsappNumber: whatsappNumber.trim(),
         locationLabel: locationLabel.trim(),
+        accountType,
         emailNotifications,
         whatsappNotifications,
       });
@@ -189,6 +193,40 @@ function SettingsPage({ currentUser, onNavigate, onSaved }: SettingsPageProps) {
       </div>
 
       <form className="settings-form" onSubmit={submit}>
+        {/* Account Role Switcher */}
+        <div className="account-role-selector-card">
+          <div className="role-selector-label-group">
+            <span className="studio-label-text">Account Purpose / Role</span>
+            <p className="role-selector-sub">
+              Choose how you want to experience Glam SA. You can switch between roles at any time.
+            </p>
+          </div>
+
+          <div className="account-role-toggle-group">
+            <button
+              type="button"
+              className={`account-role-toggle-btn ${accountType === "creator" ? "active" : ""}`}
+              onClick={() => setAccountType("creator")}
+            >
+              <div className="role-btn-title">✨ Stylist / Creator</div>
+              <div className="role-btn-desc">
+                Publish portfolio styles, appear on the radar map, set working hours, and receive client bookings.
+              </div>
+            </button>
+
+            <button
+              type="button"
+              className={`account-role-toggle-btn ${accountType === "client" ? "active" : ""}`}
+              onClick={() => setAccountType("client")}
+            >
+              <div className="role-btn-title">👤 Client / Customer</div>
+              <div className="role-btn-desc">
+                Discover styles, find nearby artists on the map, book appointments, and chat directly with stylists.
+              </div>
+            </button>
+          </div>
+        </div>
+
         <div className="settings-grid">
           <label className="studio-label">
             <span>Your Name or Salon</span>

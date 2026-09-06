@@ -185,12 +185,18 @@ def update_profile(request):
     profile.whatsapp_number = str(payload.get("whatsappNumber") or "").strip()[:30]
     profile.location_label = str(payload.get("locationLabel") or "").strip()[:120]
     
+    update_fields = ["whatsapp_number", "location_label", "email_notifications", "whatsapp_notifications"]
+
+    if "accountType" in payload and payload["accountType"] in ("creator", "client"):
+        profile.account_type = payload["accountType"]
+        update_fields.append("account_type")
+
     if "emailNotifications" in payload:
         profile.email_notifications = bool(payload["emailNotifications"])
     if "whatsappNotifications" in payload:
         profile.whatsapp_notifications = bool(payload["whatsappNotifications"])
 
-    profile.save(update_fields=["whatsapp_number", "location_label", "email_notifications", "whatsapp_notifications"])
+    profile.save(update_fields=update_fields)
 
     response = {
         "id": request.user.id,

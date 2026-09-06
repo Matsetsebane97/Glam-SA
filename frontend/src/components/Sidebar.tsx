@@ -1,7 +1,7 @@
 // Desktop navigation and the signed-in user's quick profile summary.
 import type { ReactNode } from "react";
 import { brandLogoUrl, navItems } from "../constants";
-import { IconCompass, IconHome, IconMessage, IconUpload, IconVerified } from "./Icons";
+import { IconCalendar, IconCompass, IconHome, IconMessage, IconUpload, IconVerified } from "./Icons";
 import type { CurrentUser, NavItem } from "../types";
 
 type SidebarProps = {
@@ -19,6 +19,10 @@ const navIcons: Record<NavItem, ReactNode> = {
 };
 
 function Sidebar({ activeNav, currentUser, onNavigate, onLogout }: SidebarProps) {
+  const isCreator = currentUser?.accountType === "creator";
+  const isClient = currentUser?.accountType === "client";
+  const visibleNavItems = navItems.filter((item) => (isClient ? item !== "Upload" : true));
+
   return (
     <aside className="sidebar">
       <div className="sidebar-top">
@@ -35,7 +39,7 @@ function Sidebar({ activeNav, currentUser, onNavigate, onLogout }: SidebarProps)
 
         {/* Primary Navigation */}
         <nav className="main-nav" aria-label="Main navigation">
-          {navItems.map((item) => {
+          {visibleNavItems.map((item) => {
             const isActive = activeNav === item;
 
             return (
@@ -52,32 +56,56 @@ function Sidebar({ activeNav, currentUser, onNavigate, onLogout }: SidebarProps)
                 <span className="nav-icon" aria-hidden="true">
                   {navIcons[item]}
                 </span>
-                <span className="nav-label">{item}</span>
+                <span className="nav-label">
+                  {item === "Messages" && isClient ? "Appointments" : item}
+                </span>
                 {isActive && <div className="nav-active-indicator" />}
               </button>
             );
           })}
         </nav>
 
-        {/* Quick Share Action */}
+        {/* Quick Action Buttons (Tailored to Role) */}
         <div className="sidebar-action-wrap">
-          {/* Keep the two most common creation and discovery actions visible. */}
-          <button
-            className="btn-primary sidebar-create-btn"
-            type="button"
-            onClick={() => onNavigate("/upload")}
-          >
-            <IconUpload size={18} />
-            <span>Share Your Look</span>
-          </button>
-          <button
-            className="btn-ghost sidebar-map-btn"
-            type="button"
-            onClick={() => onNavigate("/discover")}
-          >
-            <IconCompass size={18} />
-            <span>Find an Artist on Map</span>
-          </button>
+          {isClient ? (
+            <>
+              <button
+                className="btn-primary sidebar-create-btn"
+                type="button"
+                onClick={() => onNavigate("/discover")}
+              >
+                <IconCompass size={18} />
+                <span>Find Nearby Artists</span>
+              </button>
+              <button
+                className="btn-ghost sidebar-map-btn"
+                type="button"
+                onClick={() => onNavigate("/messages")}
+              >
+                <IconCalendar size={18} />
+                <span>My Appointments</span>
+              </button>
+            </>
+          ) : (
+            <>
+              <button
+                className="btn-primary sidebar-create-btn"
+                type="button"
+                onClick={() => onNavigate("/upload")}
+              >
+                <IconUpload size={18} />
+                <span>Share Your Look</span>
+              </button>
+              <button
+                className="btn-ghost sidebar-map-btn"
+                type="button"
+                onClick={() => onNavigate("/discover")}
+              >
+                <IconCompass size={18} />
+                <span>Find an Artist on Map</span>
+              </button>
+            </>
+          )}
         </div>
       </div>
 
@@ -90,8 +118,15 @@ function Sidebar({ activeNav, currentUser, onNavigate, onLogout }: SidebarProps)
           <div className="profile-info">
             <div className="profile-name-row">
               <strong>{currentUser ? currentUser.name : "Guest Visitor"}</strong>
-              {currentUser && <IconVerified size={13} />}
+              {isCreator && <IconVerified size={13} />}
             </div>
+            {currentUser && (
+              <div className="profile-role-row">
+                <span className={`user-role-badge ${currentUser.accountType || "creator"}`}>
+                  {currentUser.accountType === "client" ? "👤 Client" : "✨ Creator"}
+                </span>
+              </div>
+            )}
             <small className="profile-handle">
               {currentUser ? currentUser.handle : "Sign in to save looks"}
             </small>

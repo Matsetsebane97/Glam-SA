@@ -6308,4 +6308,210 @@ body {
   }
 }
 
+/* ─────────────────────────────────────────────────────────────
+   CLIENT VS CREATOR DISTINCTION STYLES
+   ───────────────────────────────────────────────────────────── */
+
+/* User Role Badges */
+.user-role-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 3px 9px;
+  border-radius: 9999px;
+  letter-spacing: 0.03em;
+  line-height: 1.2;
+}
+
+.user-role-badge.creator {
+  background: rgba(194, 111, 62, 0.12);
+  color: #c26f3e;
+  border: 1px solid rgba(194, 111, 62, 0.28);
+}
+
+.user-role-badge.client {
+  background: rgba(37, 99, 235, 0.1);
+  color: #2563eb;
+  border: 1px solid rgba(37, 99, 235, 0.25);
+}
+
+.profile-title-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 2px;
+}
+
+.profile-role-row {
+  margin: 2px 0 4px;
+}
+
+/* Settings: Account Role Switcher */
+.account-role-selector-card {
+  background: var(--bg-card, #ffffff);
+  border: 1px solid var(--border-subtle, #e2e8f0);
+  border-radius: 16px;
+  padding: 20px;
+  margin-bottom: 24px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
+}
+
+.role-selector-label-group {
+  margin-bottom: 14px;
+}
+
+.studio-label-text {
+  display: block;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--ink-primary, #0f172a);
+  margin-bottom: 4px;
+}
+
+.role-selector-sub {
+  font-size: 13px;
+  color: var(--ink-muted, #64748b);
+  margin: 0;
+  line-height: 1.4;
+}
+
+.account-role-toggle-group {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+@media (max-width: 640px) {
+  .account-role-toggle-group {
+    grid-template-columns: 1fr;
+  }
+}
+
+.account-role-toggle-btn {
+  text-align: left;
+  padding: 16px;
+  border-radius: 12px;
+  border: 2px solid var(--border-subtle, #e2e8f0);
+  background: var(--bg-primary, #ffffff);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.account-role-toggle-btn:hover {
+  border-color: var(--border-medium, #cbd5e1);
+  background: var(--bg-hover, #f8fafc);
+}
+
+.account-role-toggle-btn.active {
+  border-color: var(--accent, #c26f3e);
+  background: rgba(194, 111, 62, 0.05);
+  box-shadow: 0 0 0 1px var(--accent, #c26f3e);
+}
+
+.account-role-toggle-btn .role-btn-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--ink-primary, #0f172a);
+}
+
+.account-role-toggle-btn.active .role-btn-title {
+  color: var(--accent, #c26f3e);
+}
+
+.account-role-toggle-btn .role-btn-desc {
+  font-size: 12px;
+  line-height: 1.45;
+  color: var(--ink-muted, #64748b);
+}
+
+/* Client Profile Hub */
+.client-profile-hub {
+  margin-top: 28px;
+}
+
+.client-hub-header {
+  margin-bottom: 22px;
+}
+
+.client-hub-header h2 {
+  font-size: 22px;
+  font-weight: 800;
+  color: var(--ink-primary, #0f172a);
+  margin: 6px 0 4px;
+}
+
+.client-hub-subtitle {
+  font-size: 14px;
+  color: var(--ink-muted, #64748b);
+  margin: 0;
+  max-width: 620px;
+}
+
+.client-hub-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 18px;
+}
+
+.client-hub-card {
+  background: var(--bg-card, #ffffff);
+  border: 1px solid var(--border-subtle, #e2e8f0);
+  border-radius: 16px;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 16px;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.client-hub-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 24px -6px rgba(0, 0, 0, 0.06);
+  border-color: var(--border-medium, #cbd5e1);
+}
+
+.client-hub-card-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  background: rgba(194, 111, 62, 0.1);
+  color: var(--accent, #c26f3e);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.client-hub-card:nth-child(2) .client-hub-card-icon {
+  background: rgba(37, 99, 235, 0.1);
+  color: #2563eb;
+}
+
+.client-hub-card:nth-child(3) .client-hub-card-icon {
+  background: rgba(16, 185, 129, 0.1);
+  color: #10b981;
+}
+
+.client-hub-card h3 {
+  font-size: 16px;
+  font-weight: 700;
+  margin: 0;
+  color: var(--ink-primary, #0f172a);
+}
+
+.client-hub-card p {
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--ink-muted, #64748b);
+  margin: 0;
+  flex: 1;
+}
+
+
 
