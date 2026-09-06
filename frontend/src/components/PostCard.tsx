@@ -227,6 +227,11 @@ function PostCard({
         setCopied(true);
         setTimeout(() => setCopied(false), 2000);
       }
+    } catch {
+      // Ignore user cancellations or copy errors
+    }
+  };
+
   const closeBooking = () => {
     setShowInquire(false);
     setShowBookingAuthPopup(false);
@@ -250,7 +255,7 @@ function PostCard({
               onClick={closeBooking}
               aria-label="Close popup"
             >
-              ✕
+              <IconClose size={18} />
             </button>
             <div className="glam-auth-icon-wrap">
               <IconCalendar size={32} />
@@ -304,7 +309,7 @@ function PostCard({
                 onClick={closeBooking}
                 aria-label="Close booking modal"
               >
-                ✕
+                <IconClose size={18} />
               </button>
             </div>
 
@@ -865,7 +870,7 @@ function PostCard({
                 onClick={() => setShowInquire(false)}
                 aria-label="Close booking modal"
               >
-                ✕
+                <IconClose size={18} />
               </button>
             </div>
 

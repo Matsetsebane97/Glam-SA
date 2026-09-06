@@ -237,3 +237,13 @@ export function IconClock({ size = defaults.size, className = defaults.className
     </svg>
   );
 }
+
+export function IconSparkles({ size = defaults.size, className = defaults.className }: IconProps) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" className={className} aria-hidden="true">
+      <path d="M12 3l1.912 5.885L20 10l-6.088 1.115L12 17l-1.912-5.885L4 10l6.088-1.115L12 3z" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M19 17l.956 2.943L23 20.5l-3.044.557L19 24l-.956-2.943L15 20.5l3.044-.557L19 17z" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+

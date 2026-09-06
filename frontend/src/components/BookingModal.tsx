@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from "react";
-import {
+import type {
   CurrentUser,
   ServiceOffering,
   AvailabilitySlot,
@@ -97,7 +97,7 @@ export default function BookingModal({
   creatorAvatar,
   creatorPhone,
   postId,
-  postImageUrl,
+  postImageUrl: _postImageUrl,
   initialServiceId,
   initialServiceName,
   initialPrice,
@@ -203,7 +203,10 @@ export default function BookingModal({
   }, [slots]);
 
   const availableDates = useMemo(() => Object.keys(slotsByDate), [slotsByDate]);
-  const currentDaySlots = selectedDateKey ? slotsByDate[selectedDateKey] || [] : [];
+  const currentDaySlots = useMemo(
+    () => (selectedDateKey ? slotsByDate[selectedDateKey] || [] : []),
+    [selectedDateKey, slotsByDate]
+  );
 
   // Group current day's slots into Morning, Afternoon, and Evening
   const categorizedSlots = useMemo(() => {
@@ -237,8 +240,6 @@ export default function BookingModal({
   const currentDuration = selectedService?.durationMinutes
     ? formatDuration(selectedService.durationMinutes)
     : formatDuration(initialDurationMinutes);
-
-  const selectedSlot = slots.find((s) => String(s.id) === selectedSlotId);
 
   // Toggle quick tag in notes
   const toggleQuickTag = (tag: string) => {
