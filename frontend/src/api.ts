@@ -15,6 +15,8 @@ type CurrentUserResponse = {
   latitude?: number;
   longitude?: number;
   locationLabel?: string;
+  emailNotifications?: boolean;
+  whatsappNotifications?: boolean;
 };
 
 type PostQuery = Coordinates & {
@@ -41,6 +43,8 @@ export const getCurrentUser = async (): Promise<CurrentUser | null> => {
     latitude: data.latitude,
     longitude: data.longitude,
     locationLabel: data.locationLabel,
+    emailNotifications: data.emailNotifications,
+    whatsappNotifications: data.whatsappNotifications,
   };
 };
 
@@ -53,6 +57,8 @@ export const updateProfile = async (payload: {
   name: string;
   whatsappNumber: string;
   locationLabel: string;
+  emailNotifications?: boolean;
+  whatsappNotifications?: boolean;
 }): Promise<CurrentUser> => {
   const response = await fetch("/api/auth/profile/", {
     method: "PATCH",
@@ -239,4 +245,26 @@ export const sendMessage = async (payload: { recipientId: number; body: string; 
   const data = (await response.json().catch(() => ({}))) as Message & { error?: string };
   if (!response.ok) throw new Error(data.error || "Unable to send message.");
   return data;
+};
+
+export const changePassword = async (currentPassword: string, newPassword: string): Promise<void> => {
+  const response = await fetch("/api/auth/password/", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ currentPassword, newPassword }),
+  });
+  if (!response.ok) {
+    const errorData = (await response.json().catch(() => ({}))) as { error?: string };
+    throw new Error(errorData.error || "Unable to change password.");
+  }
+};
+
+export const deleteAccount = async (): Promise<void> => {
+  const response = await fetch("/api/auth/delete/", {
+    method: "DELETE",
+  });
+  if (!response.ok) {
+    const errorData = (await response.json().catch(() => ({}))) as { error?: string };
+    throw new Error(errorData.error || "Unable to delete account.");
+  }
 };

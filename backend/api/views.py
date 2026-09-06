@@ -183,7 +183,13 @@ def update_profile(request):
     request.user.save(update_fields=["first_name"])
     profile.whatsapp_number = str(payload.get("whatsappNumber") or "").strip()[:30]
     profile.location_label = str(payload.get("locationLabel") or "").strip()[:120]
-    profile.save(update_fields=["whatsapp_number", "location_label"])
+    
+    if "emailNotifications" in payload:
+        profile.email_notifications = bool(payload["emailNotifications"])
+    if "whatsappNotifications" in payload:
+        profile.whatsapp_notifications = bool(payload["whatsappNotifications"])
+
+    profile.save(update_fields=["whatsapp_number", "location_label", "email_notifications", "whatsapp_notifications"])
 
     response = {
         "id": request.user.id,
@@ -698,3 +704,46 @@ def _message_as_dict(message):
         "createdAt": message.created_at.isoformat(),
         "postService": message.post.service if message.post else "Booking inquiry",
     }
+
+
+@csrf_exempt
+def change_password(request):
+    if request.method != "POST":
+        return JsonResponse({"error": "Method not allowed."}, status=405)
+    if not request.user.is_authenticated:
+        return JsonResponse({"error": "Log in to change your password."}, status=401)
+
+    try:
+        payload = json.loads(request.body)
+    except json.JSONDecodeError:
+        return JsonResponse({"error": "Request body must be valid JSON."}, status=400)
+
+    current_password = payload.get("currentPassword", "")
+    new_password = payload.get("newPassword", "")
+
+    if not current_password or not new_password:
+        return JsonResponse({"error": "Both current and new passwords are required."}, status=400)
+
+    if len(new_password) < 8:
+        return JsonResponse({"error": "New password must be at least 8 characters long."}, status=400)
+
+    if not request.user.check_password(current_password):
+        return JsonResponse({"error": "Current password is incorrect."}, status=400)
+
+    request.user.set_password(new_password)
+    request.user.save()
+    login(request, request.user) # Keep the user logged in
+    return JsonResponse({"message": "Password updated successfully."})
+
+
+@csrf_exempt
+def delete_account(request):
+    if request.method != "DELETE":
+        return JsonResponse({"error": "Method not allowed."}, status=405)
+    if not request.user.is_authenticated:
+        return JsonResponse({"error": "Log in to delete your account."}, status=401)
+
+    user = request.user
+    logout(request)
+    user.delete()
+    return JsonResponse({"message": "Account deleted successfully."})

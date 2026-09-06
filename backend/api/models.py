@@ -17,6 +17,8 @@ class UserProfile(models.Model):
     longitude = models.DecimalField(max_digits=9, decimal_places=6)
     location_label = models.CharField(max_length=120, blank=True)
     location_captured_at = models.DateTimeField(auto_now_add=True)
+    email_notifications = models.BooleanField(default=True)
+    whatsapp_notifications = models.BooleanField(default=True)
 
     def as_dict(self):
         return {
@@ -29,6 +31,8 @@ class UserProfile(models.Model):
             "latitude": float(self.latitude),
             "longitude": float(self.longitude),
             "locationLabel": self.location_label,
+            "emailNotifications": self.email_notifications,
+            "whatsappNotifications": self.whatsapp_notifications,
         }
 
     class Meta:

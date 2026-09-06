@@ -10,6 +10,8 @@ urlpatterns = [
     path("auth/signup/", views.signup),
     path("auth/login/", views.auth_login),
     path("auth/logout/", views.auth_logout),
+    path("auth/password/", views.change_password),
+    path("auth/delete/", views.delete_account),
     path("auth/me/", views.current_user),
     path("auth/profile/", views.update_profile),
     path("users/<int:user_id>/", views.user_profile),

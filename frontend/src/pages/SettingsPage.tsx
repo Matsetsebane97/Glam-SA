@@ -1,9 +1,8 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import type { FormEvent } from "react";
-import { addAvailability, deleteAvailability, deleteService, getAvailability, getServices, saveService, updateProfile } from "../api";
+import { changePassword, deleteAccount, updateProfile } from "../api";
 import { IconPin, IconUser } from "../components/Icons";
-import type { AvailabilitySlot, CurrentUser, ServiceOffering } from "../types";
-import { formatDuration } from "../utils/geo";
+import type { CurrentUser } from "../types";
 
 type SettingsPageProps = {
   currentUser: CurrentUser | null;
@@ -15,26 +14,17 @@ function SettingsPage({ currentUser, onNavigate, onSaved }: SettingsPageProps) {
   const [name, setName] = useState(currentUser?.name || "");
   const [whatsappNumber, setWhatsappNumber] = useState(currentUser?.whatsappNumber || "");
   const [locationLabel, setLocationLabel] = useState(currentUser?.locationLabel || "");
+  const [emailNotifications, setEmailNotifications] = useState(currentUser?.emailNotifications ?? true);
+  const [whatsappNotifications, setWhatsappNotifications] = useState(currentUser?.whatsappNotifications ?? true);
   const [message, setMessage] = useState("");
   const [isSaving, setIsSaving] = useState(false);
-  const [services, setServices] = useState<ServiceOffering[]>([]);
-  const [slots, setSlots] = useState<AvailabilitySlot[]>([]);
-  const [serviceName, setServiceName] = useState("");
-  const [servicePrice, setServicePrice] = useState("");
-  const [serviceDuration, setServiceDuration] = useState("60");
-  const [slotStart, setSlotStart] = useState("");
-  const [slotEnd, setSlotEnd] = useState("");
-  const [scheduleMessage, setScheduleMessage] = useState("");
 
-  useEffect(() => {
-    if (!currentUser) return;
-    void Promise.all([getServices(), getAvailability()])
-      .then(([nextServices, nextSlots]) => {
-        setServices(nextServices);
-        setSlots(nextSlots);
-      })
-      .catch(() => setScheduleMessage("We could not load your services and availability."));
-  }, [currentUser]);
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [passwordMessage, setPasswordMessage] = useState("");
+  const [isChangingPassword, setIsChangingPassword] = useState(false);
+  
+  const [deleteMessage, setDeleteMessage] = useState("");
 
   if (!currentUser) {
     return (
@@ -58,8 +48,11 @@ function SettingsPage({ currentUser, onNavigate, onSaved }: SettingsPageProps) {
         name: name.trim(),
         whatsappNumber: whatsappNumber.trim(),
         locationLabel: locationLabel.trim(),
+        emailNotifications,
+        whatsappNotifications,
       });
       onSaved(updatedUser);
+      setMessage("Profile saved successfully.");
     } catch (error) {
       setMessage(error instanceof Error ? error.message : "Unable to update your profile.");
     } finally {
@@ -67,33 +60,33 @@ function SettingsPage({ currentUser, onNavigate, onSaved }: SettingsPageProps) {
     }
   };
 
-  const addService = async (event: FormEvent<HTMLFormElement>) => {
+  const handlePasswordSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    setScheduleMessage("");
+    setPasswordMessage("");
+    setIsChangingPassword(true);
     try {
-      const service = await saveService({
-        name: serviceName.trim(),
-        price: servicePrice,
-        durationMinutes: Number(serviceDuration),
-      });
-      setServices((current) => [...current, service].sort((left, right) => left.name.localeCompare(right.name)));
-      setServiceName("");
-      setServicePrice("");
+      await changePassword(currentPassword, newPassword);
+      setPasswordMessage("Password updated successfully.");
+      setCurrentPassword("");
+      setNewPassword("");
     } catch (error) {
-      setScheduleMessage(error instanceof Error ? error.message : "Unable to save service.");
+      setPasswordMessage(error instanceof Error ? error.message : "Unable to update password.");
+    } finally {
+      setIsChangingPassword(false);
     }
   };
 
-  const addSlot = async (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    setScheduleMessage("");
+  const handleDeleteAccount = async () => {
+    if (!window.confirm("Are you sure you want to delete your account? This action cannot be undone.")) {
+      return;
+    }
+    setDeleteMessage("");
     try {
-      const slot = await addAvailability(new Date(slotStart).toISOString(), new Date(slotEnd).toISOString());
-      setSlots((current) => [...current, slot].sort((left, right) => left.startsAt.localeCompare(right.startsAt)));
-      setSlotStart("");
-      setSlotEnd("");
+      await deleteAccount();
+      onNavigate("/");
+      window.location.reload();
     } catch (error) {
-      setScheduleMessage(error instanceof Error ? error.message : "Unable to add availability.");
+      setDeleteMessage(error instanceof Error ? error.message : "Unable to delete account.");
     }
   };
 
@@ -128,8 +121,21 @@ function SettingsPage({ currentUser, onNavigate, onSaved }: SettingsPageProps) {
             <span><IconPin size={14} /> Location</span>
             <input className="studio-input" value={locationLabel} onChange={(event) => setLocationLabel(event.target.value)} maxLength={120} autoComplete="address-level2" placeholder="e.g. Gauteng, Johannesburg, Sandton" />
           </label>
+          
+          <div className="settings-section-heading" style={{ marginTop: '2rem' }}>
+            <h3>Notification Preferences</h3>
+          </div>
+          
+          <label className="studio-label" style={{ flexDirection: 'row', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>
+            <input type="checkbox" checked={emailNotifications} onChange={(e) => setEmailNotifications(e.target.checked)} />
+            <span style={{ margin: 0, fontWeight: 'normal' }}>Receive email notifications</span>
+          </label>
+          <label className="studio-label" style={{ flexDirection: 'row', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>
+            <input type="checkbox" checked={whatsappNotifications} onChange={(e) => setWhatsappNotifications(e.target.checked)} />
+            <span style={{ margin: 0, fontWeight: 'normal' }}>Receive WhatsApp notifications</span>
+          </label>
         </div>
-        {message && <div className="profile-error" role="alert">{message}</div>}
+        {message && <div className="profile-error" role="alert" style={{ color: message.includes('success') ? 'green' : undefined }}>{message}</div>}
         <div className="settings-actions">
           <button className="btn-ghost" type="button" onClick={() => onNavigate("/profile")}>Cancel</button>
           <button className="btn-primary" type="submit" disabled={isSaving}>{isSaving ? "Saving..." : "Save changes"}</button>
@@ -139,36 +145,35 @@ function SettingsPage({ currentUser, onNavigate, onSaved }: SettingsPageProps) {
       <section className="settings-scheduling">
         <div className="settings-section-heading">
           <div>
-            <div className="eyebrow">Booking setup</div>
-            <h2>Services and availability</h2>
+            <div className="eyebrow">Security</div>
+            <h2>Account Management</h2>
           </div>
-          <p>Clients can request a slot after choosing one of your services.</p>
+          <p>Update your password or permanently delete your account.</p>
         </div>
-        {scheduleMessage && <div className="profile-error" role="alert">{scheduleMessage}</div>}
 
         <div className="settings-booking-grid">
-          <form className="settings-subform" onSubmit={addService}>
-            <h3>Add a service</h3>
-            <label className="studio-label"><span>Service name</span><input className="studio-input" value={serviceName} onChange={(event) => setServiceName(event.target.value)} placeholder="e.g. Knotless braids" required /></label>
-            <div className="settings-inline-fields">
-              <label className="studio-label"><span>Price (ZAR)</span><input className="studio-input" type="number" min="0" step="0.01" value={servicePrice} onChange={(event) => setServicePrice(event.target.value)} placeholder="850.00" required /></label>
-              <label className="studio-label"><span>Minutes</span><input className="studio-input" type="number" min="15" step="15" value={serviceDuration} onChange={(event) => setServiceDuration(event.target.value)} required /></label>
-            </div>
-            <button className="btn-primary" type="submit">Add service</button>
-            <ul className="settings-list">
-              {services.map((service) => <li key={service.id}><span><strong>{service.name}</strong><small>R {service.price} · {formatDuration(service.durationMinutes)}</small></span><button className="btn-outline-sm danger-action" type="button" onClick={() => void deleteService(service.id).then(() => setServices((current) => current.filter((item) => item.id !== service.id))).catch((error) => setScheduleMessage(error.message))}>Remove</button></li>)}
-            </ul>
+          <form className="settings-subform" onSubmit={handlePasswordSubmit}>
+            <h3>Change Password</h3>
+            <label className="studio-label">
+              <span>Current Password</span>
+              <input className="studio-input" type="password" value={currentPassword} onChange={(event) => setCurrentPassword(event.target.value)} required />
+            </label>
+            <label className="studio-label">
+              <span>New Password</span>
+              <input className="studio-input" type="password" value={newPassword} onChange={(event) => setNewPassword(event.target.value)} minLength={8} required />
+            </label>
+            {passwordMessage && <div className="profile-error" role="alert" style={{ color: passwordMessage.includes('success') ? 'green' : undefined }}>{passwordMessage}</div>}
+            <button className="btn-primary" type="submit" disabled={isChangingPassword}>{isChangingPassword ? "Updating..." : "Update Password"}</button>
           </form>
 
-          <form className="settings-subform" onSubmit={addSlot}>
-            <h3>Add availability</h3>
-            <label className="studio-label"><span>Starts</span><input className="studio-input" type="datetime-local" value={slotStart} onChange={(event) => setSlotStart(event.target.value)} required /></label>
-            <label className="studio-label"><span>Ends</span><input className="studio-input" type="datetime-local" value={slotEnd} onChange={(event) => setSlotEnd(event.target.value)} required /></label>
-            <button className="btn-primary" type="submit">Add time slot</button>
-            <ul className="settings-list">
-              {slots.map((slot) => <li key={slot.id}><span><strong>{new Date(slot.startsAt).toLocaleDateString("en-ZA", { day: "numeric", month: "short" })}</strong><small>{new Date(slot.startsAt).toLocaleTimeString("en-ZA", { hour: "numeric", minute: "2-digit" })} - {new Date(slot.endsAt).toLocaleTimeString("en-ZA", { hour: "numeric", minute: "2-digit" })}</small></span><button className="btn-outline-sm danger-action" type="button" onClick={() => void deleteAvailability(slot.id).then(() => setSlots((current) => current.filter((item) => item.id !== slot.id))).catch((error) => setScheduleMessage(error.message))}>Remove</button></li>)}
-            </ul>
-          </form>
+          <div className="settings-subform" style={{ borderColor: 'var(--danger-color, #ff4444)' }}>
+            <h3 style={{ color: 'var(--danger-color, #ff4444)' }}>Delete Account</h3>
+            <p className="settings-note" style={{ marginBottom: '1rem' }}>
+              Once you delete your account, there is no going back. Please be certain.
+            </p>
+            {deleteMessage && <div className="profile-error" role="alert">{deleteMessage}</div>}
+            <button className="btn-outline-sm danger-action" type="button" onClick={handleDeleteAccount}>Permanently Delete Account</button>
+          </div>
         </div>
       </section>
     </section>

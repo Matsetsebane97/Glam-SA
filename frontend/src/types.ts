@@ -34,6 +34,8 @@ export type CurrentUser = {
   latitude?: number;
   longitude?: number;
   locationLabel?: string;
+  emailNotifications?: boolean;
+  whatsappNotifications?: boolean;
 };
 
 export type UserProfile = Pick<CurrentUser, "id" | "name" | "handle" | "accountType" | "profilePhotoUrl" | "bio" | "serviceCategories" | "travelRadiusKm" | "locationLabel"> & {
