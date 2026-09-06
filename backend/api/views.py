@@ -8,7 +8,7 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User
 from django.http import JsonResponse
 from django.db import transaction
-from django.db.models import F, Q
+from django.db.models import Count, F, Q
 from django.utils.dateparse import parse_datetime
 from django.utils import timezone
 from django.views.decorators.csrf import csrf_exempt
@@ -445,14 +445,26 @@ def nearby_artists(request):
     if latitude is None or longitude is None:
         return JsonResponse({"error": "latitude and longitude are required."}, status=400)
 
+    now = timezone.now()
+    profiles = UserProfile.objects.select_related("user").filter(account_type="creator").annotate(
+        post_count=Count("user__posts", distinct=True),
+        open_slot_count=Count(
+            "user__availability_slots",
+            filter=Q(
+                user__availability_slots__is_available=True,
+                user__availability_slots__starts_at__gte=now,
+            ),
+            distinct=True,
+        ),
+    )
+
     artists = []
-    for profile in UserProfile.objects.select_related("user").all():
+    for profile in profiles:
         distance = haversine_km(latitude, longitude, profile.latitude, profile.longitude)
         if distance > float(radius_km):
             continue
 
         user = profile.user
-        post_count = Post.objects.filter(owner=user).count()
         artists.append({
             "id": user.id,
             "name": user.get_full_name() or user.username,
@@ -462,7 +474,8 @@ def nearby_artists(request):
             "locationLabel": profile.location_label,
             "whatsappNumber": profile.whatsapp_number,
             "distanceKm": round(distance, 1),
-            "postCount": post_count,
+            "postCount": profile.post_count,
+            "openSlotCount": profile.open_slot_count,
         })
 
     artists.sort(key=lambda artist: artist["distanceKm"])
@@ -566,6 +579,12 @@ def services(request, owner_id=None, service_id=None):
     return JsonResponse(_service_as_dict(service), status=201 if is_new_service else 200)
 
 
+def _is_creator_account(user):
+    profile = getattr(user, "profile", None)
+    return bool(profile and profile.account_type == "creator")
+
+
+@csrf_exempt
 def availability(request, owner_id=None, slot_id=None):
     if request.method == "GET":
         if owner_id is None:
@@ -573,12 +592,17 @@ def availability(request, owner_id=None, slot_id=None):
                 return JsonResponse({"error": "Log in to manage availability."}, status=401)
             owner_id = request.user.id
         slots = AvailabilitySlot.objects.filter(owner_id=owner_id, starts_at__gte=timezone.now())
+        viewing_own = request.user.is_authenticated and request.user.id == owner_id
+        if not viewing_own:
+            slots = slots.filter(is_available=True)
         if slot_id is not None:
             slots = slots.filter(id=slot_id)
         return JsonResponse({"slots": [_slot_as_dict(slot) for slot in slots]})
 
     if not request.user.is_authenticated or (owner_id is not None and owner_id != request.user.id):
         return JsonResponse({"error": "Only the profile owner can manage availability."}, status=403)
+    if not _is_creator_account(request.user):
+        return JsonResponse({"error": "Only stylists and creators can publish booking time slots."}, status=403)
 
     if slot_id is not None:
         try:
@@ -615,6 +639,8 @@ def availability(request, owner_id=None, slot_id=None):
         return JsonResponse({"error": "Valid start and end times are required."}, status=400)
     if not starts_at or not ends_at or timezone.is_naive(starts_at) or timezone.is_naive(ends_at) or ends_at <= starts_at:
         return JsonResponse({"error": "Availability must have an end time after its start time."}, status=400)
+    if starts_at < timezone.now():
+        return JsonResponse({"error": "Availability slots must start in the future."}, status=400)
     slot, created = AvailabilitySlot.objects.get_or_create(owner=request.user, starts_at=starts_at, ends_at=ends_at)
     if not created:
         return JsonResponse({"error": "That availability slot already exists."}, status=409)
@@ -727,7 +753,9 @@ def bookings(request, booking_id=None):
         service = ServiceOffering.objects.get(id=payload.get("serviceId"), is_active=True)
         slot = AvailabilitySlot.objects.get(id=payload.get("slotId"), owner=service.owner, is_available=True)
     except (json.JSONDecodeError, ServiceOffering.DoesNotExist, AvailabilitySlot.DoesNotExist, TypeError, ValueError):
-        return JsonResponse({"error": "Choose a valid service and available time."}, status=400)
+        return JsonResponse({"error": "Choose a valid service and an available time slot published by this stylist."}, status=400)
+    if slot.starts_at < timezone.now():
+        return JsonResponse({"error": "That time slot has already passed. Choose another available time."}, status=400)
     if service.owner_id == request.user.id:
         return JsonResponse({"error": "You cannot book your own service."}, status=400)
     post_id = payload.get("postId") or None

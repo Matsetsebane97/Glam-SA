@@ -169,3 +169,50 @@ class BookingLogicTests(TestCase):
         self.client_user.profile.refresh_from_db()
         self.assertEqual(self.client_user.profile.account_type, "creator")
 
+    def test_public_availability_hides_booked_slots(self):
+        booked = AvailabilitySlot.objects.create(
+            owner=self.creator_user,
+            starts_at=self.slot.starts_at + timedelta(hours=3),
+            ends_at=self.slot.ends_at + timedelta(hours=3),
+            is_available=False,
+        )
+        response = self.http_client.get(f"/api/users/{self.creator_user.id}/availability/")
+        self.assertEqual(response.status_code, 200)
+        ids = [slot["id"] for slot in response.json()["slots"]]
+        self.assertIn(self.slot.id, ids)
+        self.assertNotIn(booked.id, ids)
+
+    def test_owner_sees_booked_slots(self):
+        AvailabilitySlot.objects.create(
+            owner=self.creator_user,
+            starts_at=self.slot.starts_at + timedelta(hours=3),
+            ends_at=self.slot.ends_at + timedelta(hours=3),
+            is_available=False,
+        )
+        self.http_client.login(username="creator1", password="password123")
+        response = self.http_client.get("/api/availability/")
+        self.assertEqual(response.status_code, 200)
+        self.assertGreaterEqual(len(response.json()["slots"]), 2)
+
+    def test_booking_requires_published_slot(self):
+        self.http_client.login(username="client1", password="password123")
+        response = self.http_client.post(
+            "/api/bookings/",
+            data=json.dumps({"serviceId": self.service.id, "notes": "Anytime"}),
+            content_type="application/json",
+        )
+        self.assertEqual(response.status_code, 400)
+
+    def test_client_cannot_publish_availability(self):
+        self.http_client.login(username="client1", password="password123")
+        starts = timezone.now() + timedelta(days=2)
+        response = self.http_client.post(
+            "/api/availability/",
+            data=json.dumps({
+                "startsAt": starts.isoformat(),
+                "endsAt": (starts + timedelta(hours=1)).isoformat(),
+            }),
+            content_type="application/json",
+        )
+        self.assertEqual(response.status_code, 403)
+

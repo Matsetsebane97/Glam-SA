@@ -104,6 +104,7 @@ export type NearbyArtist = {
   whatsappNumber?: string;
   distanceKm: number;
   postCount: number;
+  openSlotCount?: number;
 };
 
 export type NavItem = "Home" | "Discover" | "Messages" | "Upload";
