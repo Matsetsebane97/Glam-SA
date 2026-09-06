@@ -26,7 +26,7 @@ const creatorSteps: Step[] = [
     eyebrow: "Welcome to Glam SA",
     title: "Your beauty journey starts here",
     description:
-      "Glam SA is South Africa's home for hair artists, nail technicians, makeup artists, barbers, and beauty clients. Let us show you around — it only takes a minute.",
+      "Glam SA is South Africa's home for hair artists, nail technicians, makeup artists, barbers, and beauty clients. Let us show you around, it only takes a minute.",
     illustration: "welcome",
   },
   {

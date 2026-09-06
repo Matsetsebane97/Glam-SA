@@ -1,5 +1,5 @@
 // Mobile-only navigation bar for the primary application routes.
-import { IconCompass, IconHome, IconUpload, IconUser } from "./Icons";
+import { IconCompass, IconHome, IconMessage, IconUpload, IconUser } from "./Icons";
 import type { CurrentUser } from "../types";
 
 type MobileNavProps = {
@@ -11,39 +11,57 @@ type MobileNavProps = {
 export function MobileNav({ pathname, currentUser, onNavigate }: MobileNavProps) {
   return (
     <nav className="mobile-nav-bar" aria-label="Mobile Navigation">
+      {/* Feed */}
       <button
         type="button"
         className={`mobile-nav-item ${pathname === "/" ? "active" : ""}`}
         onClick={() => onNavigate("/")}
+        aria-label="Feed"
       >
         <IconHome size={22} />
         <span>Feed</span>
       </button>
 
+      {/* Discover */}
       <button
         type="button"
         className={`mobile-nav-item ${pathname === "/discover" ? "active" : ""}`}
         onClick={() => onNavigate("/discover")}
+        aria-label="Discover"
       >
         <IconCompass size={22} />
-        <span>Map</span>
+        <span>Discover</span>
       </button>
 
+      {/* Centre FAB — Share / Upload */}
       <button
         type="button"
         className="mobile-nav-create-btn"
         onClick={() => onNavigate("/upload")}
-        aria-label="Create Post"
+        aria-label="Share a look"
       >
         <div className="mobile-nav-create-circle">
           <IconUpload size={20} />
         </div>
       </button>
 
+      {/* Messages */}
+      <button
+        type="button"
+        className={`mobile-nav-item ${pathname === "/messages" ? "active" : ""}`}
+        onClick={() => onNavigate(currentUser ? "/messages" : "/login")}
+        aria-label="Messages"
+      >
+        <IconMessage size={22} />
+        <span>Messages</span>
+      </button>
+
+      {/* Profile / Join */}
       <button
         type="button"
         className={`mobile-nav-item ${pathname === "/profile" || pathname === "/login" ? "active" : ""}`}
         onClick={() => onNavigate(currentUser ? "/profile" : "/login")}
+        aria-label={currentUser ? "My profile" : "Join"}
       >
         {currentUser ? (
           <div className="mobile-avatar-icon">
