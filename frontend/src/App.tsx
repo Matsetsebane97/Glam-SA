@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { ThemeProvider } from "./theme/ThemeContext";
 import { getCategories, getCurrentUser, getPosts, logout } from "./api";
 import "./App.css";
+import OnboardingWalkthrough, { STORAGE_KEY as ONBOARDING_KEY } from "./components/OnboardingWalkthrough";
 import MobileNav from "./components/MobileNav";
 import AssistantPanel from "./components/AssistantPanel";
 import RightRail from "./components/RightRail";
@@ -67,6 +68,8 @@ function App() {
   const [error, setError] = useState("");
   const [pathname, setPathname] = useState(window.location.pathname);
   const [currentUser, setCurrentUser] = useState<CurrentUser | null>(null);
+  // Show the onboarding walkthrough once per account (cleared on dismiss).
+  const [showOnboarding, setShowOnboarding] = useState(false);
 
   // Keep navigation client-side so page changes do not reload feed state.
   const navigate = (path: string) => {
@@ -94,7 +97,13 @@ function App() {
   // Re-check the session after navigation so protected pages reflect logout/login changes.
   useEffect(() => {
     void getCurrentUser()
-      .then(setCurrentUser)
+      .then((user) => {
+        setCurrentUser(user);
+        // Trigger walkthrough for newly signed-up users who haven't seen it yet.
+        if (user && !localStorage.getItem(ONBOARDING_KEY)) {
+          setShowOnboarding(true);
+        }
+      })
       .catch(() => setCurrentUser(null));
   }, [pathname]);
 
@@ -253,6 +262,13 @@ function App() {
   return (
     <ThemeProvider>
       <div className="app-shell">
+        {showOnboarding && currentUser && (
+          <OnboardingWalkthrough
+            currentUser={currentUser}
+            onNavigate={navigate}
+            onDismiss={() => setShowOnboarding(false)}
+          />
+        )}
         <Sidebar activeNav={navForPath(pathname)} currentUser={currentUser} onNavigate={navigate} onLogout={() => void handleLogout()} />
         <main className="feed-main">
           <Topbar currentUser={currentUser} query={query} onQueryChange={setQuery} onNavigate={navigate} />

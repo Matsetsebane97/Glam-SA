@@ -3,6 +3,7 @@ import { useState } from "react";
 import type { ChangeEvent, FormEvent } from "react";
 import { IconCheck, IconPin } from "./Icons";
 import { requestUserLocation, type GeolocationResult } from "../utils/geolocation";
+import { STORAGE_KEY as ONBOARDING_KEY } from "./OnboardingWalkthrough";
 
 type AuthMode = "login" | "signup";
 
@@ -124,6 +125,8 @@ function AuthSection({ onSuccess }: AuthSectionProps) {
       if (!response.ok) throw new Error(data.error || "Authentication failed.");
       setPassword("");
       setLocation(null);
+      // New signups should see the onboarding walkthrough; clear any stale flag.
+      if (mode === "signup") localStorage.removeItem(ONBOARDING_KEY);
       onSuccess?.();
     } catch (error) {
       setMessage(error instanceof Error ? error.message : "Authentication failed.");
