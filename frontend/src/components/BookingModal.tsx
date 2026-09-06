@@ -24,6 +24,7 @@ import {
   IconSparkles,
   IconSun,
 } from "./Icons";
+import { formatDurationMinutes } from "../utils/assistantLogic";
 
 export interface BookingModalProps {
   isOpen: boolean;
@@ -53,14 +54,7 @@ const QUICK_TAGS = [
   "House call request",
 ];
 
-const formatDuration = (minutes?: number): string => {
-  if (!minutes) return "60 mins";
-  const hours = Math.floor(minutes / 60);
-  const remaining = minutes % 60;
-  if (hours && remaining) return `${hours}h ${remaining}m`;
-  if (hours) return `${hours} hr${hours > 1 ? "s" : ""}`;
-  return `${remaining} mins`;
-};
+// Duration formatting is provided by formatDurationMinutes from assistantLogic.
 
 const formatGoogleCalendarUrl = ({
   title,
@@ -240,8 +234,8 @@ export default function BookingModal({
     ? `R ${initialPrice}`
     : "Price on request";
   const currentDuration = selectedService?.durationMinutes
-    ? formatDuration(selectedService.durationMinutes)
-    : formatDuration(initialDurationMinutes);
+    ? formatDurationMinutes(selectedService.durationMinutes)
+    : formatDurationMinutes(initialDurationMinutes);
 
   // Toggle quick tag in notes
   const toggleQuickTag = (tag: string) => {
@@ -596,7 +590,7 @@ export default function BookingModal({
                           <div className="glam-service-card-bottom">
                             <span className="glam-service-duration">
                               <IconClock size={12} />
-                              {formatDuration(service.durationMinutes)}
+                              {formatDurationMinutes(service.durationMinutes)}
                             </span>
                             <span className="glam-service-price">R {service.price}</span>
                           </div>

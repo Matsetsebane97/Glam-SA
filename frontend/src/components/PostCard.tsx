@@ -120,7 +120,7 @@ function PostCard({
   const currentPrice = selectedService?.price ? `R ${selectedService.price}` : `R ${post.price}`;
   const currentDuration = selectedService?.durationMinutes
     ? formatDuration(selectedService.durationMinutes)
-    : formatDuration(post.durationMinutes);
+    : formatDuration(post.durationMinutes ?? 0);
 
   const toggleLike = async () => {
     if (!currentUser) {
@@ -238,419 +238,415 @@ function PostCard({
     onCloseBooking?.();
   };
 
-  const bookingModalsMarkup = (
-    <>
-      {/* ─── AUTH POPUP (WHEN SIGN IN REQUIRED TO BOOK) ───────────────────────── */}
-      {showBookingAuthPopup && (
-        <div
-          className="glam-modal-backdrop"
-          role="dialog"
-          aria-modal="true"
+  // ─── Booking Modals ──────────────────────────────────────────────────────────
+
+  const authPopup = showBookingAuthPopup && (
+    <div
+      className="glam-modal-backdrop"
+      role="dialog"
+      aria-modal="true"
+      onClick={closeBooking}
+    >
+      <div className="glam-auth-modal-card" onClick={(e) => e.stopPropagation()}>
+        <button
+          className="glam-modal-close"
+          type="button"
           onClick={closeBooking}
+          aria-label="Close popup"
         >
-          <div className="glam-auth-modal-card" onClick={(e) => e.stopPropagation()}>
-            <button
-              className="glam-modal-close"
-              type="button"
-              onClick={closeBooking}
-              aria-label="Close popup"
-            >
-              <IconClose size={18} />
-            </button>
-            <div className="glam-auth-icon-wrap">
-              <IconCalendar size={32} />
-            </div>
-            <h3>Book this style on Glam SA</h3>
-            <p>
-              Sign in or create a free client account to book with <strong>{post.creator}</strong>,
-              select available slots, and manage appointments.
-            </p>
-            <div className="glam-auth-actions-stack">
-              <button
-                className="btn-primary btn-block"
-                type="button"
-                onClick={() => onNavigate("/login")}
-              >
-                Sign in / Create Account
-              </button>
-              <button
-                className="btn-ghost btn-block"
-                type="button"
-                onClick={closeBooking}
-              >
-                Keep browsing
-              </button>
-            </div>
-          </div>
+          <IconClose size={18} />
+        </button>
+        <div className="glam-auth-icon-wrap">
+          <IconCalendar size={32} />
         </div>
-      )}
-
-      {/* ─── MODERN BOOKING DRAWER / MODAL ────────────────────────────────────── */}
-      {showInquire && (
-        <div className="glam-modal-backdrop" onClick={closeBooking}>
-          <div className="glam-booking-sheet" onClick={(e) => e.stopPropagation()}>
-            {/* Sheet Header */}
-            <div className="glam-sheet-header">
-              <div className="glam-sheet-artist">
-                <div className="glam-artist-avatar">{post.creator.charAt(0)}</div>
-                <div>
-                  <div className="glam-artist-title-row">
-                    <h3>{post.creator}</h3>
-                    <IconVerified size={14} />
-                  </div>
-                  <p className="glam-artist-sub">
-                    {post.service} {post.location ? `· ${post.location}` : ""}
-                  </p>
-                </div>
-              </div>
-              <button
-                className="glam-modal-close"
-                type="button"
-                onClick={closeBooking}
-                aria-label="Close booking modal"
-              >
-                <IconClose size={18} />
-              </button>
-            </div>
-
-            {/* Segmented Modal Tabs */}
-            {!bookingSuccess && (
-              <div className="glam-booking-tabs" role="tablist">
-                <button
-                  type="button"
-                  role="tab"
-                  aria-selected={bookingModalTab === "book"}
-                  className={`glam-booking-tab ${bookingModalTab === "book" ? "active" : ""}`}
-                  onClick={() => setBookingModalTab("book")}
-                >
-                  <IconCalendar size={15} /> Book Appointment
-                </button>
-                <button
-                  type="button"
-                  role="tab"
-                  aria-selected={bookingModalTab === "inquire"}
-                  className={`glam-booking-tab ${bookingModalTab === "inquire" ? "active" : ""}`}
-                  onClick={() => setBookingModalTab("inquire")}
-                >
-                  <IconMessage size={15} /> Message / WhatsApp
-                </button>
-              </div>
-            )}
-
-            {/* Content Body */}
-            <div className="glam-sheet-body">
-              {/* SUCCESS CONFIRMATION STATE */}
-              {bookingSuccess ? (
-                <div className="glam-booking-success-view">
-                  <div className="glam-success-icon-badge">
-                    <IconCheck size={36} />
-                  </div>
-                  <h2>Appointment Requested!</h2>
-                  <p className="glam-success-desc">
-                    Your booking request has been sent to <strong>{post.creator}</strong>.
-                    You will receive updates once confirmed.
-                  </p>
-
-                  <div className="glam-success-summary-card">
-                    <div className="glam-summary-row">
-                      <span className="summary-label">Service:</span>
-                      <strong>{bookingSuccess.serviceName}</strong>
-                    </div>
-                    <div className="glam-summary-row">
-                      <span className="summary-label">Price:</span>
-                      <strong className="summary-price">R {bookingSuccess.price}</strong>
-                    </div>
-                    <div className="glam-summary-row">
-                      <span className="summary-label">Date & Time:</span>
-                      <strong>
-                        {new Date(bookingSuccess.startsAt).toLocaleString("en-ZA", {
-                          weekday: "short",
-                          day: "numeric",
-                          month: "short",
-                          hour: "2-digit",
-                          minute: "2-digit",
-                        })}
-                      </strong>
-                    </div>
-                    {bookingSuccess.notes && (
-                      <div className="glam-summary-row">
-                        <span className="summary-label">Notes:</span>
-                        <em>"{bookingSuccess.notes}"</em>
-                      </div>
-                    )}
-                  </div>
-
-                  <div className="glam-success-actions">
-                    <button
-                      type="button"
-                      className="btn-primary btn-block"
-                      onClick={() => onNavigate("/messages")}
-                    >
-                      <IconCalendar size={16} /> View in Appointments & Bookings
-                    </button>
-                    <button
-                      type="button"
-                      className="btn-ghost btn-block"
-                      onClick={closeBooking}
-                    >
-                      Done
-                    </button>
-                  </div>
-                </div>
-              ) : bookingModalTab === "book" ? (
-                /* TAB 1: BOOK APPOINTMENT FLOW */
-                <div className="glam-booking-flow">
-                  {/* Step 1: Select Service */}
-                  <div className="glam-flow-section">
-                    <label className="glam-flow-label">
-                      <span>1. Select Service</span>
-                      <span className="glam-flow-hint">Tap to switch service</span>
-                    </label>
-
-                    {services.length > 0 ? (
-                      <div className="glam-services-chips-grid">
-                        {services.map((service) => {
-                          const isSelected = String(service.id) === selectedServiceId;
-                          return (
-                            <button
-                              key={service.id}
-                              type="button"
-                              className={`glam-service-chip ${isSelected ? "selected" : ""}`}
-                              onClick={() => setSelectedServiceId(String(service.id))}
-                            >
-                              <div className="chip-service-info">
-                                <strong>{service.name}</strong>
-                                <small>{formatDuration(service.durationMinutes)}</small>
-                              </div>
-                              <span className="chip-service-price">R {service.price}</span>
-                            </button>
-                          );
-                        })}
-                      </div>
-                    ) : (
-                      <div className="glam-default-service-card">
-                        <div>
-                          <strong>{post.service}</strong>
-                          <small>Estimated: {formatDuration(post.durationMinutes)}</small>
-                        </div>
-                        <span className="chip-service-price">R {post.price}</span>
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Step 2: Select Date & Time Slot */}
-                  <div className="glam-flow-section">
-                    <label className="glam-flow-label">
-                      <span>2. Choose Date & Time</span>
-                      {availableDates.length > 0 && (
-                        <span className="glam-flow-hint">
-                          {slots.length} available slot(s)
-                        </span>
-                      )}
-                    </label>
-
-                    {slots.length === 0 ? (
-                      <div className="glam-no-slots-box">
-                        <IconClock size={24} />
-                        <div>
-                          <strong>No pre-set calendar slots available</strong>
-                          <p>
-                            {post.creator} accepts direct appointments. You can send a booking inquiry
-                            or message them on WhatsApp to arrange a time.
-                          </p>
-                        </div>
-                        <div className="glam-no-slots-actions">
-                          {whatsappLink && (
-                            <a
-                              href={whatsappLink}
-                              target="_blank"
-                              rel="noreferrer"
-                              className="btn-whatsapp-sm"
-                            >
-                              <IconWhatsApp size={14} /> WhatsApp {post.creator}
-                            </a>
-                          )}
-                          <button
-                            type="button"
-                            className="btn-ghost-sm"
-                            onClick={() => setBookingModalTab("inquire")}
-                          >
-                            Send In-App Message
-                          </button>
-                        </div>
-                      </div>
-                    ) : (
-                      <>
-                        {/* Horizontal Date Pills */}
-                        <div className="glam-date-pills-row">
-                          {availableDates.map((dateKey) => {
-                            const isSelectedDate = dateKey === selectedDateKey;
-                            const count = slotsByDate[dateKey]?.length || 0;
-                            return (
-                              <button
-                                key={dateKey}
-                                type="button"
-                                className={`glam-date-pill ${isSelectedDate ? "active" : ""}`}
-                                onClick={() => {
-                                  setSelectedDateKey(dateKey);
-                                  const firstSlot = slotsByDate[dateKey]?.[0];
-                                  if (firstSlot) setSelectedSlotId(String(firstSlot.id));
-                                }}
-                              >
-                                <strong>{dateKey}</strong>
-                                <small>{count} slot{count > 1 ? "s" : ""}</small>
-                              </button>
-                            );
-                          })}
-                        </div>
-
-                        {/* Time Slots for Selected Date */}
-                        <div className="glam-time-slots-grid">
-                          {currentDaySlots.map((slot) => {
-                            const isSelectedSlot = String(slot.id) === selectedSlotId;
-                            const start = new Date(slot.startsAt);
-                            const end = new Date(slot.endsAt);
-                            const timeLabel = `${start.toLocaleTimeString("en-ZA", {
-                              hour: "2-digit",
-                              minute: "2-digit",
-                            })} – ${end.toLocaleTimeString("en-ZA", {
-                              hour: "2-digit",
-                              minute: "2-digit",
-                            })}`;
-
-                            return (
-                              <button
-                                key={slot.id}
-                                type="button"
-                                className={`glam-time-chip ${isSelectedSlot ? "selected" : ""}`}
-                                onClick={() => setSelectedSlotId(String(slot.id))}
-                              >
-                                <IconClock size={12} />
-                                <span>{timeLabel}</span>
-                                {isSelectedSlot && <IconCheck size={12} />}
-                              </button>
-                            );
-                          })}
-                        </div>
-                      </>
-                    )}
-                  </div>
-
-                  {/* Step 3: Special Requests / Notes */}
-                  <div className="glam-flow-section">
-                    <label className="glam-flow-label">
-                      <span>3. Notes or Preferences (Optional)</span>
-                    </label>
-                    <textarea
-                      className="glam-booking-notes"
-                      rows={2}
-                      placeholder="e.g. Hair length, color, prefer morning session, or salon visit preference..."
-                      value={inquiryText}
-                      onChange={(e) => setInquiryText(e.target.value)}
-                    />
-                  </div>
-
-                  {bookingStatus && (
-                    <div className="profile-error" role="alert">
-                      {bookingStatus}
-                    </div>
-                  )}
-
-                  {/* Footer Action & Summary */}
-                  <div className="glam-booking-sheet-footer">
-                    <div className="glam-footer-price-summary">
-                      <span className="summary-total-label">Estimated Total:</span>
-                      <strong className="summary-total-price">{currentPrice}</strong>
-                      <small className="summary-duration">({currentDuration})</small>
-                    </div>
-
-                    <button
-                      type="button"
-                      className="btn-primary btn-book-submit"
-                      onClick={() => void submitBooking()}
-                      disabled={!slots.length || !selectedSlotId || isSubmittingBooking}
-                    >
-                      {isSubmittingBooking ? (
-                        "Submitting request..."
-                      ) : (
-                        <>
-                          <IconCalendar size={16} /> Request Appointment
-                        </>
-                      )}
-                    </button>
-                  </div>
-                </div>
-              ) : (
-                /* TAB 2: DIRECT INQUIRY & WHATSAPP FLOW */
-                <div className="glam-inquire-flow">
-                  <p className="glam-inquire-desc">
-                    Have questions about this style or need custom arrangements? Message{" "}
-                    <strong>{post.creator}</strong> directly.
-                  </p>
-
-                  <div className="glam-inquire-channels">
-                    {whatsappLink ? (
-                      <a
-                        href={whatsappLink}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="btn-whatsapp btn-block"
-                      >
-                        <IconWhatsApp size={18} />
-                        <span>Chat on WhatsApp</span>
-                      </a>
-                    ) : (
-                      <div className="whatsapp-unavailable-notice">
-                        <IconWhatsApp size={16} /> WhatsApp number not provided by this artist
-                      </div>
-                    )}
-
-                    <div className="glam-inquire-divider">
-                      <span>or send an in-app message</span>
-                    </div>
-
-                    <textarea
-                      className="glam-booking-notes"
-                      rows={3}
-                      value={inquiryText}
-                      onChange={(e) => setInquiryText(e.target.value)}
-                      placeholder="Write your question or booking request..."
-                    />
-
-                    {inquiryStatus && (
-                      <p className="glam-inquiry-status-msg">{inquiryStatus}</p>
-                    )}
-
-                    <button
-                      type="button"
-                      className="btn-primary btn-block"
-                      onClick={() => void submitInquiry()}
-                      disabled={isSendingInquiry || !inquiryText.trim()}
-                    >
-                      {isSendingInquiry ? "Sending..." : "Send In-App Message"}
-                    </button>
-
-                    {inquiryStatus.includes("sent") && (
-                      <button
-                        type="button"
-                        className="btn-outline-sm btn-block"
-                        onClick={() => onNavigate("/messages")}
-                      >
-                        Go to Messages Inbox
-                      </button>
-                    )}
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
+        <h3>Book this style on Glam SA</h3>
+        <p>
+          Sign in or create a free client account to book with <strong>{post.creator}</strong>,
+          select available slots, and manage appointments.
+        </p>
+        <div className="glam-auth-actions-stack">
+          <button
+            className="btn-primary btn-block"
+            type="button"
+            onClick={() => onNavigate("/login")}
+          >
+            Sign in / Create Account
+          </button>
+          <button
+            className="btn-ghost btn-block"
+            type="button"
+            onClick={closeBooking}
+          >
+            Keep browsing
+          </button>
         </div>
-      )}
-    </>
+      </div>
+    </div>
   );
 
+  const bookingSheet = showInquire && (
+    <div className="glam-modal-backdrop" onClick={closeBooking}>
+      <div className="glam-booking-sheet" onClick={(e) => e.stopPropagation()}>
+        {/* Sheet Header */}
+        <div className="glam-sheet-header">
+          <div className="glam-sheet-artist">
+            <div className="glam-artist-avatar">{post.creator.charAt(0)}</div>
+            <div>
+              <div className="glam-artist-title-row">
+                <h3>{post.creator}</h3>
+                <IconVerified size={14} />
+              </div>
+              <p className="glam-artist-sub">
+                {post.service} {post.location ? `· ${post.location}` : ""}
+              </p>
+            </div>
+          </div>
+          <button
+            className="glam-modal-close"
+            type="button"
+            onClick={closeBooking}
+            aria-label="Close booking modal"
+          >
+            <IconClose size={18} />
+          </button>
+        </div>
+
+        {/* Segmented Modal Tabs */}
+        {!bookingSuccess && (
+          <div className="glam-booking-tabs" role="tablist">
+            <button
+              type="button"
+              role="tab"
+              aria-selected={bookingModalTab === "book"}
+              className={`glam-booking-tab ${bookingModalTab === "book" ? "active" : ""}`}
+              onClick={() => setBookingModalTab("book")}
+            >
+              <IconCalendar size={15} /> Book Appointment
+            </button>
+            <button
+              type="button"
+              role="tab"
+              aria-selected={bookingModalTab === "inquire"}
+              className={`glam-booking-tab ${bookingModalTab === "inquire" ? "active" : ""}`}
+              onClick={() => setBookingModalTab("inquire")}
+            >
+              <IconMessage size={15} /> Message / WhatsApp
+            </button>
+          </div>
+        )}
+
+        {/* Content Body */}
+        <div className="glam-sheet-body">
+          {/* SUCCESS CONFIRMATION STATE */}
+          {bookingSuccess ? (
+            <div className="glam-booking-success-view">
+              <div className="glam-success-icon-badge">
+                <IconCheck size={36} />
+              </div>
+              <h2>Appointment Requested!</h2>
+              <p className="glam-success-desc">
+                Your booking request has been sent to <strong>{post.creator}</strong>.
+                You will receive updates once confirmed.
+              </p>
+
+              <div className="glam-success-summary-card">
+                <div className="glam-summary-row">
+                  <span className="summary-label">Service:</span>
+                  <strong>{bookingSuccess.serviceName}</strong>
+                </div>
+                <div className="glam-summary-row">
+                  <span className="summary-label">Price:</span>
+                  <strong className="summary-price">R {bookingSuccess.price}</strong>
+                </div>
+                <div className="glam-summary-row">
+                  <span className="summary-label">Date &amp; Time:</span>
+                  <strong>
+                    {new Date(bookingSuccess.startsAt).toLocaleString("en-ZA", {
+                      weekday: "short",
+                      day: "numeric",
+                      month: "short",
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })}
+                  </strong>
+                </div>
+                {bookingSuccess.notes && (
+                  <div className="glam-summary-row">
+                    <span className="summary-label">Notes:</span>
+                    <em>"{bookingSuccess.notes}"</em>
+                  </div>
+                )}
+              </div>
+
+              <div className="glam-success-actions">
+                <button
+                  type="button"
+                  className="btn-primary btn-block"
+                  onClick={() => onNavigate("/messages")}
+                >
+                  <IconCalendar size={16} /> View in Appointments &amp; Bookings
+                </button>
+                <button type="button" className="btn-ghost btn-block" onClick={closeBooking}>
+                  Done
+                </button>
+              </div>
+            </div>
+          ) : bookingModalTab === "book" ? (
+            /* TAB 1: BOOK APPOINTMENT FLOW */
+            <div className="glam-booking-flow">
+              {/* Step 1: Select Service */}
+              <div className="glam-flow-section">
+                <label className="glam-flow-label">
+                  <span>1. Select Service</span>
+                  <span className="glam-flow-hint">Tap to switch service</span>
+                </label>
+
+                {services.length > 0 ? (
+                  <div className="glam-services-chips-grid">
+                    {services.map((service) => {
+                      const isSelected = String(service.id) === selectedServiceId;
+                      return (
+                        <button
+                          key={service.id}
+                          type="button"
+                          className={`glam-service-chip ${isSelected ? "selected" : ""}`}
+                          onClick={() => setSelectedServiceId(String(service.id))}
+                        >
+                          <div className="chip-service-info">
+                            <strong>{service.name}</strong>
+                            <small>{formatDuration(service.durationMinutes ?? 0)}</small>
+                          </div>
+                          <span className="chip-service-price">R {service.price}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                ) : (
+                  <div className="glam-default-service-card">
+                    <div>
+                      <strong>{post.service}</strong>
+                      <small>Estimated: {formatDuration(post.durationMinutes ?? 0)}</small>
+                    </div>
+                    <span className="chip-service-price">R {post.price}</span>
+                  </div>
+                )}
+              </div>
+
+              {/* Step 2: Select Date & Time Slot */}
+              <div className="glam-flow-section">
+                <label className="glam-flow-label">
+                  <span>2. Choose Date &amp; Time</span>
+                  {availableDates.length > 0 && (
+                    <span className="glam-flow-hint">{slots.length} available slot(s)</span>
+                  )}
+                </label>
+
+                {slots.length === 0 ? (
+                  <div className="glam-no-slots-box">
+                    <IconClock size={24} />
+                    <div>
+                      <strong>No pre-set calendar slots available</strong>
+                      <p>
+                        {post.creator} accepts direct appointments. You can send a booking inquiry
+                        or message them on WhatsApp to arrange a time.
+                      </p>
+                    </div>
+                    <div className="glam-no-slots-actions">
+                      {whatsappLink && (
+                        <a
+                          href={whatsappLink}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="btn-whatsapp-sm"
+                        >
+                          <IconWhatsApp size={14} /> WhatsApp {post.creator}
+                        </a>
+                      )}
+                      <button
+                        type="button"
+                        className="btn-ghost-sm"
+                        onClick={() => setBookingModalTab("inquire")}
+                      >
+                        Send In-App Message
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <>
+                    {/* Horizontal Date Pills */}
+                    <div className="glam-date-pills-row">
+                      {availableDates.map((dateKey) => {
+                        const isSelectedDate = dateKey === selectedDateKey;
+                        const count = slotsByDate[dateKey]?.length || 0;
+                        return (
+                          <button
+                            key={dateKey}
+                            type="button"
+                            className={`glam-date-pill ${isSelectedDate ? "active" : ""}`}
+                            onClick={() => {
+                              setSelectedDateKey(dateKey);
+                              const firstSlot = slotsByDate[dateKey]?.[0];
+                              if (firstSlot) setSelectedSlotId(String(firstSlot.id));
+                            }}
+                          >
+                            <strong>{dateKey}</strong>
+                            <small>{count} slot{count > 1 ? "s" : ""}</small>
+                          </button>
+                        );
+                      })}
+                    </div>
+
+                    {/* Time Slots for Selected Date */}
+                    <div className="glam-time-slots-grid">
+                      {currentDaySlots.map((slot) => {
+                        const isSelectedSlot = String(slot.id) === selectedSlotId;
+                        const start = new Date(slot.startsAt);
+                        const end = new Date(slot.endsAt);
+                        const timeLabel = `${start.toLocaleTimeString("en-ZA", {
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        })} – ${end.toLocaleTimeString("en-ZA", {
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        })}`;
+
+                        return (
+                          <button
+                            key={slot.id}
+                            type="button"
+                            className={`glam-time-chip ${isSelectedSlot ? "selected" : ""}`}
+                            onClick={() => setSelectedSlotId(String(slot.id))}
+                          >
+                            <IconClock size={12} />
+                            <span>{timeLabel}</span>
+                            {isSelectedSlot && <IconCheck size={12} />}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </>
+                )}
+              </div>
+
+              {/* Step 3: Special Requests / Notes */}
+              <div className="glam-flow-section">
+                <label className="glam-flow-label">
+                  <span>3. Notes or Preferences (Optional)</span>
+                </label>
+                <textarea
+                  className="glam-booking-notes"
+                  rows={2}
+                  placeholder="e.g. Hair length, color, prefer morning session, or salon visit preference..."
+                  value={inquiryText}
+                  onChange={(e) => setInquiryText(e.target.value)}
+                />
+              </div>
+
+              {bookingStatus && (
+                <div className="profile-error" role="alert">
+                  {bookingStatus}
+                </div>
+              )}
+
+              {/* Footer Action & Summary */}
+              <div className="glam-booking-sheet-footer">
+                <div className="glam-footer-price-summary">
+                  <span className="summary-total-label">Estimated Total:</span>
+                  <strong className="summary-total-price">{currentPrice}</strong>
+                  <small className="summary-duration">({currentDuration})</small>
+                </div>
+
+                <button
+                  type="button"
+                  className="btn-primary btn-book-submit"
+                  onClick={() => void submitBooking()}
+                  disabled={!slots.length || !selectedSlotId || isSubmittingBooking}
+                >
+                  {isSubmittingBooking ? (
+                    "Submitting request..."
+                  ) : (
+                    <>
+                      <IconCalendar size={16} /> Request Appointment
+                    </>
+                  )}
+                </button>
+              </div>
+            </div>
+          ) : (
+            /* TAB 2: DIRECT INQUIRY & WHATSAPP FLOW */
+            <div className="glam-inquire-flow">
+              <p className="glam-inquire-desc">
+                Have questions about this style or need custom arrangements? Message{" "}
+                <strong>{post.creator}</strong> directly.
+              </p>
+
+              <div className="glam-inquire-channels">
+                {whatsappLink ? (
+                  <a
+                    href={whatsappLink}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="btn-whatsapp btn-block"
+                  >
+                    <IconWhatsApp size={18} />
+                    <span>Chat on WhatsApp</span>
+                  </a>
+                ) : (
+                  <div className="whatsapp-unavailable-notice">
+                    <IconWhatsApp size={16} /> WhatsApp number not provided by this artist
+                  </div>
+                )}
+
+                <div className="glam-inquire-divider">
+                  <span>or send an in-app message</span>
+                </div>
+
+                <textarea
+                  className="glam-booking-notes"
+                  rows={3}
+                  value={inquiryText}
+                  onChange={(e) => setInquiryText(e.target.value)}
+                  placeholder="Write your question or booking request..."
+                />
+
+                {inquiryStatus && (
+                  <p className="glam-inquiry-status-msg">{inquiryStatus}</p>
+                )}
+
+                <button
+                  type="button"
+                  className="btn-primary btn-block"
+                  onClick={() => void submitInquiry()}
+                  disabled={isSendingInquiry || !inquiryText.trim()}
+                >
+                  {isSendingInquiry ? "Sending..." : "Send In-App Message"}
+                </button>
+
+                {inquiryStatus.includes("sent") && (
+                  <button
+                    type="button"
+                    className="btn-outline-sm btn-block"
+                    onClick={() => onNavigate("/messages")}
+                  >
+                    Go to Messages Inbox
+                  </button>
+                )}
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+
+  // bookingOnly mode: render only the modals (used when opened from a profile page)
   if (bookingOnly) {
-    return bookingModalsMarkup;
+    return (
+      <>
+        {authPopup}
+        {bookingSheet}
+      </>
+    );
   }
 
   return (
@@ -801,412 +797,9 @@ function PostCard({
         </time>
       </footer>
 
-      {/* ─── AUTH POPUP (WHEN SIGN IN REQUIRED TO BOOK) ───────────────────────── */}
-      {showBookingAuthPopup && (
-        <div
-          className="glam-modal-backdrop"
-          role="dialog"
-          aria-modal="true"
-          onClick={() => setShowBookingAuthPopup(false)}
-        >
-          <div className="glam-auth-modal-card" onClick={(e) => e.stopPropagation()}>
-            <button
-              className="glam-modal-close"
-              type="button"
-              onClick={() => setShowBookingAuthPopup(false)}
-              aria-label="Close popup"
-            >
-              <IconClose size={18} />
-            </button>
-            <div className="glam-auth-icon-wrap">
-              <IconCalendar size={32} />
-            </div>
-            <h3>Book this style on Glam SA</h3>
-            <p>
-              Sign in or create a free client account to book with <strong>{post.creator}</strong>,
-              select available slots, and manage appointments.
-            </p>
-            <div className="glam-auth-actions-stack">
-              <button
-                className="btn-primary btn-block"
-                type="button"
-                onClick={() => onNavigate("/login")}
-              >
-                Sign in / Create Account
-              </button>
-              <button
-                className="btn-ghost btn-block"
-                type="button"
-                onClick={() => setShowBookingAuthPopup(false)}
-              >
-                Keep browsing
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* ─── MODERN BOOKING DRAWER / MODAL ────────────────────────────────────── */}
-      {showInquire && (
-        <div className="glam-modal-backdrop" onClick={() => setShowInquire(false)}>
-          <div className="glam-booking-sheet" onClick={(e) => e.stopPropagation()}>
-            {/* Sheet Header */}
-            <div className="glam-sheet-header">
-              <div className="glam-sheet-artist">
-                <div className="glam-artist-avatar">{post.creator.charAt(0)}</div>
-                <div>
-                  <div className="glam-artist-title-row">
-                    <h3>{post.creator}</h3>
-                    <IconVerified size={14} />
-                  </div>
-                  <p className="glam-artist-sub">
-                    {post.service} {post.location ? `· ${post.location}` : ""}
-                  </p>
-                </div>
-              </div>
-              <button
-                className="glam-modal-close"
-                type="button"
-                onClick={() => setShowInquire(false)}
-                aria-label="Close booking modal"
-              >
-                <IconClose size={18} />
-              </button>
-            </div>
-
-            {/* Segmented Modal Tabs */}
-            {!bookingSuccess && (
-              <div className="glam-booking-tabs" role="tablist">
-                <button
-                  type="button"
-                  role="tab"
-                  aria-selected={bookingModalTab === "book"}
-                  className={`glam-booking-tab ${bookingModalTab === "book" ? "active" : ""}`}
-                  onClick={() => setBookingModalTab("book")}
-                >
-                  <IconCalendar size={15} /> Book Appointment
-                </button>
-                <button
-                  type="button"
-                  role="tab"
-                  aria-selected={bookingModalTab === "inquire"}
-                  className={`glam-booking-tab ${bookingModalTab === "inquire" ? "active" : ""}`}
-                  onClick={() => setBookingModalTab("inquire")}
-                >
-                  <IconMessage size={15} /> Message / WhatsApp
-                </button>
-              </div>
-            )}
-
-            {/* Content Body */}
-            <div className="glam-sheet-body">
-              {/* SUCCESS CONFIRMATION STATE */}
-              {bookingSuccess ? (
-                <div className="glam-booking-success-view">
-                  <div className="glam-success-icon-badge">
-                    <IconCheck size={36} />
-                  </div>
-                  <h2>Appointment Requested!</h2>
-                  <p className="glam-success-desc">
-                    Your booking request has been sent to <strong>{post.creator}</strong>.
-                    You will receive updates once confirmed.
-                  </p>
-
-                  <div className="glam-success-summary-card">
-                    <div className="glam-summary-row">
-                      <span className="summary-label">Service:</span>
-                      <strong>{bookingSuccess.serviceName}</strong>
-                    </div>
-                    <div className="glam-summary-row">
-                      <span className="summary-label">Price:</span>
-                      <strong className="summary-price">R {bookingSuccess.price}</strong>
-                    </div>
-                    <div className="glam-summary-row">
-                      <span className="summary-label">Date & Time:</span>
-                      <strong>
-                        {new Date(bookingSuccess.startsAt).toLocaleString("en-ZA", {
-                          weekday: "short",
-                          day: "numeric",
-                          month: "short",
-                          hour: "2-digit",
-                          minute: "2-digit",
-                        })}
-                      </strong>
-                    </div>
-                    {bookingSuccess.notes && (
-                      <div className="glam-summary-row">
-                        <span className="summary-label">Notes:</span>
-                        <em>"{bookingSuccess.notes}"</em>
-                      </div>
-                    )}
-                  </div>
-
-                  <div className="glam-success-actions">
-                    <button
-                      type="button"
-                      className="btn-primary btn-block"
-                      onClick={() => onNavigate("/messages")}
-                    >
-                      <IconCalendar size={16} /> View in Appointments & Bookings
-                    </button>
-                    <button
-                      type="button"
-                      className="btn-ghost btn-block"
-                      onClick={() => setShowInquire(false)}
-                    >
-                      Done
-                    </button>
-                  </div>
-                </div>
-              ) : bookingModalTab === "book" ? (
-                /* TAB 1: BOOK APPOINTMENT FLOW */
-                <div className="glam-booking-flow">
-                  {/* Step 1: Select Service */}
-                  <div className="glam-flow-section">
-                    <label className="glam-flow-label">
-                      <span>1. Select Service</span>
-                      <span className="glam-flow-hint">Tap to switch service</span>
-                    </label>
-
-                    {services.length > 0 ? (
-                      <div className="glam-services-chips-grid">
-                        {services.map((service) => {
-                          const isSelected = String(service.id) === selectedServiceId;
-                          return (
-                            <button
-                              key={service.id}
-                              type="button"
-                              className={`glam-service-chip ${isSelected ? "selected" : ""}`}
-                              onClick={() => setSelectedServiceId(String(service.id))}
-                            >
-                              <div className="chip-service-info">
-                                <strong>{service.name}</strong>
-                                <small>{formatDuration(service.durationMinutes)}</small>
-                              </div>
-                              <span className="chip-service-price">R {service.price}</span>
-                            </button>
-                          );
-                        })}
-                      </div>
-                    ) : (
-                      <div className="glam-default-service-card">
-                        <div>
-                          <strong>{post.service}</strong>
-                          <small>Estimated: {formatDuration(post.durationMinutes)}</small>
-                        </div>
-                        <span className="chip-service-price">R {post.price}</span>
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Step 2: Select Date & Time Slot */}
-                  <div className="glam-flow-section">
-                    <label className="glam-flow-label">
-                      <span>2. Choose Date & Time</span>
-                      {availableDates.length > 0 && (
-                        <span className="glam-flow-hint">
-                          {slots.length} available slot(s)
-                        </span>
-                      )}
-                    </label>
-
-                    {slots.length === 0 ? (
-                      <div className="glam-no-slots-box">
-                        <IconClock size={24} />
-                        <div>
-                          <strong>No pre-set calendar slots available</strong>
-                          <p>
-                            {post.creator} accepts direct appointments. You can send a booking inquiry
-                            or message them on WhatsApp to arrange a time.
-                          </p>
-                        </div>
-                        <div className="glam-no-slots-actions">
-                          {whatsappLink && (
-                            <a
-                              href={whatsappLink}
-                              target="_blank"
-                              rel="noreferrer"
-                              className="btn-whatsapp-sm"
-                            >
-                              <IconWhatsApp size={14} /> WhatsApp {post.creator}
-                            </a>
-                          )}
-                          <button
-                            type="button"
-                            className="btn-ghost-sm"
-                            onClick={() => setBookingModalTab("inquire")}
-                          >
-                            Send In-App Message
-                          </button>
-                        </div>
-                      </div>
-                    ) : (
-                      <>
-                        {/* Horizontal Date Pills */}
-                        <div className="glam-date-pills-row">
-                          {availableDates.map((dateKey) => {
-                            const isSelectedDate = dateKey === selectedDateKey;
-                            const count = slotsByDate[dateKey]?.length || 0;
-                            return (
-                              <button
-                                key={dateKey}
-                                type="button"
-                                className={`glam-date-pill ${isSelectedDate ? "active" : ""}`}
-                                onClick={() => {
-                                  setSelectedDateKey(dateKey);
-                                  const firstSlot = slotsByDate[dateKey]?.[0];
-                                  if (firstSlot) setSelectedSlotId(String(firstSlot.id));
-                                }}
-                              >
-                                <strong>{dateKey}</strong>
-                                <small>{count} slot{count > 1 ? "s" : ""}</small>
-                              </button>
-                            );
-                          })}
-                        </div>
-
-                        {/* Time Slots for Selected Date */}
-                        <div className="glam-time-slots-grid">
-                          {currentDaySlots.map((slot) => {
-                            const isSelectedSlot = String(slot.id) === selectedSlotId;
-                            const start = new Date(slot.startsAt);
-                            const end = new Date(slot.endsAt);
-                            const timeLabel = `${start.toLocaleTimeString("en-ZA", {
-                              hour: "2-digit",
-                              minute: "2-digit",
-                            })} – ${end.toLocaleTimeString("en-ZA", {
-                              hour: "2-digit",
-                              minute: "2-digit",
-                            })}`;
-
-                            return (
-                              <button
-                                key={slot.id}
-                                type="button"
-                                className={`glam-time-chip ${isSelectedSlot ? "selected" : ""}`}
-                                onClick={() => setSelectedSlotId(String(slot.id))}
-                              >
-                                <IconClock size={12} />
-                                <span>{timeLabel}</span>
-                                {isSelectedSlot && <IconCheck size={12} />}
-                              </button>
-                            );
-                          })}
-                        </div>
-                      </>
-                    )}
-                  </div>
-
-                  {/* Step 3: Special Requests / Notes */}
-                  <div className="glam-flow-section">
-                    <label className="glam-flow-label">
-                      <span>3. Notes or Preferences (Optional)</span>
-                    </label>
-                    <textarea
-                      className="glam-booking-notes"
-                      rows={2}
-                      placeholder="e.g. Hair length, color, prefer morning session, or salon visit preference..."
-                      value={inquiryText}
-                      onChange={(e) => setInquiryText(e.target.value)}
-                    />
-                  </div>
-
-                  {bookingStatus && (
-                    <div className="profile-error" role="alert">
-                      {bookingStatus}
-                    </div>
-                  )}
-
-                  {/* Footer Action & Summary */}
-                  <div className="glam-booking-sheet-footer">
-                    <div className="glam-footer-price-summary">
-                      <span className="summary-total-label">Estimated Total:</span>
-                      <strong className="summary-total-price">{currentPrice}</strong>
-                      <small className="summary-duration">({currentDuration})</small>
-                    </div>
-
-                    <button
-                      type="button"
-                      className="btn-primary btn-book-submit"
-                      onClick={() => void submitBooking()}
-                      disabled={!slots.length || !selectedSlotId || isSubmittingBooking}
-                    >
-                      {isSubmittingBooking ? (
-                        "Submitting request..."
-                      ) : (
-                        <>
-                          <IconCalendar size={16} /> Request Appointment
-                        </>
-                      )}
-                    </button>
-                  </div>
-                </div>
-              ) : (
-                /* TAB 2: DIRECT INQUIRY & WHATSAPP FLOW */
-                <div className="glam-inquire-flow">
-                  <p className="glam-inquire-desc">
-                    Have questions about this style or need custom arrangements? Message{" "}
-                    <strong>{post.creator}</strong> directly.
-                  </p>
-
-                  <div className="glam-inquire-channels">
-                    {whatsappLink ? (
-                      <a
-                        href={whatsappLink}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="btn-whatsapp btn-block"
-                      >
-                        <IconWhatsApp size={18} />
-                        <span>Chat on WhatsApp</span>
-                      </a>
-                    ) : (
-                      <div className="whatsapp-unavailable-notice">
-                        <IconWhatsApp size={16} /> WhatsApp number not provided by this artist
-                      </div>
-                    )}
-
-                    <div className="glam-inquire-divider">
-                      <span>or send an in-app message</span>
-                    </div>
-
-                    <textarea
-                      className="glam-booking-notes"
-                      rows={3}
-                      value={inquiryText}
-                      onChange={(e) => setInquiryText(e.target.value)}
-                      placeholder="Write your question or booking request..."
-                    />
-
-                    {inquiryStatus && (
-                      <p className="glam-inquiry-status-msg">{inquiryStatus}</p>
-                    )}
-
-                    <button
-                      type="button"
-                      className="btn-primary btn-block"
-                      onClick={() => void submitInquiry()}
-                      disabled={isSendingInquiry || !inquiryText.trim()}
-                    >
-                      {isSendingInquiry ? "Sending..." : "Send In-App Message"}
-                    </button>
-
-                    {inquiryStatus.includes("sent") && (
-                      <button
-                        type="button"
-                        className="btn-outline-sm btn-block"
-                        onClick={() => onNavigate("/messages")}
-                      >
-                        Go to Messages Inbox
-                      </button>
-                    )}
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-      )}
+      {/* Modals */}
+      {authPopup}
+      {bookingSheet}
     </article>
   );
 }

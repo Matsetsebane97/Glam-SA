@@ -1,43 +1,32 @@
 import { useMemo, useState } from "react";
-import { createBooking, getAvailability, getNearbyArtists, getServices } from "../api";
+import { createBooking, getAvailability, getServices } from "../api";
 import { IconBookmark, IconChevronRight, IconClose, IconMessage, IconMic, IconPin, IconSend, IconSparkles, IconWhatsApp } from "./Icons";
-import type { AvailabilitySlot, CurrentUser, NearbyArtist, Post, ServiceOffering } from "../types";
-import { formatDuration } from "../utils/geo";
+import type { AvailabilitySlot, CurrentUser, Post, ServiceOffering } from "../types";
 import { whatsappUrl } from "../utils/whatsapp";
+import {
+  answerQuestion,
+  assistantSuggestions,
+  createBookingNote,
+  formatDistanceKm,
+  formatDurationMinutes,
+  formatPriceRange,
+  formatSlot,
+  parseQuestion,
+  recentSearchesKey,
+  savedArtistsKey,
+  selectBestService,
+  sortSlotsByPreference,
+  type ArtistMatch,
+  type ChatMessage,
+} from "../utils/assistantLogic";
+
+// ─── Local Types ──────────────────────────────────────────────────────────────
 
 type AssistantPanelProps = {
   posts: Post[];
   currentUser: CurrentUser | null;
   onNavigate: (path: string) => void;
   onSearch: (query: string) => void;
-};
-
-type ChatMessage = {
-  id: number;
-  author: "assistant" | "user";
-  text: string;
-  matches?: ArtistMatch[];
-  quickReplies?: string[];
-  fullResultCount?: number;
-  fullResultQuery?: string;
-};
-
-type ArtistMatch = {
-  id: string;
-  ownerId?: number;
-  postId?: number;
-  preferredWeekday?: number;
-  preferredDateLabel?: string;
-  name: string;
-  handle: string;
-  service?: string;
-  category?: string;
-  location?: string;
-  whatsappNumber?: string;
-  distanceKm?: number;
-  minPrice?: number;
-  maxPrice?: number;
-  resultCount: number;
 };
 
 type BookingPanelState = {
@@ -51,40 +40,6 @@ type BookingPanelState = {
   status: string;
 };
 
-const categoryAliases: Record<string, string> = {
-  braid: "Hair",
-  braids: "Hair",
-  hair: "Hair",
-  nail: "Nails",
-  nails: "Nails",
-  manicure: "Nails",
-  pedicure: "Nails",
-  barber: "Barbering",
-  barbers: "Barbering",
-  barbering: "Barbering",
-  makeup: "Makeup",
-  facial: "Skincare",
-  skincare: "Skincare",
-  tattoo: "Tattoos",
-  tattoos: "Tattoos",
-};
-
-const assistantSuggestions = ["Hair near me", "Nails under R500", "Makeup in Sandton", "Find artist Naledi"];
-const fallbackSuggestions = ["Try a broader budget", "Search another area", "Browse the full feed"];
-const recentSearchesKey = "glamAssistantRecentSearches";
-const savedArtistsKey = "glamAssistantSavedArtists";
-const searchStopWords = new Set(["a", "an", "appointment", "artist", "artists", "beauty", "book", "booking", "find", "for", "in", "look", "looks", "me", "near", "nearby", "next", "please", "session", "show", "the", "than", "this", "to", "under", "below", "less"]);
-const speechRecognitionName = "webkitSpeechRecognition";
-const weekdayAliases: Record<string, number> = {
-  sunday: 0,
-  monday: 1,
-  tuesday: 2,
-  wednesday: 3,
-  thursday: 4,
-  friday: 5,
-  saturday: 6,
-};
-
 type SpeechRecognitionConstructor = new () => {
   continuous: boolean;
   interimResults: boolean;
@@ -95,292 +50,9 @@ type SpeechRecognitionConstructor = new () => {
   onerror: (() => void) | null;
 };
 
-type ParsedQuestion = {
-  category?: string;
-  location?: string;
-  maxPrice?: number;
-  searchTerms: string[];
-  wantsNearby: boolean;
-  preferredWeekday?: number;
-  preferredDateLabel?: string;
-};
+const speechRecognitionName = "webkitSpeechRecognition";
 
-function parseQuestion(question: string): ParsedQuestion {
-  const normalizedQuestion = question.trim().toLowerCase();
-  const categoryToken = normalizedQuestion.match(/\b(braids?|hair|nails?|manicure|pedicure|barber(?:ing|s)?|makeup|facials?|skincare|tattoos?)\b/);
-  const priceMatch = normalizedQuestion.match(/(?:under|below|less than)\s*r?\s*(\d+(?:\.\d+)?)/);
-  const locationMatch = normalizedQuestion.match(/\bnear\s+(?!me\b)([a-z][a-z\s-]*?)(?=\s+(?:under|below|less than)\b|$)/);
-  const weekdayMatch = normalizedQuestion.match(/\b(sunday|monday|tuesday|wednesday|thursday|friday|saturday)\b/);
-  const category = categoryToken ? categoryAliases[categoryToken[1]] : getFuzzyCategory(normalizedQuestion);
-  const wantsNearby = /\b(near me|nearby|close to me|around me)\b/.test(normalizedQuestion);
-  const searchTerms = normalizedQuestion
-    .replace(categoryToken?.[0] || "", "")
-    .replace(priceMatch?.[0] || "", "")
-    .replace(locationMatch?.[0] || "", "")
-    .replace(weekdayMatch?.[0] || "", "")
-    .replace(/\b(today|tomorrow|weekend)\b/g, "")
-    .replace(/\b(near me|nearby|close to me|around me)\b/g, "")
-    .split(/\s+/)
-    .map((term) => term.trim())
-    .filter((term) => term && !searchStopWords.has(term));
-
-  return {
-    category,
-    location: locationMatch?.[1].trim(),
-    maxPrice: priceMatch ? Number(priceMatch[1]) : undefined,
-    searchTerms,
-    wantsNearby,
-    preferredWeekday: weekdayMatch ? weekdayAliases[weekdayMatch[1]] : undefined,
-    preferredDateLabel: weekdayMatch?.[1],
-  };
-}
-
-function getEditDistance(firstValue: string, secondValue: string) {
-  const distances = Array.from({ length: firstValue.length + 1 }, (_, firstIndex) =>
-    Array.from({ length: secondValue.length + 1 }, (_, secondIndex) => firstIndex + secondIndex),
-  );
-
-  for (let firstIndex = 0; firstIndex <= firstValue.length; firstIndex += 1) distances[firstIndex][0] = firstIndex;
-  for (let secondIndex = 0; secondIndex <= secondValue.length; secondIndex += 1) distances[0][secondIndex] = secondIndex;
-
-  for (let firstIndex = 1; firstIndex <= firstValue.length; firstIndex += 1) {
-    for (let secondIndex = 1; secondIndex <= secondValue.length; secondIndex += 1) {
-      const cost = firstValue[firstIndex - 1] === secondValue[secondIndex - 1] ? 0 : 1;
-      distances[firstIndex][secondIndex] = Math.min(
-        distances[firstIndex - 1][secondIndex] + 1,
-        distances[firstIndex][secondIndex - 1] + 1,
-        distances[firstIndex - 1][secondIndex - 1] + cost,
-      );
-    }
-  }
-
-  return distances[firstValue.length][secondValue.length];
-}
-
-function isFuzzyMatch(term: string, candidate: string) {
-  if (!term || !candidate) return false;
-  if (candidate.includes(term) || term.includes(candidate)) return true;
-  const maxDistance = term.length > 6 ? 2 : 1;
-  return Math.abs(candidate.length - term.length) <= maxDistance && getEditDistance(term, candidate) <= maxDistance;
-}
-
-function textMatchesTerm(text: string, term: string) {
-  const normalizedText = text.toLowerCase();
-  if (normalizedText.includes(term)) return true;
-  return normalizedText.split(/[^a-z0-9]+/).some((word) => isFuzzyMatch(term, word));
-}
-
-function getFuzzyCategory(normalizedQuestion: string) {
-  const terms = normalizedQuestion.split(/[^a-z0-9]+/).filter(Boolean);
-  const categoryAlias = Object.entries(categoryAliases).find(([alias]) =>
-    terms.some((term) => isFuzzyMatch(term, alias)),
-  );
-
-  return categoryAlias?.[1];
-}
-
-function priceFromPost(post: Post) {
-  const price = Number(post.price);
-  return Number.isFinite(price) ? price : undefined;
-}
-
-function formatPrice(price?: number) {
-  if (price == null) return "";
-  return `R${price % 1 === 0 ? price.toFixed(0) : price.toFixed(2)}`;
-}
-
-function formatPriceRange(artist: ArtistMatch) {
-  if (artist.minPrice == null) return "";
-  if (artist.maxPrice != null && artist.maxPrice !== artist.minPrice) {
-    return `${formatPrice(artist.minPrice)}-${formatPrice(artist.maxPrice)}`;
-  }
-  return formatPrice(artist.minPrice);
-}
-
-function formatDistance(distanceKm?: number) {
-  if (distanceKm == null) return "";
-  return distanceKm < 1 ? `${Math.round(distanceKm * 1000)} m away` : `${distanceKm.toFixed(1)} km away`;
-}
-
-function formatSlot(slot: AvailabilitySlot) {
-  return new Date(slot.startsAt).toLocaleString("en-ZA", {
-    weekday: "short",
-    day: "numeric",
-    month: "short",
-    hour: "numeric",
-    minute: "2-digit",
-  });
-}
-
-function createBookingNote(artist: ArtistMatch) {
-  const serviceText = artist.service || artist.category || "a beauty service";
-  return `Hi ${artist.name}, I found you on Glam SA and would like to request a booking for ${serviceText}.`;
-}
-
-function selectBestService(services: ServiceOffering[], artist: ArtistMatch) {
-  const activeServices = services.filter((service) => service.isActive);
-  const normalizedService = artist.service?.toLowerCase();
-  const normalizedCategory = artist.category?.toLowerCase();
-  const match = activeServices.find((service) => {
-    const normalizedName = service.name.toLowerCase();
-    return Boolean(
-      normalizedService &&
-        (normalizedName.includes(normalizedService) || normalizedService.includes(normalizedName)),
-    ) || Boolean(normalizedCategory && normalizedName.includes(normalizedCategory));
-  });
-
-  return match || activeServices[0];
-}
-
-function sortSlotsByPreference(slots: AvailabilitySlot[], preferredWeekday?: number) {
-  if (preferredWeekday == null) return slots;
-  return [...slots].sort((leftSlot, rightSlot) => {
-    const leftMatches = new Date(leftSlot.startsAt).getDay() === preferredWeekday;
-    const rightMatches = new Date(rightSlot.startsAt).getDay() === preferredWeekday;
-    if (leftMatches === rightMatches) return leftSlot.startsAt.localeCompare(rightSlot.startsAt);
-    return leftMatches ? -1 : 1;
-  });
-}
-
-function withBookingPreference(artists: ArtistMatch[], parsedQuestion: ParsedQuestion) {
-  return artists.map((artist) => ({
-    ...artist,
-    preferredWeekday: parsedQuestion.preferredWeekday,
-    preferredDateLabel: parsedQuestion.preferredDateLabel,
-  }));
-}
-
-function getArtistMatches(posts: Post[]): ArtistMatch[] {
-  const artistsByKey = new Map<string, ArtistMatch>();
-
-  posts.forEach((post) => {
-    const key = post.ownerId ? `owner-${post.ownerId}` : `handle-${post.handle.toLowerCase()}`;
-    const existingArtist = artistsByKey.get(key);
-    const price = priceFromPost(post);
-
-    if (existingArtist) {
-      artistsByKey.set(key, {
-        ...existingArtist,
-        postId: existingArtist.postId || post.id,
-        whatsappNumber: existingArtist.whatsappNumber || post.whatsappNumber,
-        minPrice: price == null ? existingArtist.minPrice : Math.min(existingArtist.minPrice ?? price, price),
-        maxPrice: price == null ? existingArtist.maxPrice : Math.max(existingArtist.maxPrice ?? price, price),
-        resultCount: existingArtist.resultCount + 1,
-      });
-      return;
-    }
-
-    artistsByKey.set(key, {
-      id: key,
-      ownerId: post.ownerId,
-      postId: post.id,
-      name: post.creator,
-      handle: post.handle,
-      service: post.service,
-      category: post.category,
-      location: post.location,
-      whatsappNumber: post.whatsappNumber,
-      minPrice: price,
-      maxPrice: price,
-      resultCount: 1,
-    });
-  });
-
-  return Array.from(artistsByKey.values());
-}
-
-function matchesQuestion(post: Post, parsedQuestion: ParsedQuestion) {
-  const matchesCategory = !parsedQuestion.category || post.category.toLowerCase() === parsedQuestion.category.toLowerCase();
-  const matchesLocation = !parsedQuestion.location || textMatchesTerm(post.location, parsedQuestion.location);
-  const matchesPrice = parsedQuestion.maxPrice == null || Number(post.price) <= parsedQuestion.maxPrice;
-  const searchableText = [post.creator, post.handle, post.location, post.service, post.category, post.caption]
-    .join(" ")
-    .toLowerCase();
-  const matchesSearch = parsedQuestion.searchTerms.every((term) => textMatchesTerm(searchableText, term));
-
-  return matchesCategory && matchesLocation && matchesPrice && matchesSearch;
-}
-
-function mergeNearbyArtist(artist: NearbyArtist, postMatch?: ArtistMatch): ArtistMatch {
-  return {
-    id: `owner-${artist.id}`,
-    ownerId: artist.id,
-    name: artist.name,
-    handle: artist.handle,
-    service: postMatch?.service,
-    postId: postMatch?.postId,
-    category: postMatch?.category,
-    location: artist.locationLabel || postMatch?.location,
-    whatsappNumber: artist.whatsappNumber || postMatch?.whatsappNumber,
-    distanceKm: artist.distanceKm,
-    minPrice: postMatch?.minPrice,
-    maxPrice: postMatch?.maxPrice,
-    resultCount: postMatch?.resultCount || artist.postCount,
-  };
-}
-
-async function answerQuestion(question: string, posts: Post[], currentUser: CurrentUser | null): Promise<Pick<ChatMessage, "text" | "matches" | "quickReplies" | "fullResultCount" | "fullResultQuery">> {
-  const parsedQuestion = parseQuestion(question);
-  const matchingPosts = posts.filter((post) => {
-    return matchesQuestion(post, parsedQuestion);
-  });
-
-  if (parsedQuestion.wantsNearby) {
-    if (currentUser?.latitude == null || currentUser.longitude == null) {
-      return {
-        text: "I need your profile location before I can show artists near you.",
-        quickReplies: ["Makeup in Sandton", "Nails under R500", "Browse the full feed"],
-      };
-    }
-
-    try {
-      const nearbyArtists = await getNearbyArtists({
-        latitude: currentUser.latitude,
-        longitude: currentUser.longitude,
-        radius: 50,
-      });
-      const postMatchesByOwnerId = new Map(
-        getArtistMatches(matchingPosts).flatMap((artist) => artist.ownerId ? [[artist.ownerId, artist]] : []),
-      );
-      const nearbyMatches = nearbyArtists
-        .map((artist) => mergeNearbyArtist(artist, postMatchesByOwnerId.get(artist.id)))
-        .filter((artist) => {
-          const matchesCategory = !parsedQuestion.category || artist.category === parsedQuestion.category || postMatchesByOwnerId.has(artist.ownerId || 0);
-          const matchesPrice = parsedQuestion.maxPrice == null || artist.minPrice == null || artist.minPrice <= parsedQuestion.maxPrice;
-          const searchableText = [artist.name, artist.handle, artist.service, artist.category, artist.location].join(" ").toLowerCase();
-          return matchesCategory && matchesPrice && parsedQuestion.searchTerms.every((term) => textMatchesTerm(searchableText, term));
-        });
-
-      if (nearbyMatches.length > 0) {
-        return {
-          text: `Here are ${Math.min(nearbyMatches.length, 3)} nearby artist${nearbyMatches.length === 1 ? "" : "s"} within 50 km.`,
-          matches: withBookingPreference(nearbyMatches.slice(0, 3), parsedQuestion),
-          fullResultCount: nearbyMatches.length > 3 ? nearbyMatches.length : undefined,
-          fullResultQuery: question,
-        };
-      }
-    } catch {
-      return { text: "I could not load nearby artists right now. Try a location search instead.", quickReplies: fallbackSuggestions };
-    }
-  }
-
-  if (matchingPosts.length === 0) {
-    return {
-      text: "I could not find a matching artist yet. Try a broader location, category, or budget.",
-      quickReplies: fallbackSuggestions,
-    };
-  }
-
-  const allArtistMatches = getArtistMatches(matchingPosts);
-  const matches = withBookingPreference(allArtistMatches.slice(0, 3), parsedQuestion);
-  const suffix = matchingPosts.length > matches.length ? ` I found ${matchingPosts.length} matching looks in total.` : "";
-  return {
-    text: `Here are ${matches.length} matching artist${matches.length === 1 ? "" : "s"}.${suffix}`,
-    matches,
-    fullResultCount: allArtistMatches.length > 3 ? allArtistMatches.length : undefined,
-    fullResultQuery: question,
-  };
-}
+// ─── Component ────────────────────────────────────────────────────────────────
 
 function AssistantPanel({ posts, currentUser, onNavigate, onSearch }: AssistantPanelProps) {
   const [isOpen, setIsOpen] = useState(false);
@@ -411,11 +83,11 @@ function AssistantPanel({ posts, currentUser, onNavigate, onSearch }: AssistantP
   const [showBookingAuthPopup, setShowBookingAuthPopup] = useState(false);
 
   const visiblePrompts = useMemo(() => {
-    return [...recentSearches, ...assistantSuggestions.filter((suggestion) => !recentSearches.includes(suggestion))].slice(0, 4);
+    return [...recentSearches, ...assistantSuggestions.filter((s) => !recentSearches.includes(s))].slice(0, 4);
   }, [recentSearches]);
 
   const saveRecentSearch = (question: string) => {
-    const nextSearches = [question, ...recentSearches.filter((search) => search.toLowerCase() !== question.toLowerCase())].slice(0, 3);
+    const nextSearches = [question, ...recentSearches.filter((s) => s.toLowerCase() !== question.toLowerCase())].slice(0, 3);
     setRecentSearches(nextSearches);
     window.localStorage.setItem(recentSearchesKey, JSON.stringify(nextSearches));
   };
@@ -431,7 +103,6 @@ function AssistantPanel({ posts, currentUser, onNavigate, onSearch }: AssistantP
       onNavigate("/discover");
       return;
     }
-
     onSearch(query);
     browseFeed();
   };
@@ -439,7 +110,7 @@ function AssistantPanel({ posts, currentUser, onNavigate, onSearch }: AssistantP
   const toggleSavedArtist = (artist: ArtistMatch) => {
     const artistId = artist.ownerId ? `owner-${artist.ownerId}` : artist.id;
     const nextSavedArtistIds = savedArtistIds.includes(artistId)
-      ? savedArtistIds.filter((savedArtistId) => savedArtistId !== artistId)
+      ? savedArtistIds.filter((savedId) => savedId !== artistId)
       : [artistId, ...savedArtistIds];
     setSavedArtistIds(nextSavedArtistIds);
     window.localStorage.setItem(savedArtistsKey, JSON.stringify(nextSavedArtistIds));
@@ -470,7 +141,6 @@ function AssistantPanel({ posts, currentUser, onNavigate, onSearch }: AssistantP
       setVoiceStatus("Voice search is not supported in this browser.");
       return;
     }
-
     const recognition = new recognitionConstructor();
     recognition.continuous = false;
     recognition.interimResults = false;
@@ -483,7 +153,7 @@ function AssistantPanel({ posts, currentUser, onNavigate, onSearch }: AssistantP
       void ask(transcript);
     };
     recognition.onerror = () => setVoiceStatus("I could not hear that clearly.");
-    recognition.onend = () => setVoiceStatus((status) => status === "Listening..." ? "" : status);
+    recognition.onend = () => setVoiceStatus((status) => (status === "Listening..." ? "" : status));
     recognition.start();
   };
 
@@ -495,18 +165,11 @@ function AssistantPanel({ posts, currentUser, onNavigate, onSearch }: AssistantP
       return;
     }
     saveRecentSearch(question);
-    setMessages((currentMessages) => [
-      ...currentMessages,
-      { id: Date.now(), author: "user", text: question },
-    ]);
+    setMessages((current) => [...current, { id: Date.now(), author: "user", text: question }]);
     setDraft("");
     setIsThinking(true);
-
     const answer = await answerQuestion(question, posts, currentUser);
-    setMessages((currentMessages) => [
-      ...currentMessages,
-      { id: Date.now() + 1, author: "assistant", ...answer },
-    ]);
+    setMessages((current) => [...current, { id: Date.now() + 1, author: "assistant", ...answer }]);
     setIsThinking(false);
   };
 
@@ -522,12 +185,10 @@ function AssistantPanel({ posts, currentUser, onNavigate, onSearch }: AssistantP
       setShowBookingAuthPopup(true);
       return;
     }
-
     if (activeBookingArtistId === artist.id) {
       setActiveBookingArtistId(null);
       return;
     }
-
     setActiveBookingArtistId(artist.id);
     updateBookingPanel(artist.id, {
       isLoading: true,
@@ -537,22 +198,27 @@ function AssistantPanel({ posts, currentUser, onNavigate, onSearch }: AssistantP
 
     void Promise.all([getServices(artist.ownerId), getAvailability(artist.ownerId)])
       .then(([nextServices, nextSlots]) => {
-        const activeServices = nextServices.filter((service) => service.isActive);
+        const activeServices = nextServices.filter((s) => s.isActive);
         const availableSlots = sortSlotsByPreference(
           nextSlots.filter((slot) => slot.isAvailable),
           artist.preferredWeekday,
         );
         const bestService = selectBestService(activeServices, artist);
-        const hasPreferredSlot = artist.preferredWeekday == null || availableSlots.some((slot) => new Date(slot.startsAt).getDay() === artist.preferredWeekday);
+        const hasPreferredSlot =
+          artist.preferredWeekday == null ||
+          availableSlots.some((slot) => new Date(slot.startsAt).getDay() === artist.preferredWeekday);
         updateBookingPanel(artist.id, {
           isLoading: false,
           services: activeServices,
           slots: availableSlots,
           selectedServiceId: String(bestService?.id || ""),
           selectedSlotId: String(availableSlots[0]?.id || ""),
-          status: activeServices.length && availableSlots.length
-            ? hasPreferredSlot ? "" : `No ${artist.preferredDateLabel} slot yet, so I selected the next open time.`
-            : "This artist needs an active service and open time before bookings can be requested.",
+          status:
+            activeServices.length && availableSlots.length
+              ? hasPreferredSlot
+                ? ""
+                : `No ${artist.preferredDateLabel} slot yet, so I selected the next open time.`
+              : "This artist needs an active service and open time before bookings can be requested.",
         });
       })
       .catch(() => {
@@ -579,7 +245,6 @@ function AssistantPanel({ posts, currentUser, onNavigate, onSearch }: AssistantP
       updateBookingPanel(artist.id, { status: "Choose a service and available time first." });
       return;
     }
-
     updateBookingPanel(artist.id, { isSubmitting: true, status: "" });
     try {
       const booking = await createBooking({
@@ -613,7 +278,7 @@ function AssistantPanel({ posts, currentUser, onNavigate, onSearch }: AssistantP
               </div>
               <div>
                 <strong>Glam Assistant</strong>
-                <span style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+                <span style={{ display: "flex", alignItems: "center", gap: "5px" }}>
                   <span className="assistant-online-dot" />
                   Discovery help
                 </span>
@@ -637,13 +302,10 @@ function AssistantPanel({ posts, currentUser, onNavigate, onSearch }: AssistantP
                         artist.whatsappNumber,
                         `Hi ${artist.name}, I found you on Glam SA and want to inquire about booking a session!`,
                       );
+                      const savedArtistId = artist.ownerId ? `owner-${artist.ownerId}` : artist.id;
+                      const isSaved = savedArtistIds.includes(savedArtistId);
                       return (
                         <article className="assistant-artist-card" key={artist.id}>
-                          {(() => {
-                            const savedArtistId = artist.ownerId ? `owner-${artist.ownerId}` : artist.id;
-                            const isSaved = savedArtistIds.includes(savedArtistId);
-                            return (
-                              <>
                           <button
                             className="assistant-artist-card-main"
                             type="button"
@@ -657,18 +319,25 @@ function AssistantPanel({ posts, currentUser, onNavigate, onSearch }: AssistantP
                                 <strong>{artist.name}</strong>
                                 {artist.ownerId && <IconChevronRight size={14} />}
                               </span>
-                              <span>{[artist.service || artist.category, priceRange].filter(Boolean).join(" - ") || `${artist.resultCount} matching look${artist.resultCount === 1 ? "" : "s"}`}</span>
+                              <span>
+                                {[artist.service || artist.category, priceRange].filter(Boolean).join(" - ") ||
+                                  `${artist.resultCount} matching look${artist.resultCount === 1 ? "" : "s"}`}
+                              </span>
                               {(artist.location || artist.distanceKm != null) && (
                                 <span className="assistant-artist-location">
                                   <IconPin size={11} />
-                                  {[artist.location, formatDistance(artist.distanceKm)].filter(Boolean).join(" - ")}
+                                  {[artist.location, formatDistanceKm(artist.distanceKm)].filter(Boolean).join(" - ")}
                                 </span>
                               )}
                             </span>
                           </button>
                           <div className="assistant-artist-actions">
-                            <button type="button" disabled={!artist.ownerId} onClick={() => openProfile(artist)}>Profile</button>
-                            <button type="button" disabled={!artist.ownerId} onClick={() => openBooking(artist)}>Book</button>
+                            <button type="button" disabled={!artist.ownerId} onClick={() => openProfile(artist)}>
+                              Profile
+                            </button>
+                            <button type="button" disabled={!artist.ownerId} onClick={() => openBooking(artist)}>
+                              Book
+                            </button>
                             <button type="button" className={isSaved ? "saved" : ""} onClick={() => toggleSavedArtist(artist)}>
                               <IconBookmark size={13} fill={isSaved ? "currentColor" : undefined} />
                               {isSaved ? "Saved" : "Save"}
@@ -678,7 +347,9 @@ function AssistantPanel({ posts, currentUser, onNavigate, onSearch }: AssistantP
                                 <IconWhatsApp size={14} /> Message
                               </a>
                             ) : (
-                              <button type="button" disabled>Message</button>
+                              <button type="button" disabled>
+                                Message
+                              </button>
                             )}
                           </div>
                           {showBookingPanel && (
@@ -692,11 +363,11 @@ function AssistantPanel({ posts, currentUser, onNavigate, onSearch }: AssistantP
                                       <span>Service</span>
                                       <select
                                         value={bookingPanel.selectedServiceId}
-                                        onChange={(event) => updateBookingPanel(artist.id, { selectedServiceId: event.target.value, status: "" })}
+                                        onChange={(e) => updateBookingPanel(artist.id, { selectedServiceId: e.target.value, status: "" })}
                                       >
                                         {bookingPanel.services.map((service) => (
                                           <option key={service.id} value={service.id}>
-                                            {service.name} - R {service.price} - {formatDuration(service.durationMinutes)}
+                                            {service.name} - R {service.price} - {formatDurationMinutes(service.durationMinutes)}
                                           </option>
                                         ))}
                                       </select>
@@ -707,7 +378,7 @@ function AssistantPanel({ posts, currentUser, onNavigate, onSearch }: AssistantP
                                       <span>Available time</span>
                                       <select
                                         value={bookingPanel.selectedSlotId}
-                                        onChange={(event) => updateBookingPanel(artist.id, { selectedSlotId: event.target.value, status: "" })}
+                                        onChange={(e) => updateBookingPanel(artist.id, { selectedSlotId: e.target.value, status: "" })}
                                       >
                                         {bookingPanel.slots.map((slot) => (
                                           <option key={slot.id} value={slot.id}>
@@ -722,7 +393,7 @@ function AssistantPanel({ posts, currentUser, onNavigate, onSearch }: AssistantP
                                     <textarea
                                       rows={3}
                                       value={bookingPanel.notes}
-                                      onChange={(event) => updateBookingPanel(artist.id, { notes: event.target.value })}
+                                      onChange={(e) => updateBookingPanel(artist.id, { notes: e.target.value })}
                                     />
                                   </label>
                                   <div className="assistant-booking-actions">
@@ -747,9 +418,6 @@ function AssistantPanel({ posts, currentUser, onNavigate, onSearch }: AssistantP
                               )}
                             </div>
                           )}
-                              </>
-                            );
-                          })()}
                         </article>
                       );
                     })}
@@ -758,7 +426,9 @@ function AssistantPanel({ posts, currentUser, onNavigate, onSearch }: AssistantP
                 {message.quickReplies && (
                   <div className="assistant-quick-replies">
                     {message.quickReplies.map((reply) => (
-                      <button type="button" key={reply} onClick={() => void ask(reply)}>{reply}</button>
+                      <button type="button" key={reply} onClick={() => void ask(reply)}>
+                        {reply}
+                      </button>
                     ))}
                   </div>
                 )}
@@ -771,19 +441,23 @@ function AssistantPanel({ posts, currentUser, onNavigate, onSearch }: AssistantP
             ))}
             {isThinking && (
               <div className="assistant-thinking" aria-label="Finding artists">
-                <span /><span /><span />
+                <span />
+                <span />
+                <span />
               </div>
             )}
           </div>
           <div className="assistant-suggestions" aria-label="Suggested assistant searches">
             {visiblePrompts.map((suggestion) => (
-              <button type="button" key={suggestion} onClick={() => void ask(suggestion)}>{suggestion}</button>
+              <button type="button" key={suggestion} onClick={() => void ask(suggestion)}>
+                {suggestion}
+              </button>
             ))}
           </div>
-          <form className="assistant-compose" onSubmit={(event) => { event.preventDefault(); ask(); }}>
+          <form className="assistant-compose" onSubmit={(e) => { e.preventDefault(); void ask(); }}>
             <input
               value={draft}
-              onChange={(event) => setDraft(event.target.value)}
+              onChange={(e) => setDraft(e.target.value)}
               placeholder="Try: makeup near Sandton under R800"
               aria-label="Ask Glam SA assistant"
             />
@@ -802,7 +476,7 @@ function AssistantPanel({ posts, currentUser, onNavigate, onSearch }: AssistantP
       )}
       {showBookingAuthPopup && (
         <div className="booking-auth-backdrop" role="dialog" aria-modal="true" aria-label="Create an account to book" onClick={() => setShowBookingAuthPopup(false)}>
-          <section className="booking-auth-popup" onClick={(event) => event.stopPropagation()}>
+          <section className="booking-auth-popup" onClick={(e) => e.stopPropagation()}>
             <button className="booking-auth-close" type="button" onClick={() => setShowBookingAuthPopup(false)} aria-label="Close popup">
               <IconClose size={17} />
             </button>
@@ -814,7 +488,11 @@ function AssistantPanel({ posts, currentUser, onNavigate, onSearch }: AssistantP
               Booking requests are available after sign in so artists can confirm who you are and manage the appointment from Glam SA.
             </p>
             <div className="booking-auth-actions">
-              <button className="btn-primary" type="button" onClick={() => { setShowBookingAuthPopup(false); setIsOpen(false); onNavigate("/login"); }}>
+              <button
+                className="btn-primary"
+                type="button"
+                onClick={() => { setShowBookingAuthPopup(false); setIsOpen(false); onNavigate("/login"); }}
+              >
                 Sign in / Join
               </button>
               <button className="btn-ghost" type="button" onClick={() => setShowBookingAuthPopup(false)}>
