@@ -607,9 +607,15 @@ function AssistantPanel({ posts, currentUser, onNavigate, onSearch }: AssistantP
       {isOpen && (
         <section className="assistant-panel" aria-label="Glam SA assistant">
           <header className="assistant-header">
-            <div>
-              <strong>Glam SA assistant</strong>
-              <span>Discovery help</span>
+            <div className="assistant-header-identity">
+              <div className="assistant-header-avatar" aria-hidden="true">✨</div>
+              <div>
+                <strong>Glam Assistant</strong>
+                <span style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+                  <span className="assistant-online-dot" />
+                  Discovery help
+                </span>
+              </div>
             </div>
             <button className="icon-btn" type="button" onClick={() => setIsOpen(false)} aria-label="Close assistant">
               <IconClose size={16} />
@@ -761,7 +767,11 @@ function AssistantPanel({ posts, currentUser, onNavigate, onSearch }: AssistantP
                 )}
               </div>
             ))}
-            {isThinking && <div className="assistant-message"><span>Finding artists...</span></div>}
+            {isThinking && (
+              <div className="assistant-thinking" aria-label="Finding artists">
+                <span /><span /><span />
+              </div>
+            )}
           </div>
           <div className="assistant-suggestions" aria-label="Suggested assistant searches">
             {visiblePrompts.map((suggestion) => (
@@ -778,7 +788,7 @@ function AssistantPanel({ posts, currentUser, onNavigate, onSearch }: AssistantP
             <button className="icon-btn assistant-voice-btn" type="button" onClick={startVoiceSearch} aria-label="Start voice search">
               <IconMic size={15} />
             </button>
-            <button className="icon-btn" type="submit" disabled={!draft.trim() || isThinking} aria-label="Send question">
+            <button className="icon-btn asst-send-btn" type="submit" disabled={!draft.trim() || isThinking} aria-label="Send question">
               <IconSend size={16} />
             </button>
           </form>
