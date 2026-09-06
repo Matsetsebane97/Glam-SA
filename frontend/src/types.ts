@@ -70,13 +70,18 @@ export type Booking = {
   id: number;
   clientId: number;
   creatorId: number;
+  isCreator?: boolean;
   otherUserName: string;
+  otherUserPhoto?: string;
+  whatsappNumber?: string;
   serviceName: string;
   price: string;
   startsAt: string;
   endsAt: string;
-  status: "requested" | "confirmed" | "declined" | "cancelled";
+  status: "requested" | "confirmed" | "declined" | "cancelled" | "completed";
   notes: string;
+  postId?: number | null;
+  postImageUrl?: string;
   createdAt: string;
 };
 

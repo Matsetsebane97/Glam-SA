@@ -7,6 +7,7 @@ from django.conf import settings
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User
 from django.http import JsonResponse
+from django.db import transaction
 from django.db.models import F, Q
 from django.utils.dateparse import parse_datetime
 from django.utils import timezone
@@ -483,17 +484,26 @@ def _slot_as_dict(slot):
 
 def _booking_as_dict(booking, viewer):
     other_user = booking.creator if booking.client_id == viewer.id else booking.client
+    other_profile = getattr(other_user, "profile", None)
+    post_img = ""
+    if booking.post:
+        post_img = booking.post.media_file.url if booking.post.media_file else booking.post.image_url
     return {
         "id": booking.id,
         "clientId": booking.client_id,
         "creatorId": booking.creator_id,
+        "isCreator": booking.creator_id == viewer.id,
         "otherUserName": other_user.get_full_name() or other_user.username,
+        "otherUserPhoto": other_profile.profile_photo_url if other_profile else "",
+        "whatsappNumber": other_profile.whatsapp_number if other_profile else "",
         "serviceName": booking.service_name,
         "price": str(booking.price),
         "startsAt": booking.starts_at.isoformat(),
         "endsAt": booking.ends_at.isoformat(),
         "status": booking.status,
         "notes": booking.notes,
+        "postId": booking.post_id,
+        "postImageUrl": post_img,
         "createdAt": booking.created_at.isoformat(),
     }
 
@@ -563,14 +573,7 @@ def availability(request, owner_id=None, slot_id=None):
 
     if not request.user.is_authenticated or (owner_id is not None and owner_id != request.user.id):
         return JsonResponse({"error": "Only the profile owner can manage availability."}, status=403)
-    try:
-        payload = json.loads(request.body or "{}")
-        starts_at = parse_datetime(str(payload["startsAt"]))
-        ends_at = parse_datetime(str(payload["endsAt"]))
-    except (KeyError, TypeError, ValueError):
-        return JsonResponse({"error": "Valid start and end times are required."}, status=400)
-    if not starts_at or not ends_at or timezone.is_naive(starts_at) or timezone.is_naive(ends_at) or ends_at <= starts_at:
-        return JsonResponse({"error": "Availability must have an end time after its start time."}, status=400)
+
     if slot_id is not None:
         try:
             slot = AvailabilitySlot.objects.get(id=slot_id, owner=request.user)
@@ -580,8 +583,32 @@ def availability(request, owner_id=None, slot_id=None):
             slot.delete()
             return JsonResponse({"message": "Availability removed."})
         return JsonResponse({"error": "Only deletion is supported for existing slots."}, status=405)
+
     if request.method != "POST":
         return JsonResponse({"error": "Method not allowed."}, status=405)
+
+    payload = json.loads(request.body or "{}")
+
+    # Support batch slots creation
+    slots_batch = payload.get("slots")
+    if isinstance(slots_batch, list) and slots_batch:
+        created_slots = []
+        for item in slots_batch:
+            s_at = parse_datetime(str(item.get("startsAt", "")))
+            e_at = parse_datetime(str(item.get("endsAt", "")))
+            if s_at and e_at and not timezone.is_naive(s_at) and not timezone.is_naive(e_at) and e_at > s_at and s_at >= timezone.now():
+                slot, created = AvailabilitySlot.objects.get_or_create(owner=request.user, starts_at=s_at, ends_at=e_at)
+                if created:
+                    created_slots.append(slot)
+        return JsonResponse({"slots": [_slot_as_dict(slot) for slot in created_slots], "count": len(created_slots)}, status=201)
+
+    try:
+        starts_at = parse_datetime(str(payload["startsAt"]))
+        ends_at = parse_datetime(str(payload["endsAt"]))
+    except (KeyError, TypeError, ValueError):
+        return JsonResponse({"error": "Valid start and end times are required."}, status=400)
+    if not starts_at or not ends_at or timezone.is_naive(starts_at) or timezone.is_naive(ends_at) or ends_at <= starts_at:
+        return JsonResponse({"error": "Availability must have an end time after its start time."}, status=400)
     slot, created = AvailabilitySlot.objects.get_or_create(owner=request.user, starts_at=starts_at, ends_at=ends_at)
     if not created:
         return JsonResponse({"error": "That availability slot already exists."}, status=409)
@@ -592,11 +619,100 @@ def availability(request, owner_id=None, slot_id=None):
 def bookings(request, booking_id=None):
     if not request.user.is_authenticated:
         return JsonResponse({"error": "Log in to manage bookings."}, status=401)
+
     if request.method == "GET":
-        queryset = Booking.objects.filter(Q(client=request.user) | Q(creator=request.user)).select_related("client", "creator")
+        queryset = (
+            Booking.objects.filter(Q(client=request.user) | Q(creator=request.user))
+            .select_related("client", "creator", "post", "creator__profile", "client__profile")
+            .order_by("-starts_at")
+        )
         if booking_id is not None:
             queryset = queryset.filter(id=booking_id)
         return JsonResponse({"bookings": [_booking_as_dict(booking, request.user) for booking in queryset]})
+
+    if request.method == "PATCH":
+        if booking_id is None:
+            return JsonResponse({"error": "Booking ID is required for updates."}, status=400)
+        try:
+            booking = Booking.objects.select_related("client", "creator", "post").get(id=booking_id)
+        except Booking.DoesNotExist:
+            return JsonResponse({"error": "Booking not found."}, status=404)
+
+        is_client = booking.client_id == request.user.id
+        is_creator = booking.creator_id == request.user.id
+        if not (is_client or is_creator):
+            return JsonResponse({"error": "You do not have permission to modify this booking."}, status=403)
+
+        payload = json.loads(request.body or "{}")
+        action = payload.get("action")
+
+        if action == "confirm":
+            if not is_creator:
+                return JsonResponse({"error": "Only the service creator can confirm a booking."}, status=403)
+            if booking.status != "requested":
+                return JsonResponse({"error": f"Cannot confirm booking with status '{booking.status}'."}, status=400)
+            booking.status = "confirmed"
+            booking.save(update_fields=["status"])
+            Message.objects.create(
+                sender=request.user,
+                recipient=booking.client,
+                post=booking.post,
+                body=f"✅ Booking Confirmed: Your appointment for {booking.service_name} on {booking.starts_at.strftime('%d %b %Y at %H:%M')} has been accepted.",
+            )
+
+        elif action == "decline":
+            if not is_creator:
+                return JsonResponse({"error": "Only the service creator can decline a booking."}, status=403)
+            if booking.status != "requested":
+                return JsonResponse({"error": f"Cannot decline booking with status '{booking.status}'."}, status=400)
+            booking.status = "declined"
+            booking.save(update_fields=["status"])
+            # Auto-release slot so another client can book
+            AvailabilitySlot.objects.filter(
+                owner=booking.creator, starts_at=booking.starts_at, ends_at=booking.ends_at
+            ).update(is_available=True)
+            Message.objects.create(
+                sender=request.user,
+                recipient=booking.client,
+                post=booking.post,
+                body=f"❌ Booking Declined: The appointment request for {booking.service_name} on {booking.starts_at.strftime('%d %b %Y at %H:%M')} could not be accommodated.",
+            )
+
+        elif action == "cancel":
+            if booking.status not in ["requested", "confirmed"]:
+                return JsonResponse({"error": f"Cannot cancel booking with status '{booking.status}'."}, status=400)
+            booking.status = "cancelled"
+            booking.save(update_fields=["status"])
+            # Auto-release slot
+            AvailabilitySlot.objects.filter(
+                owner=booking.creator, starts_at=booking.starts_at, ends_at=booking.ends_at
+            ).update(is_available=True)
+            other_user = booking.creator if is_client else booking.client
+            canceller = "Client" if is_client else "Creator"
+            Message.objects.create(
+                sender=request.user,
+                recipient=other_user,
+                post=booking.post,
+                body=f"⚠️ Booking Cancelled: The appointment for {booking.service_name} on {booking.starts_at.strftime('%d %b %Y at %H:%M')} was cancelled by the {canceller}.",
+            )
+
+        elif action == "complete":
+            if not is_creator:
+                return JsonResponse({"error": "Only the creator can mark a booking as completed."}, status=403)
+            booking.status = "completed"
+            booking.save(update_fields=["status"])
+            Message.objects.create(
+                sender=request.user,
+                recipient=booking.client,
+                post=booking.post,
+                body=f"🎉 Booking Completed: Thank you for booking {booking.service_name} with {booking.creator.get_full_name() or booking.creator.username}!",
+            )
+
+        else:
+            return JsonResponse({"error": f"Unknown action '{action}'."}, status=400)
+
+        return JsonResponse(_booking_as_dict(booking, request.user))
+
     if request.method != "POST":
         return JsonResponse({"error": "Method not allowed."}, status=405)
 
@@ -616,21 +732,33 @@ def bookings(request, booking_id=None):
             return JsonResponse({"error": "That portfolio look does not belong to this creator."}, status=400)
     else:
         post = None
-    if Booking.objects.filter(creator=service.owner, starts_at__lt=slot.ends_at, ends_at__gt=slot.starts_at, status__in=["requested", "confirmed"]).exists():
-        return JsonResponse({"error": "That time is no longer available."}, status=409)
 
-    booking = Booking.objects.create(
-        client=request.user,
-        creator=service.owner,
-        post=post,
-        service_name=service.name,
-        price=service.price,
-        starts_at=slot.starts_at,
-        ends_at=slot.ends_at,
-        notes=str(payload.get("notes") or "").strip(),
-    )
-    slot.is_available = False
-    slot.save(update_fields=["is_available"])
+    with transaction.atomic():
+        if Booking.objects.filter(creator=service.owner, starts_at__lt=slot.ends_at, ends_at__gt=slot.starts_at, status__in=["requested", "confirmed"]).exists():
+            return JsonResponse({"error": "That time is no longer available."}, status=409)
+
+        booking = Booking.objects.create(
+            client=request.user,
+            creator=service.owner,
+            post=post,
+            service_name=service.name,
+            price=service.price,
+            starts_at=slot.starts_at,
+            ends_at=slot.ends_at,
+            notes=str(payload.get("notes") or "").strip(),
+        )
+        slot.is_available = False
+        slot.save(update_fields=["is_available"])
+
+        client_name = request.user.get_full_name() or request.user.username
+        notes_str = f" Notes: \"{booking.notes}\"" if booking.notes else ""
+        Message.objects.create(
+            sender=request.user,
+            recipient=service.owner,
+            post=post,
+            body=f"📅 New booking requested by {client_name} for {booking.service_name} on {slot.starts_at.strftime('%d %b %Y at %H:%M')}. Price: R{booking.price}.{notes_str}",
+        )
+
     return JsonResponse(_booking_as_dict(booking, request.user), status=201)
 
 

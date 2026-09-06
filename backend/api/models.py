@@ -1,7 +1,6 @@
 """Database models for creator profiles, portfolio posts, and messages."""
 
 from django.db import models
-from django.contrib.postgres.fields import ArrayField
 from django.contrib.auth.models import User
 
 
@@ -69,7 +68,7 @@ class AvailabilitySlot(models.Model):
 class SearchSynonym(models.Model):
     """Store synonyms for search terms, e.g., "hairstyle" ↔ "haircut"."""
     term = models.CharField(max_length=80, unique=True)
-    synonyms = ArrayField(models.CharField(max_length=80), default=list, blank=True)
+    synonyms = models.JSONField(default=list, blank=True)
 
     def __str__(self):
         return self.term
@@ -81,6 +80,7 @@ class Booking(models.Model):
         ("confirmed", "Confirmed"),
         ("declined", "Declined"),
         ("cancelled", "Cancelled"),
+        ("completed", "Completed"),
     ]
 
     client = models.ForeignKey(User, on_delete=models.CASCADE, related_name="bookings_made")

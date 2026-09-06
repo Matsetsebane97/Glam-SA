@@ -16,7 +16,7 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('term', models.CharField(max_length=80, unique=True)),
-                ('synonyms', django.contrib.postgres.fields.ArrayField(base_field=models.CharField(max_length=80), blank=True, default=list, size=None)),
+                ('synonyms', models.JSONField(blank=True, default=list)),
             ],
         ),
         migrations.AlterModelOptions(

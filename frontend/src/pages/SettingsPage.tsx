@@ -1,8 +1,15 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import type { FormEvent } from "react";
-import { changePassword, deleteAccount, updateProfile } from "../api";
-import { IconPin, IconUser } from "../components/Icons";
-import type { CurrentUser } from "../types";
+import {
+  batchCreateAvailability,
+  changePassword,
+  deleteAccount,
+  deleteAvailability,
+  getAvailability,
+  updateProfile,
+} from "../api";
+import { IconCalendar, IconClock, IconPin, IconTrash, IconUser } from "../components/Icons";
+import type { AvailabilitySlot, CurrentUser } from "../types";
 
 type SettingsPageProps = {
   currentUser: CurrentUser | null;
@@ -23,8 +30,30 @@ function SettingsPage({ currentUser, onNavigate, onSaved }: SettingsPageProps) {
   const [newPassword, setNewPassword] = useState("");
   const [passwordMessage, setPasswordMessage] = useState("");
   const [isChangingPassword, setIsChangingPassword] = useState(false);
-  
+
   const [deleteMessage, setDeleteMessage] = useState("");
+
+  // Creator Availability Schedule Generator state
+  const isCreator = currentUser?.accountType === "creator";
+  const todayIso = new Date().toISOString().split("T")[0];
+  const [slots, setSlots] = useState<AvailabilitySlot[]>([]);
+  const [isLoadingSlots, setIsLoadingSlots] = useState(false);
+  const [generatorStartDate, setGeneratorStartDate] = useState(todayIso);
+  const [generatorDays, setGeneratorDays] = useState(7);
+  const [generatorStartTime, setGeneratorStartTime] = useState("09:00");
+  const [generatorEndTime, setGeneratorEndTime] = useState("17:00");
+  const [generatorDuration, setGeneratorDuration] = useState(60);
+  const [isGeneratingSlots, setIsGeneratingSlots] = useState(false);
+  const [slotMessage, setSlotMessage] = useState("");
+
+  useEffect(() => {
+    if (!currentUser || !isCreator) return;
+    setIsLoadingSlots(true);
+    getAvailability()
+      .then(setSlots)
+      .catch(() => {})
+      .finally(() => setIsLoadingSlots(false));
+  }, [currentUser, isCreator]);
 
   if (!currentUser) {
     return (
@@ -33,7 +62,9 @@ function SettingsPage({ currentUser, onNavigate, onSaved }: SettingsPageProps) {
           <IconUser size={34} />
           <h1>Sign in to edit your profile</h1>
           <p>Update your public details, contact number, and location from one place.</p>
-          <button className="btn-primary" type="button" onClick={() => onNavigate("/login")}>Sign in to continue</button>
+          <button className="btn-primary" type="button" onClick={() => onNavigate("/login")}>
+            Sign in to continue
+          </button>
         </div>
       </section>
     );
@@ -70,14 +101,14 @@ function SettingsPage({ currentUser, onNavigate, onSaved }: SettingsPageProps) {
       setCurrentPassword("");
       setNewPassword("");
     } catch (error) {
-      setPasswordMessage(error instanceof Error ? error.message : "Unable to update password.");
+      setPasswordMessage(error instanceof Error ? error.message : "Unable to change password.");
     } finally {
       setIsChangingPassword(false);
     }
   };
 
   const handleDeleteAccount = async () => {
-    if (!window.confirm("Are you sure you want to delete your account? This action cannot be undone.")) {
+    if (!window.confirm("Are you sure you want to permanently delete your account? This cannot be undone.")) {
       return;
     }
     setDeleteMessage("");
@@ -90,58 +121,307 @@ function SettingsPage({ currentUser, onNavigate, onSaved }: SettingsPageProps) {
     }
   };
 
+  const handleGenerateSlots = async (e: FormEvent) => {
+    e.preventDefault();
+    setIsGeneratingSlots(true);
+    setSlotMessage("");
+
+    try {
+      const generated: { startsAt: string; endsAt: string }[] = [];
+      const [startH, startM] = generatorStartTime.split(":").map(Number);
+      const [endH, endM] = generatorEndTime.split(":").map(Number);
+      const startMinutes = startH * 60 + startM;
+      const endMinutes = endH * 60 + endM;
+
+      for (let day = 0; day < generatorDays; day++) {
+        const currentDate = new Date(generatorStartDate);
+        currentDate.setDate(currentDate.getDate() + day);
+
+        for (let m = startMinutes; m + generatorDuration <= endMinutes; m += generatorDuration) {
+          const slotStart = new Date(currentDate);
+          slotStart.setHours(Math.floor(m / 60), m % 60, 0, 0);
+
+          const slotEnd = new Date(currentDate);
+          slotEnd.setHours(Math.floor((m + generatorDuration) / 60), (m + generatorDuration) % 60, 0, 0);
+
+          if (slotStart.getTime() > Date.now()) {
+            generated.push({
+              startsAt: slotStart.toISOString(),
+              endsAt: slotEnd.toISOString(),
+            });
+          }
+        }
+      }
+
+      if (generated.length === 0) {
+        setSlotMessage("No upcoming slots generated. Ensure the chosen start time and date are in the future.");
+        return;
+      }
+
+      const created = await batchCreateAvailability(generated);
+      setSlotMessage(`Success: Created ${created.length} new booking slot(s)!`);
+      const refreshed = await getAvailability();
+      setSlots(refreshed);
+    } catch (err) {
+      setSlotMessage(err instanceof Error ? err.message : "Failed to generate availability slots.");
+    } finally {
+      setIsGeneratingSlots(false);
+    }
+  };
+
+  const handleDeleteSlot = async (slotId: number) => {
+    try {
+      await deleteAvailability(slotId);
+      setSlots((prev) => prev.filter((s) => s.id !== slotId));
+    } catch (err) {
+      setSlotMessage(err instanceof Error ? err.message : "Failed to remove slot.");
+    }
+  };
+
   return (
     <section className="page-content settings-page">
-      <header className="settings-heading">
+      <div className="settings-header">
         <div>
-          <div className="eyebrow"><IconUser size={13} /> Account settings</div>
-          <h1>Edit your profile</h1>
-          <p>Keep your public details current so the right people can find you.</p>
+          <div className="eyebrow">Studio controls</div>
+          <h1>Profile & Account Settings</h1>
         </div>
-        <button className="btn-ghost" type="button" onClick={() => onNavigate("/profile")}>View profile</button>
-      </header>
+        <p>Keep your profile up to date, set your working hours, and manage your account.</p>
+      </div>
 
       <form className="settings-form" onSubmit={submit}>
-        <div className="settings-avatar" aria-hidden="true">{name.charAt(0).toUpperCase() || "G"}</div>
-        <div className="settings-form-fields">
+        <div className="settings-grid">
           <label className="studio-label">
-            <span>Name or brand name</span>
-            <input className="studio-input" value={name} onChange={(event) => setName(event.target.value)} maxLength={150} autoComplete="name" required />
+            <span>Your Name or Salon</span>
+            <input
+              className="studio-input"
+              value={name}
+              onChange={(event) => setName(event.target.value)}
+              required
+              maxLength={80}
+              autoComplete="name"
+            />
           </label>
+
           <label className="studio-label">
-            <span>Handle</span>
-            <input className="studio-input settings-readonly" value={currentUser.handle} readOnly aria-describedby="handle-note" />
-            <small id="handle-note" className="settings-note">Your handle is linked to your sign-in email.</small>
+            <span>WhatsApp Number</span>
+            <input
+              className="studio-input"
+              value={whatsappNumber}
+              onChange={(event) => setWhatsappNumber(event.target.value)}
+              maxLength={30}
+              autoComplete="tel"
+              placeholder="+27..."
+            />
           </label>
-          <label className="studio-label">
-            <span>WhatsApp number</span>
-            <input className="studio-input" value={whatsappNumber} onChange={(event) => setWhatsappNumber(event.target.value)} maxLength={30} autoComplete="tel" placeholder="e.g. +27 82 123 4567" />
-          </label>
+
           <label className="studio-label">
             <span><IconPin size={14} /> Location</span>
-            <input className="studio-input" value={locationLabel} onChange={(event) => setLocationLabel(event.target.value)} maxLength={120} autoComplete="address-level2" placeholder="e.g. Gauteng, Johannesburg, Sandton" />
+            <input
+              className="studio-input"
+              value={locationLabel}
+              onChange={(event) => setLocationLabel(event.target.value)}
+              maxLength={120}
+              autoComplete="address-level2"
+              placeholder="e.g. Gauteng, Johannesburg, Sandton"
+            />
           </label>
-          
-          <div className="settings-section-heading" style={{ marginTop: '2rem' }}>
+
+          <div className="settings-section-heading" style={{ marginTop: "2rem" }}>
             <h3>Notification Preferences</h3>
           </div>
-          
-          <label className="studio-label" style={{ flexDirection: 'row', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>
-            <input type="checkbox" checked={emailNotifications} onChange={(e) => setEmailNotifications(e.target.checked)} />
-            <span style={{ margin: 0, fontWeight: 'normal' }}>Receive email notifications</span>
+
+          <label className="studio-label" style={{ flexDirection: "row", alignItems: "center", gap: "0.5rem", cursor: "pointer" }}>
+            <input
+              type="checkbox"
+              checked={emailNotifications}
+              onChange={(e) => setEmailNotifications(e.target.checked)}
+            />
+            <span style={{ margin: 0, fontWeight: "normal" }}>Receive email notifications</span>
           </label>
-          <label className="studio-label" style={{ flexDirection: 'row', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>
-            <input type="checkbox" checked={whatsappNotifications} onChange={(e) => setWhatsappNotifications(e.target.checked)} />
-            <span style={{ margin: 0, fontWeight: 'normal' }}>Receive WhatsApp notifications</span>
+          <label className="studio-label" style={{ flexDirection: "row", alignItems: "center", gap: "0.5rem", cursor: "pointer" }}>
+            <input
+              type="checkbox"
+              checked={whatsappNotifications}
+              onChange={(e) => setWhatsappNotifications(e.target.checked)}
+            />
+            <span style={{ margin: 0, fontWeight: "normal" }}>Receive WhatsApp notifications</span>
           </label>
         </div>
-        {message && <div className="profile-error" role="alert" style={{ color: message.includes('success') ? 'green' : undefined }}>{message}</div>}
+
+        {message && (
+          <div
+            className="profile-error"
+            role="alert"
+            style={{ color: message.includes("success") ? "#4ade80" : undefined }}
+          >
+            {message}
+          </div>
+        )}
+
         <div className="settings-actions">
-          <button className="btn-ghost" type="button" onClick={() => onNavigate("/profile")}>Cancel</button>
-          <button className="btn-primary" type="submit" disabled={isSaving}>{isSaving ? "Saving..." : "Save changes"}</button>
+          <button className="btn-ghost" type="button" onClick={() => onNavigate("/profile")}>
+            Cancel
+          </button>
+          <button className="btn-primary" type="submit" disabled={isSaving}>
+            {isSaving ? "Saving..." : "Save changes"}
+          </button>
         </div>
       </form>
 
+      {/* ─── CREATOR WORKING HOURS & AVAILABILITY ──────────────────────────────── */}
+      {isCreator && (
+        <section className="settings-scheduling" id="availability">
+          <div className="settings-section-heading">
+            <div>
+              <div className="eyebrow"><IconCalendar size={13} /> Booking Schedule</div>
+              <h2>Working Hours & Availability</h2>
+            </div>
+            <p>Clients can only request bookings during your active available slots. Generate recurring weekly hours below.</p>
+          </div>
+
+          <div className="availability-generator-card">
+            <form onSubmit={handleGenerateSlots} className="availability-gen-form">
+              <h3>⚡ Quick Schedule Generator</h3>
+              <p className="availability-gen-desc">
+                Select your working window and we'll automatically generate booking slots for clients on your profile.
+              </p>
+
+              <div className="availability-fields-grid">
+                <label className="studio-label">
+                  <span>Start Date</span>
+                  <input
+                    className="studio-input"
+                    type="date"
+                    min={todayIso}
+                    value={generatorStartDate}
+                    onChange={(e) => setGeneratorStartDate(e.target.value)}
+                    required
+                  />
+                </label>
+
+                <label className="studio-label">
+                  <span>Days Ahead</span>
+                  <select
+                    className="studio-input"
+                    value={generatorDays}
+                    onChange={(e) => setGeneratorDays(Number(e.target.value))}
+                  >
+                    <option value={1}>1 Day (Today only)</option>
+                    <option value={3}>3 Days</option>
+                    <option value={5}>5 Days (Work week)</option>
+                    <option value={7}>7 Days (Full week)</option>
+                    <option value={14}>14 Days (2 Weeks)</option>
+                    <option value={30}>30 Days (Full Month)</option>
+                  </select>
+                </label>
+
+                <label className="studio-label">
+                  <span>Daily Start Time</span>
+                  <input
+                    className="studio-input"
+                    type="time"
+                    value={generatorStartTime}
+                    onChange={(e) => setGeneratorStartTime(e.target.value)}
+                    required
+                  />
+                </label>
+
+                <label className="studio-label">
+                  <span>Daily End Time</span>
+                  <input
+                    className="studio-input"
+                    type="time"
+                    value={generatorEndTime}
+                    onChange={(e) => setGeneratorEndTime(e.target.value)}
+                    required
+                  />
+                </label>
+
+                <label className="studio-label">
+                  <span>Slot Duration</span>
+                  <select
+                    className="studio-input"
+                    value={generatorDuration}
+                    onChange={(e) => setGeneratorDuration(Number(e.target.value))}
+                  >
+                    <option value={30}>30 minutes</option>
+                    <option value={45}>45 minutes</option>
+                    <option value={60}>60 minutes (1 hour)</option>
+                    <option value={90}>90 minutes (1.5 hours)</option>
+                    <option value={120}>120 minutes (2 hours)</option>
+                    <option value={180}>180 minutes (3 hours)</option>
+                  </select>
+                </label>
+              </div>
+
+              {slotMessage && (
+                <div
+                  className="profile-error"
+                  role="status"
+                  style={{ color: slotMessage.includes("Success") ? "#4ade80" : undefined }}
+                >
+                  {slotMessage}
+                </div>
+              )}
+
+              <button
+                type="submit"
+                className="btn-primary"
+                disabled={isGeneratingSlots}
+                style={{ marginTop: "1rem" }}
+              >
+                <IconClock size={16} />
+                {isGeneratingSlots ? "Generating slots..." : "Generate Available Slots"}
+              </button>
+            </form>
+
+            {/* Active Upcoming Slots Preview */}
+            <div className="active-slots-preview">
+              <div className="active-slots-header">
+                <h3>Upcoming Active Slots ({slots.filter((s) => s.isAvailable).length})</h3>
+                <small>Slots booked by clients are locked automatically.</small>
+              </div>
+
+              {isLoadingSlots ? (
+                <p>Loading slots...</p>
+              ) : slots.length === 0 ? (
+                <p className="no-slots-note">No active availability slots yet. Use the generator above to create slots.</p>
+              ) : (
+                <div className="slots-chips-container">
+                  {slots.map((slot) => {
+                    const start = new Date(slot.startsAt);
+                    const end = new Date(slot.endsAt);
+                    const dateStr = start.toLocaleDateString("en-ZA", { weekday: "short", day: "numeric", month: "short" });
+                    const timeStr = `${start.toLocaleTimeString("en-ZA", { hour: "2-digit", minute: "2-digit" })} - ${end.toLocaleTimeString("en-ZA", { hour: "2-digit", minute: "2-digit" })}`;
+
+                    return (
+                      <div key={slot.id} className={`slot-chip ${slot.isAvailable ? "available" : "booked"}`}>
+                        <div>
+                          <strong>{dateStr}</strong>
+                          <span>{timeStr}</span>
+                          {!slot.isAvailable && <span className="slot-booked-tag">Booked</span>}
+                        </div>
+                        {slot.isAvailable && (
+                          <button
+                            type="button"
+                            className="slot-delete-btn"
+                            title="Remove this slot"
+                            onClick={() => handleDeleteSlot(slot.id)}
+                          >
+                            <IconTrash size={13} />
+                          </button>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* ─── SECURITY / ACCOUNT MANAGEMENT ───────────────────────────────────── */}
       <section className="settings-scheduling">
         <div className="settings-section-heading">
           <div>
@@ -156,23 +436,52 @@ function SettingsPage({ currentUser, onNavigate, onSaved }: SettingsPageProps) {
             <h3>Change Password</h3>
             <label className="studio-label">
               <span>Current Password</span>
-              <input className="studio-input" type="password" value={currentPassword} onChange={(event) => setCurrentPassword(event.target.value)} required />
+              <input
+                className="studio-input"
+                type="password"
+                value={currentPassword}
+                onChange={(event) => setCurrentPassword(event.target.value)}
+                required
+              />
             </label>
             <label className="studio-label">
               <span>New Password</span>
-              <input className="studio-input" type="password" value={newPassword} onChange={(event) => setNewPassword(event.target.value)} minLength={8} required />
+              <input
+                className="studio-input"
+                type="password"
+                value={newPassword}
+                onChange={(event) => setNewPassword(event.target.value)}
+                minLength={8}
+                required
+              />
             </label>
-            {passwordMessage && <div className="profile-error" role="alert" style={{ color: passwordMessage.includes('success') ? 'green' : undefined }}>{passwordMessage}</div>}
-            <button className="btn-primary" type="submit" disabled={isChangingPassword}>{isChangingPassword ? "Updating..." : "Update Password"}</button>
+            {passwordMessage && (
+              <div
+                className="profile-error"
+                role="alert"
+                style={{ color: passwordMessage.includes("success") ? "#4ade80" : undefined }}
+              >
+                {passwordMessage}
+              </div>
+            )}
+            <button className="btn-primary" type="submit" disabled={isChangingPassword}>
+              {isChangingPassword ? "Updating..." : "Update Password"}
+            </button>
           </form>
 
-          <div className="settings-subform" style={{ borderColor: 'var(--danger-color, #ff4444)' }}>
-            <h3 style={{ color: 'var(--danger-color, #ff4444)' }}>Delete Account</h3>
-            <p className="settings-note" style={{ marginBottom: '1rem' }}>
+          <div className="settings-subform" style={{ borderColor: "var(--danger-color, #ff4444)" }}>
+            <h3 style={{ color: "var(--danger-color, #ff4444)" }}>Delete Account</h3>
+            <p className="settings-note" style={{ marginBottom: "1rem" }}>
               Once you delete your account, there is no going back. Please be certain.
             </p>
             {deleteMessage && <div className="profile-error" role="alert">{deleteMessage}</div>}
-            <button className="btn-outline-sm danger-action" type="button" onClick={handleDeleteAccount}>Permanently Delete Account</button>
+            <button
+              className="btn-outline-sm danger-action"
+              type="button"
+              onClick={handleDeleteAccount}
+            >
+              Permanently Delete Account
+            </button>
           </div>
         </div>
       </section>

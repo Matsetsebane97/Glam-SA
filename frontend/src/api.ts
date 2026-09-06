@@ -177,6 +177,38 @@ export const deleteAvailability = async (slotId: number): Promise<void> => {
   if (!response.ok) throw new Error("Unable to remove availability.");
 };
 
+export const batchCreateAvailability = async (slots: { startsAt: string; endsAt: string }[]): Promise<AvailabilitySlot[]> => {
+  const response = await fetch("/api/availability/", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ slots }),
+  });
+  const data = (await response.json().catch(() => ({}))) as { slots?: AvailabilitySlot[]; error?: string };
+  if (!response.ok) throw new Error(data.error || "Unable to add availability slots.");
+  return data.slots || [];
+};
+
+export const getBookings = async (): Promise<Booking[]> => {
+  const response = await fetch("/api/bookings/");
+  if (!response.ok) throw new Error("Unable to load bookings.");
+  const data = (await response.json()) as { bookings: Booking[] };
+  return data.bookings;
+};
+
+export const updateBookingStatus = async (
+  bookingId: number,
+  action: "confirm" | "decline" | "cancel" | "complete",
+): Promise<Booking> => {
+  const response = await fetch(`/api/bookings/${bookingId}/`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ action }),
+  });
+  const data = (await response.json().catch(() => ({}))) as Booking & { error?: string };
+  if (!response.ok) throw new Error(data.error || "Unable to update booking status.");
+  return data;
+};
+
 export const createBooking = async (payload: { serviceId: number; slotId: number; postId?: number; notes?: string }): Promise<Booking> => {
   const response = await fetch("/api/bookings/", {
     method: "POST",
