@@ -651,7 +651,7 @@ function PostCard({
 
   return (
     <article className="post-card">
-      {/* Header */}
+      {/* ── Header ───────────────────────────────────────────────── */}
       <header className="post-card-head">
         <button
           className="post-author post-author-link"
@@ -669,28 +669,36 @@ function PostCard({
             </div>
             <div className="post-meta-sub">
               <span className="post-handle">{post.handle}</span>
-              {post.distanceKm != null && (
+              {post.distanceKm != null ? (
                 <span className="post-distance-badge">
-                  <IconPin size={11} />
+                  <IconPin size={10} />
                   {formatDistance(post.distanceKm)}
                 </span>
-              )}
-              {post.location && !post.distanceKm && (
+              ) : post.location ? (
                 <span className="post-location-tag">
-                  <IconPin size={11} />
+                  <IconPin size={10} />
                   {post.location}
                 </span>
-              )}
+              ) : null}
             </div>
           </div>
         </button>
 
-        <button className="btn-book-action" type="button" onClick={openBooking}>
-          <IconCalendar size={13} /> Book Look
-        </button>
+        {/* Price + duration pill in header */}
+        {Number(post.price) > 0 && (
+          <div className="post-price-pill">
+            <span className="post-price-amount">R{Number(post.price).toFixed(0)}</span>
+            {post.durationMinutes ? (
+              <span className="post-price-sep">·</span>
+            ) : null}
+            {post.durationMinutes ? (
+              <span className="post-price-duration">{formatDuration(post.durationMinutes)}</span>
+            ) : null}
+          </div>
+        )}
       </header>
 
-      {/* Media Viewport */}
+      {/* ── Media Viewport ───────────────────────────────────────── */}
       <div className="post-media-wrap" onDoubleClick={toggleLike}>
         {post.mediaUrl && post.mediaType.startsWith("video/") ? (
           <video
@@ -713,6 +721,16 @@ function PostCard({
           </div>
         )}
 
+        {/* Bottom scrim with service + category overlay */}
+        {!post.mediaType.startsWith("video/") && (
+          <div className="post-media-scrim" aria-hidden="true">
+            <span className="post-media-service-label">{post.service}</span>
+            {post.category && (
+              <span className="post-media-category-badge">{post.category}</span>
+            )}
+          </div>
+        )}
+
         {/* Double-tap Heart Animation */}
         {heartBurst && (
           <div className="heart-burst-overlay">
@@ -721,47 +739,51 @@ function PostCard({
         )}
       </div>
 
-      {/* Actions Row */}
+      {/* ── Actions Row ──────────────────────────────────────────── */}
       <div className="post-card-actions">
         <div className="action-group">
+          {/* Like */}
           <button
             className={`action-btn like-btn ${isLiked ? "active" : ""}`}
             onClick={toggleLike}
-            aria-label="Like look"
+            aria-label={isLiked ? "Unlike look" : "Like look"}
             type="button"
           >
             <IconHeart size={20} fill={isLiked ? "#E5484D" : "none"} />
-            <span className="action-count">{likesCount}</span>
+            {likesCount > 0 && <span className="action-count">{likesCount}</span>}
           </button>
 
+          {/* Book */}
           <button
             className="action-btn book-look-btn"
             aria-label="Book look"
             type="button"
             onClick={openBooking}
           >
-            <IconCalendar size={19} />
+            <IconCalendar size={18} />
             <span className="action-label">Book</span>
           </button>
 
+          {/* Share */}
           <button
             className="action-btn"
             aria-label="Share post"
             type="button"
             onClick={handleShare}
           >
-            <IconShare size={20} />
-            {copied && <span className="action-copied"><IconCheck size={12} /> Copied</span>}
+            <IconShare size={19} />
+            {copied && <span className="action-copied"><IconCheck size={11} /> Copied</span>}
           </button>
         </div>
 
+        {/* Save / Bookmark */}
         <button
           className={`action-btn bookmark-btn ${isSaved ? "active" : ""}`}
           onClick={toggleSave}
-          aria-label="Save look"
+          aria-label={isSaved ? "Unsave look" : "Save look"}
           type="button"
         >
-          <IconBookmark size={20} fill={isSaved ? "#E5BE76" : "none"} />
+          <IconBookmark size={20} fill={isSaved ? "#c87941" : "none"} />
         </button>
       </div>
 
@@ -774,7 +796,7 @@ function PostCard({
         </div>
       )}
 
-      {/* Caption & Timestamp */}
+      {/* ── Caption ──────────────────────────────────────────────── */}
       {post.caption && (
         <div className="post-caption-box">
           <p className="post-caption">
@@ -783,11 +805,8 @@ function PostCard({
         </div>
       )}
 
+      {/* ── Footer: timestamp only (service+category now on overlay) */}
       <footer className="post-footer">
-        <div className="post-style-meta">
-          <span><strong>Style:</strong> {post.service}</span>
-          <span><strong>Category:</strong> {post.category}</span>
-        </div>
         <time className="post-time" dateTime={post.createdAt}>
           {new Date(post.createdAt).toLocaleDateString("en-ZA", {
             day: "numeric",

@@ -1132,7 +1132,7 @@ body {
 }
 
 .post-card-head {
-  padding: 17px 18px;
+  padding: 12px 14px;
 }
 
 .post-media-wrap {
@@ -1141,7 +1141,7 @@ body {
 }
 
 .post-card-actions {
-  padding: 12px 16px 8px;
+  padding: 10px 14px 8px;
 }
 
 .action-btn {
@@ -3228,6 +3228,7 @@ body {
   gap: 24px;
 }
 
+/* ── Post Card ───────────────────────────────────────────────────────────── */
 .post-card {
   background: #ffffff;
   border: 1px solid var(--border-subtle);
@@ -3247,27 +3248,31 @@ body {
   border-color: var(--border-medium);
 }
 
+/* ─ Header ──────────────────────────────────────────────────────────────── */
 .post-card-head {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 14px 16px;
+  gap: 10px;
+  padding: 12px 14px;
 }
 
 .post-author {
   display: flex;
   align-items: center;
   gap: 10px;
+  min-width: 0;
+  flex: 1;
 }
 
 .post-avatar {
-  width: 38px;
-  height: 38px;
+  width: 36px;
+  height: 36px;
   border-radius: 50%;
   background: var(--ink-primary);
   color: #ffffff;
   font-weight: 700;
-  font-size: 15px;
+  font-size: 14px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -3277,6 +3282,7 @@ body {
 .post-author-details {
   display: flex;
   flex-direction: column;
+  min-width: 0;
 }
 
 .post-creator-name {
@@ -3286,42 +3292,57 @@ body {
 }
 
 .post-creator-name strong {
-  font-size: 14px;
+  font-size: 13.5px;
   color: var(--ink-primary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .post-meta-sub {
   display: flex;
   align-items: center;
   gap: 6px;
-  font-size: 12px;
+  font-size: 11.5px;
   color: var(--ink-muted);
+  margin-top: 1px;
 }
 
 .post-distance-badge,
 .post-location-tag {
   display: inline-flex;
   align-items: center;
-  gap: 3px;
+  gap: 2px;
   color: var(--ink-secondary);
 }
 
-.btn-book-action {
-  padding: 6px 14px;
+/* Price + duration pill */
+.post-price-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 5px 10px;
   border-radius: var(--radius-full);
-  font-size: 12px;
-  font-weight: 600;
-  color: var(--ink-primary);
-  background: var(--bg-secondary);
-  border: 1px solid var(--border-subtle);
-  transition: all var(--transition-fast);
-}
-
-.btn-book-action:hover {
   background: var(--ink-primary);
   color: #ffffff;
+  font-size: 11.5px;
+  font-weight: 700;
+  white-space: nowrap;
+  flex-shrink: 0;
+  letter-spacing: 0.01em;
 }
 
+.post-price-sep {
+  opacity: 0.5;
+  font-weight: 400;
+}
+
+.post-price-duration {
+  opacity: 0.75;
+  font-weight: 500;
+}
+
+/* ─ Media ───────────────────────────────────────────────────────────────── */
 .post-media-wrap {
   position: relative;
   aspect-ratio: 4 / 5;
@@ -3334,6 +3355,12 @@ body {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  will-change: transform;
+}
+
+.post-card:hover .post-media-img {
+  transform: scale(1.04);
 }
 
 .post-media-video {
@@ -3355,6 +3382,52 @@ body {
   font-weight: 600;
 }
 
+/* Bottom gradient scrim with service + category overlay */
+.post-media-scrim {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 28px 12px 11px;
+  background: linear-gradient(
+    to top,
+    rgba(10, 10, 8, 0.72) 0%,
+    rgba(10, 10, 8, 0.28) 60%,
+    transparent 100%
+  );
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 6px;
+  pointer-events: none;
+}
+
+.post-media-service-label {
+  color: rgba(255, 255, 255, 0.93);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  line-height: 1.2;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.post-media-category-badge {
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  flex-shrink: 0;
+  backdrop-filter: blur(4px);
+}
+
 .media-service-badge {
   position: absolute;
   top: 12px;
@@ -3368,6 +3441,7 @@ body {
   color: var(--ink-primary);
 }
 
+/* ─ Heart burst double-tap animation ───────────────────────────────────── */
 .heart-burst-overlay {
   position: absolute;
   inset: 0;
@@ -3381,17 +3455,24 @@ body {
   animation: heartBurst 0.6s cubic-bezier(0.17, 0.89, 0.32, 1.49) forwards;
 }
 
-.post-card-actions {
+@keyframes heartBurst {
+  0%   { transform: scale(0.4); opacity: 0; }
+  50%  { transform: scale(1.3); opacity: 1; }
+  80%  { transform: scale(1.05); opacity: 1; }
+  100% { transform: scale(1.0); opacity: 0; }
+}
+
+/* ─ Actions ─────────────────────────────────────────────────────────────── */
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 12px 16px 6px;
+  padding: 10px 14px 8px;
 }
 
 .action-group {
   display: flex;
   align-items: center;
-  gap: 14px;
+  gap: 16px;
 }
 
 .action-btn {
@@ -3401,28 +3482,84 @@ body {
   color: var(--ink-secondary);
   font-size: 13px;
   font-weight: 500;
-  transition: color var(--transition-fast);
+  transition: color var(--transition-fast), transform var(--transition-fast);
 }
 
 .action-btn:hover {
   color: var(--ink-primary);
+  transform: scale(1.08);
 }
 
 .action-btn.like-btn.active {
   color: #be123c;
 }
 
-.action-btn.bookmark-btn.active {
-  color: var(--ink-primary);
+.action-btn.like-btn.active:hover {
+  color: #9f1239;
 }
 
+.action-btn.bookmark-btn.active {
+  color: #c87941;
+}
+
+/* Book button — styled as a small pill */
+.action-btn.book-look-btn {
+  padding: 5px 12px;
+  border-radius: var(--radius-full);
+  background: transparent;
+  border: 1px solid var(--border-medium);
+  color: var(--ink-primary);
+  font-size: 12px;
+  font-weight: 600;
+  gap: 5px;
+  transition: background var(--transition-fast), border-color var(--transition-fast), color var(--transition-fast), transform var(--transition-fast);
+}
+
+.action-btn.book-look-btn:hover {
+  background: var(--ink-primary);
+  border-color: var(--ink-primary);
+  color: #ffffff;
+  transform: scale(1.04);
+}
+
+/* ─ Caption ─────────────────────────────────────────────────────────────── */
+.post-caption-box {
+  padding: 0 14px 8px;
+}
+
+.post-caption {
+  font-size: 13.5px;
+  color: var(--ink-secondary);
+  line-height: 1.5;
+}
+
+.caption-author {
+  color: var(--ink-primary);
+  margin-right: 5px;
+}
+
+/* ─ Footer ──────────────────────────────────────────────────────────────── */
+.post-footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding: 0 14px 12px;
+}
+
+.post-time {
+  font-size: 11px;
+  color: var(--ink-muted);
+  white-space: nowrap;
+}
+
+/* ─ Auth notice ─────────────────────────────────────────────────────────── */
 .post-auth-notice {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  margin: 0 18px 12px;
-  padding: 10px 12px;
+  margin: 0 14px 10px;
+  padding: 9px 12px;
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-sm);
   background: #fbfaf6;
@@ -3432,7 +3569,7 @@ body {
 
 .post-auth-notice button {
   flex: 0 0 auto;
-  padding: 6px 10px;
+  padding: 5px 10px;
   border: 1px solid var(--ink-primary);
   border-radius: 999px;
   background: var(--ink-primary);
@@ -3447,52 +3584,6 @@ body {
   gap: 3px;
   color: #15803d;
   font-size: 12px;
-}
-
-.post-caption-box {
-  padding: 0 16px 8px;
-}
-
-.post-caption {
-  font-size: 14px;
-  color: var(--ink-secondary);
-  line-height: 1.5;
-}
-
-.caption-author {
-  color: var(--ink-primary);
-  margin-right: 6px;
-}
-
-.post-footer {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  padding: 0 16px 14px;
-}
-
-.post-style-meta {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px 14px;
-  min-width: 0;
-  color: var(--ink-secondary);
-  font-size: 11px;
-}
-
-.post-style-meta span {
-  overflow-wrap: anywhere;
-}
-
-.post-style-meta strong {
-  color: var(--ink-primary);
-}
-
-.post-time {
-  font-size: 11px;
-  color: var(--ink-muted);
-  white-space: nowrap;
 }
 
 /* 8. Booking / Inquiry Modal */
@@ -5239,7 +5330,7 @@ body {
   transform: translateY(-2px);
 }
 .post-card-head {
-  padding: 16px 18px;
+  padding: 12px 14px;
 }
 .post-media-wrap {
   border-top: 1px solid var(--border-subtle);
