@@ -1,9 +1,8 @@
-import { useEffect, useMemo, useState } from "react";
-import { deletePost, getAvailability, getMyPosts, getUserProfile, updatePost } from "../api";
+import { useEffect, useState } from "react";
+import { deletePost, getMyPosts, getUserProfile, updatePost } from "../api";
 import BookingModal from "../components/BookingModal";
 import {
   IconCalendar,
-  IconClock,
   IconClose,
   IconCompass,
   IconEdit,
@@ -15,7 +14,7 @@ import {
   IconUser,
   IconVerified,
 } from "../components/Icons";
-import type { AvailabilitySlot, CurrentUser, Post } from "../types";
+import type { CurrentUser, Post } from "../types";
 
 type ProfilePageProps = {
   profileId?: number;
@@ -42,13 +41,10 @@ function ProfilePage({ profileId, currentUser, onNavigate, onLogout }: ProfilePa
   const [isSaving, setIsSaving] = useState(false);
   const [deletingId, setDeletingId] = useState<number | null>(null);
   const [viewingPost, setViewingPost] = useState<Post | null>(null);
-  const [slots, setSlots] = useState<AvailabilitySlot[]>([]);
-  const [isLoadingSlots, setIsLoadingSlots] = useState(false);
   const [showBooking, setShowBooking] = useState(false);
 
   const isCreator = (profile?.accountType || "creator") === "creator";
   const isClient = profile?.accountType === "client";
-  const openSlots = slots.filter((slot) => slot.isAvailable);
 
   // The owner endpoint supports editing; public profiles only need read-only data.
   useEffect(() => {
@@ -68,7 +64,7 @@ function ProfilePage({ profileId, currentUser, onNavigate, onLogout }: ProfilePa
 
       void getMyPosts()
         .then(setPosts)
-        .catch(() => setError("We could not load your work right now."))
+        .catch(() => setError("We unable load your work right now."))
         .finally(() => setIsLoading(false));
       return;
     }
@@ -81,19 +77,6 @@ function ProfilePage({ profileId, currentUser, onNavigate, onLogout }: ProfilePa
       .catch(() => setError("We could not load this profile right now."))
       .finally(() => setIsLoading(false));
   }, [currentUser, isOwnProfile, profileId]);
-
-  useEffect(() => {
-    const ownerId = isOwnProfile ? currentUser?.id : profileId;
-    if (!ownerId || !isCreator) {
-      setSlots([]);
-      return;
-    }
-    setIsLoadingSlots(true);
-    getAvailability(isOwnProfile ? undefined : ownerId)
-      .then(setSlots)
-      .catch(() => setSlots([]))
-      .finally(() => setIsLoadingSlots(false));
-  }, [currentUser?.id, isCreator, isOwnProfile, profileId, profile?.id]);
 
   const beginEditing = (post: Post) => {
     setEditingId(post.id);
@@ -154,18 +137,6 @@ function ProfilePage({ profileId, currentUser, onNavigate, onLogout }: ProfilePa
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [viewingPost]);
 
-  const slotsByDate = useMemo(() => {
-    return openSlots.reduce<Record<string, AvailabilitySlot[]>>((acc, slot) => {
-      const dateKey = new Date(slot.startsAt).toLocaleDateString("en-ZA", {
-        weekday: "short",
-        day: "numeric",
-        month: "short",
-      });
-      if (!acc[dateKey]) acc[dateKey] = [];
-      acc[dateKey].push(slot);
-      return acc;
-    }, {});
-  }, [openSlots]);
 
   if (isOwnProfile && !profile) {
     return (

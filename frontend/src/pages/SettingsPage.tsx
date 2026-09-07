@@ -8,7 +8,15 @@ import {
   getAvailability,
   updateProfile,
 } from "../api";
-import { IconCalendar, IconClock, IconPin, IconSparkles, IconTrash, IconUser, IconZap } from "../components/Icons";
+import {
+  IconCalendar,
+  IconClock,
+  IconPin,
+  IconSparkles,
+  IconTrash,
+  IconUser,
+  IconZap,
+} from "../components/Icons";
 import type { AvailabilitySlot, CurrentUser } from "../types";
 
 type SettingsPageProps = {
@@ -19,13 +27,21 @@ type SettingsPageProps = {
 
 function SettingsPage({ currentUser, onNavigate, onSaved }: SettingsPageProps) {
   const [name, setName] = useState(currentUser?.name || "");
-  const [whatsappNumber, setWhatsappNumber] = useState(currentUser?.whatsappNumber || "");
-  const [locationLabel, setLocationLabel] = useState(currentUser?.locationLabel || "");
-  const [accountType, setAccountType] = useState<"creator" | "client">(
-    currentUser?.accountType || "creator"
+  const [whatsappNumber, setWhatsappNumber] = useState(
+    currentUser?.whatsappNumber || "",
   );
-  const [emailNotifications, setEmailNotifications] = useState(currentUser?.emailNotifications ?? true);
-  const [whatsappNotifications, setWhatsappNotifications] = useState(currentUser?.whatsappNotifications ?? true);
+  const [locationLabel, setLocationLabel] = useState(
+    currentUser?.locationLabel || "",
+  );
+  const [accountType, setAccountType] = useState<"creator" | "client">(
+    currentUser?.accountType || "creator",
+  );
+  const [emailNotifications, setEmailNotifications] = useState(
+    currentUser?.emailNotifications ?? true,
+  );
+  const [whatsappNotifications, setWhatsappNotifications] = useState(
+    currentUser?.whatsappNotifications ?? true,
+  );
   const [message, setMessage] = useState("");
   const [isSaving, setIsSaving] = useState(false);
 
@@ -64,8 +80,15 @@ function SettingsPage({ currentUser, onNavigate, onSaved }: SettingsPageProps) {
         <div className="profile-login-state">
           <IconUser size={34} />
           <h1>Sign in to edit your profile</h1>
-          <p>Update your public details, contact number, and location from one place.</p>
-          <button className="btn-primary" type="button" onClick={() => onNavigate("/login")}>
+          <p>
+            Update your public details, contact number, and location from one
+            place.
+          </p>
+          <button
+            className="btn-primary"
+            type="button"
+            onClick={() => onNavigate("/login")}
+          >
             Sign in to continue
           </button>
         </div>
@@ -89,7 +112,11 @@ function SettingsPage({ currentUser, onNavigate, onSaved }: SettingsPageProps) {
       onSaved(updatedUser);
       setMessage("Profile saved successfully.");
     } catch (error) {
-      setMessage(error instanceof Error ? error.message : "Unable to update your profile.");
+      setMessage(
+        error instanceof Error
+          ? error.message
+          : "Unable to update your profile.",
+      );
     } finally {
       setIsSaving(false);
     }
@@ -105,14 +132,20 @@ function SettingsPage({ currentUser, onNavigate, onSaved }: SettingsPageProps) {
       setCurrentPassword("");
       setNewPassword("");
     } catch (error) {
-      setPasswordMessage(error instanceof Error ? error.message : "Unable to change password.");
+      setPasswordMessage(
+        error instanceof Error ? error.message : "Unable to change password.",
+      );
     } finally {
       setIsChangingPassword(false);
     }
   };
 
   const handleDeleteAccount = async () => {
-    if (!window.confirm("Are you sure you want to permanently delete your account? This cannot be undone.")) {
+    if (
+      !window.confirm(
+        "Are you sure you want to permanently delete your account? This cannot be undone.",
+      )
+    ) {
       return;
     }
     setDeleteMessage("");
@@ -121,7 +154,9 @@ function SettingsPage({ currentUser, onNavigate, onSaved }: SettingsPageProps) {
       onNavigate("/");
       window.location.reload();
     } catch (error) {
-      setDeleteMessage(error instanceof Error ? error.message : "Unable to delete account.");
+      setDeleteMessage(
+        error instanceof Error ? error.message : "Unable to delete account.",
+      );
     }
   };
 
@@ -138,15 +173,25 @@ function SettingsPage({ currentUser, onNavigate, onSaved }: SettingsPageProps) {
       const endMinutes = endH * 60 + endM;
 
       for (let day = 0; day < generatorDays; day++) {
-        const currentDate = new Date(generatorStartDate);
+        // Parse as LOCAL midnight (appending T00:00:00 avoids UTC-midnight parsing)
+        const currentDate = new Date(`${generatorStartDate}T00:00:00`);
         currentDate.setDate(currentDate.getDate() + day);
 
-        for (let m = startMinutes; m + generatorDuration <= endMinutes; m += generatorDuration) {
+        for (
+          let m = startMinutes;
+          m + generatorDuration <= endMinutes;
+          m += generatorDuration
+        ) {
           const slotStart = new Date(currentDate);
           slotStart.setHours(Math.floor(m / 60), m % 60, 0, 0);
 
           const slotEnd = new Date(currentDate);
-          slotEnd.setHours(Math.floor((m + generatorDuration) / 60), (m + generatorDuration) % 60, 0, 0);
+          slotEnd.setHours(
+            Math.floor((m + generatorDuration) / 60),
+            (m + generatorDuration) % 60,
+            0,
+            0,
+          );
 
           if (slotStart.getTime() > Date.now()) {
             generated.push({
@@ -158,7 +203,9 @@ function SettingsPage({ currentUser, onNavigate, onSaved }: SettingsPageProps) {
       }
 
       if (generated.length === 0) {
-        setSlotMessage("No upcoming slots generated. Ensure the chosen start time and date are in the future.");
+        setSlotMessage(
+          "No upcoming slots generated. Ensure the chosen start time and date are in the future.",
+        );
         return;
       }
 
@@ -167,7 +214,11 @@ function SettingsPage({ currentUser, onNavigate, onSaved }: SettingsPageProps) {
       const refreshed = await getAvailability();
       setSlots(refreshed);
     } catch (err) {
-      setSlotMessage(err instanceof Error ? err.message : "Failed to generate availability slots.");
+      setSlotMessage(
+        err instanceof Error
+          ? err.message
+          : "Failed to generate availability slots.",
+      );
     } finally {
       setIsGeneratingSlots(false);
     }
@@ -178,7 +229,9 @@ function SettingsPage({ currentUser, onNavigate, onSaved }: SettingsPageProps) {
       await deleteAvailability(slotId);
       setSlots((prev) => prev.filter((s) => s.id !== slotId));
     } catch (err) {
-      setSlotMessage(err instanceof Error ? err.message : "Failed to remove slot.");
+      setSlotMessage(
+        err instanceof Error ? err.message : "Failed to remove slot.",
+      );
     }
   };
 
@@ -189,7 +242,10 @@ function SettingsPage({ currentUser, onNavigate, onSaved }: SettingsPageProps) {
           <div className="eyebrow">Studio controls</div>
           <h1>Profile & Account Settings</h1>
         </div>
-        <p>Keep your profile up to date, set your working hours, and manage your account.</p>
+        <p>
+          Keep your profile up to date, set your working hours, and manage your
+          account.
+        </p>
       </div>
 
       <form className="settings-form" onSubmit={submit}>
@@ -198,7 +254,8 @@ function SettingsPage({ currentUser, onNavigate, onSaved }: SettingsPageProps) {
           <div className="role-selector-label-group">
             <span className="studio-label-text">Account Purpose / Role</span>
             <p className="role-selector-sub">
-              Choose how you want to experience Glam SA. You can switch between roles at any time.
+              Choose how you want to experience Glam SA. You can switch between
+              roles at any time.
             </p>
           </div>
 
@@ -213,7 +270,8 @@ function SettingsPage({ currentUser, onNavigate, onSaved }: SettingsPageProps) {
                 <span>Stylist / Creator</span>
               </div>
               <div className="role-btn-desc">
-                Publish portfolio styles, appear on the radar map, set working hours, and receive client bookings.
+                Publish portfolio styles, appear on the radar map, set working
+                hours, and receive client bookings.
               </div>
             </button>
 
@@ -227,7 +285,8 @@ function SettingsPage({ currentUser, onNavigate, onSaved }: SettingsPageProps) {
                 <span>Client / Customer</span>
               </div>
               <div className="role-btn-desc">
-                Discover styles, find nearby artists on the map, book appointments, and chat directly with stylists.
+                Discover styles, find nearby artists on the map, book
+                appointments, and chat directly with stylists.
               </div>
             </button>
           </div>
@@ -259,7 +318,9 @@ function SettingsPage({ currentUser, onNavigate, onSaved }: SettingsPageProps) {
           </label>
 
           <label className="studio-label">
-            <span><IconPin size={14} /> Location</span>
+            <span>
+              <IconPin size={14} /> Location
+            </span>
             <input
               className="studio-input"
               value={locationLabel}
@@ -270,25 +331,48 @@ function SettingsPage({ currentUser, onNavigate, onSaved }: SettingsPageProps) {
             />
           </label>
 
-          <div className="settings-section-heading" style={{ marginTop: "2rem" }}>
+          <div
+            className="settings-section-heading"
+            style={{ marginTop: "2rem" }}
+          >
             <h3>Notification Preferences</h3>
           </div>
 
-          <label className="studio-label" style={{ flexDirection: "row", alignItems: "center", gap: "0.5rem", cursor: "pointer" }}>
+          <label
+            className="studio-label"
+            style={{
+              flexDirection: "row",
+              alignItems: "center",
+              gap: "0.5rem",
+              cursor: "pointer",
+            }}
+          >
             <input
               type="checkbox"
               checked={emailNotifications}
               onChange={(e) => setEmailNotifications(e.target.checked)}
             />
-            <span style={{ margin: 0, fontWeight: "normal" }}>Receive email notifications</span>
+            <span style={{ margin: 0, fontWeight: "normal" }}>
+              Receive email notifications
+            </span>
           </label>
-          <label className="studio-label" style={{ flexDirection: "row", alignItems: "center", gap: "0.5rem", cursor: "pointer" }}>
+          <label
+            className="studio-label"
+            style={{
+              flexDirection: "row",
+              alignItems: "center",
+              gap: "0.5rem",
+              cursor: "pointer",
+            }}
+          >
             <input
               type="checkbox"
               checked={whatsappNotifications}
               onChange={(e) => setWhatsappNotifications(e.target.checked)}
             />
-            <span style={{ margin: 0, fontWeight: "normal" }}>Receive WhatsApp notifications</span>
+            <span style={{ margin: 0, fontWeight: "normal" }}>
+              Receive WhatsApp notifications
+            </span>
           </label>
         </div>
 
@@ -296,14 +380,20 @@ function SettingsPage({ currentUser, onNavigate, onSaved }: SettingsPageProps) {
           <div
             className="profile-error"
             role="alert"
-            style={{ color: message.includes("success") ? "#4ade80" : undefined }}
+            style={{
+              color: message.includes("success") ? "#4ade80" : undefined,
+            }}
           >
             {message}
           </div>
         )}
 
         <div className="settings-actions">
-          <button className="btn-ghost" type="button" onClick={() => onNavigate("/profile")}>
+          <button
+            className="btn-ghost"
+            type="button"
+            onClick={() => onNavigate("/profile")}
+          >
             Cancel
           </button>
           <button className="btn-primary" type="submit" disabled={isSaving}>
@@ -317,20 +407,29 @@ function SettingsPage({ currentUser, onNavigate, onSaved }: SettingsPageProps) {
         <section className="settings-scheduling" id="availability">
           <div className="settings-section-heading">
             <div>
-              <div className="eyebrow"><IconCalendar size={13} /> Booking Schedule</div>
+              <div className="eyebrow">
+                <IconCalendar size={13} /> Booking Schedule
+              </div>
               <h2>Working Hours & Availability</h2>
             </div>
-            <p>Clients can only request bookings during your active available slots. Generate recurring weekly hours below.</p>
+            <p>
+              Clients can only request bookings during your active available
+              slots. Generate recurring weekly hours below.
+            </p>
           </div>
 
           <div className="availability-generator-card">
-            <form onSubmit={handleGenerateSlots} className="availability-gen-form">
+            <form
+              onSubmit={handleGenerateSlots}
+              className="availability-gen-form"
+            >
               <h3>
                 <IconZap size={18} />
                 <span>Quick Schedule Generator</span>
               </h3>
               <p className="availability-gen-desc">
-                Select your working window and we'll automatically generate booking slots for clients on your profile.
+                Select your working window and we'll automatically generate
+                booking slots for clients on your profile.
               </p>
 
               <div className="availability-fields-grid">
@@ -389,7 +488,9 @@ function SettingsPage({ currentUser, onNavigate, onSaved }: SettingsPageProps) {
                   <select
                     className="studio-input"
                     value={generatorDuration}
-                    onChange={(e) => setGeneratorDuration(Number(e.target.value))}
+                    onChange={(e) =>
+                      setGeneratorDuration(Number(e.target.value))
+                    }
                   >
                     <option value={30}>30 minutes</option>
                     <option value={45}>45 minutes</option>
@@ -405,7 +506,11 @@ function SettingsPage({ currentUser, onNavigate, onSaved }: SettingsPageProps) {
                 <div
                   className="profile-error"
                   role="status"
-                  style={{ color: slotMessage.includes("Success") ? "#4ade80" : undefined }}
+                  style={{
+                    color: slotMessage.includes("Success")
+                      ? "#4ade80"
+                      : undefined,
+                  }}
                 >
                   {slotMessage}
                 </div>
@@ -418,35 +523,52 @@ function SettingsPage({ currentUser, onNavigate, onSaved }: SettingsPageProps) {
                 style={{ marginTop: "1rem" }}
               >
                 <IconClock size={16} />
-                {isGeneratingSlots ? "Generating slots..." : "Generate Available Slots"}
+                {isGeneratingSlots
+                  ? "Generating slots..."
+                  : "Generate Available Slots"}
               </button>
             </form>
 
             {/* Active Upcoming Slots Preview */}
             <div className="active-slots-preview">
               <div className="active-slots-header">
-                <h3>Upcoming Active Slots ({slots.filter((s) => s.isAvailable).length})</h3>
+                <h3>
+                  Upcoming Active Slots (
+                  {slots.filter((s) => s.isAvailable).length})
+                </h3>
                 <small>Slots booked by clients are locked automatically.</small>
               </div>
 
               {isLoadingSlots ? (
                 <p>Loading slots...</p>
               ) : slots.length === 0 ? (
-                <p className="no-slots-note">No active availability slots yet. Use the generator above to create slots.</p>
+                <p className="no-slots-note">
+                  No active availability slots yet. Use the generator above to
+                  create slots.
+                </p>
               ) : (
                 <div className="slots-chips-container">
                   {slots.map((slot) => {
                     const start = new Date(slot.startsAt);
                     const end = new Date(slot.endsAt);
-                    const dateStr = start.toLocaleDateString("en-ZA", { weekday: "short", day: "numeric", month: "short" });
+                    const dateStr = start.toLocaleDateString("en-ZA", {
+                      weekday: "short",
+                      day: "numeric",
+                      month: "short",
+                    });
                     const timeStr = `${start.toLocaleTimeString("en-ZA", { hour: "2-digit", minute: "2-digit" })} - ${end.toLocaleTimeString("en-ZA", { hour: "2-digit", minute: "2-digit" })}`;
 
                     return (
-                      <div key={slot.id} className={`slot-chip ${slot.isAvailable ? "available" : "booked"}`}>
+                      <div
+                        key={slot.id}
+                        className={`slot-chip ${slot.isAvailable ? "available" : "booked"}`}
+                      >
                         <div>
                           <strong>{dateStr}</strong>
                           <span>{timeStr}</span>
-                          {!slot.isAvailable && <span className="slot-booked-tag">Booked</span>}
+                          {!slot.isAvailable && (
+                            <span className="slot-booked-tag">Booked</span>
+                          )}
                         </div>
                         {slot.isAvailable && (
                           <button
@@ -506,22 +628,40 @@ function SettingsPage({ currentUser, onNavigate, onSaved }: SettingsPageProps) {
               <div
                 className="profile-error"
                 role="alert"
-                style={{ color: passwordMessage.includes("success") ? "#4ade80" : undefined }}
+                style={{
+                  color: passwordMessage.includes("success")
+                    ? "#4ade80"
+                    : undefined,
+                }}
               >
                 {passwordMessage}
               </div>
             )}
-            <button className="btn-primary" type="submit" disabled={isChangingPassword}>
+            <button
+              className="btn-primary"
+              type="submit"
+              disabled={isChangingPassword}
+            >
               {isChangingPassword ? "Updating..." : "Update Password"}
             </button>
           </form>
 
-          <div className="settings-subform" style={{ borderColor: "var(--danger-color, #ff4444)" }}>
-            <h3 style={{ color: "var(--danger-color, #ff4444)" }}>Delete Account</h3>
+          <div
+            className="settings-subform"
+            style={{ borderColor: "var(--danger-color, #ff4444)" }}
+          >
+            <h3 style={{ color: "var(--danger-color, #ff4444)" }}>
+              Delete Account
+            </h3>
             <p className="settings-note" style={{ marginBottom: "1rem" }}>
-              Once you delete your account, there is no going back. Please be certain.
+              Once you delete your account, there is no going back. Please be
+              certain.
             </p>
-            {deleteMessage && <div className="profile-error" role="alert">{deleteMessage}</div>}
+            {deleteMessage && (
+              <div className="profile-error" role="alert">
+                {deleteMessage}
+              </div>
+            )}
             <button
               className="btn-outline-sm danger-action"
               type="button"
