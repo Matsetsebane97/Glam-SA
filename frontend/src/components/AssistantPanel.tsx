@@ -1,16 +1,18 @@
 import { useMemo, useState } from "react";
-import { createBooking, getAvailability, getServices } from "../api";
+import { createBooking, getAvailability, getServices, getSearchSynonyms } from "../api";
 import { IconBookmark, IconChevronRight, IconClose, IconMessage, IconMic, IconPin, IconSend, IconSparkles, IconWhatsApp } from "./Icons";
 import type { AvailabilitySlot, CurrentUser, Post, ServiceOffering } from "../types";
 import { whatsappUrl } from "../utils/whatsapp";
 import {
   answerQuestion,
   assistantSuggestions,
+  applySessionContextToQuery,
   createBookingNote,
   formatDistanceKm,
   formatDurationMinutes,
   formatPriceRange,
   formatSlot,
+  getSessionContext,
   parseQuestion,
   recentSearchesKey,
   savedArtistsKey,
@@ -81,6 +83,18 @@ function AssistantPanel({ posts, currentUser, onNavigate, onSearch }: AssistantP
   const [activeBookingArtistId, setActiveBookingArtistId] = useState<string | null>(null);
   const [bookingPanels, setBookingPanels] = useState<Record<string, BookingPanelState>>({});
   const [showBookingAuthPopup, setShowBookingAuthPopup] = useState(false);
+  const [synonyms, setSynonyms] = useState<Record<string, string[]> | undefined>(undefined);
+
+  // Load search synonyms on mount
+  const [synLoaded, setSynLoaded] = useState(false);
+  if (!synLoaded) {
+    setSynLoaded(true);
+    void getSearchSynonyms()
+      .then(setSynonyms)
+      .catch(() => {
+        // Silently fail - continue without synonyms
+      });
+  }
 
   const visiblePrompts = useMemo(() => {
     return [...recentSearches, ...assistantSuggestions.filter((s) => !recentSearches.includes(s))].slice(0, 4);
@@ -168,7 +182,10 @@ function AssistantPanel({ posts, currentUser, onNavigate, onSearch }: AssistantP
     setMessages((current) => [...current, { id: Date.now(), author: "user", text: question }]);
     setDraft("");
     setIsThinking(true);
-    const answer = await answerQuestion(question, posts, currentUser);
+    // Apply session context for multi-turn refinements (e.g., "cheaper" → expand with last category)
+    const sessionContext = getSessionContext();
+    const expandedQuestion = applySessionContextToQuery(question, sessionContext);
+    const answer = await answerQuestion(expandedQuestion, posts, currentUser, synonyms);
     setMessages((current) => [...current, { id: Date.now() + 1, author: "assistant", ...answer }]);
     setIsThinking(false);
   };

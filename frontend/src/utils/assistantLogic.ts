@@ -44,6 +44,14 @@ export type ChatMessage = {
   fullResultQuery?: string;
 };
 
+export type SessionContext = {
+  lastCategory?: string;
+  lastLocation?: string;
+  lastMaxPrice?: number;
+  queryCount: number;
+  noResultsCount: number;
+};
+
 // ─── Constants ────────────────────────────────────────────────────────────────
 
 export const categoryAliases: Record<string, string> = {
@@ -68,6 +76,7 @@ export const assistantSuggestions = ["Hair near me", "Nails under R500", "Makeup
 export const fallbackSuggestions = ["Try a broader budget", "Search another area", "Browse the full feed"];
 export const recentSearchesKey = "glamAssistantRecentSearches";
 export const savedArtistsKey = "glamAssistantSavedArtists";
+export const sessionContextKey = "glamAssistantSessionContext";
 
 export const searchStopWords = new Set([
   "a", "an", "appointment", "artist", "artists", "beauty", "book", "booking",
@@ -122,21 +131,33 @@ function textMatchesTerm(text: string, term: string) {
   return normalizedText.split(/[^a-z0-9]+/).some((word) => isFuzzyMatch(term, word));
 }
 
-function getFuzzyCategory(normalizedQuestion: string) {
+function getFuzzyCategory(normalizedQuestion: string, synonyms?: Record<string, string[]>) {
   const terms = normalizedQuestion.split(/[^a-z0-9]+/).filter(Boolean);
   const categoryAlias = Object.entries(categoryAliases).find(([alias]) =>
     terms.some((term) => isFuzzyMatch(term, alias)),
   );
+  
+  // If no direct match, check synonyms
+  if (!categoryAlias && synonyms) {
+    for (const [term, synonymList] of Object.entries(synonyms)) {
+      if (terms.some((t) => isFuzzyMatch(t, term) || synonymList.some((s) => isFuzzyMatch(t, s)))) {
+        // Map the synonym term to a category if it matches a known category
+        const mappedCategory = categoryAliases[term.toLowerCase()];
+        if (mappedCategory) return mappedCategory;
+      }
+    }
+  }
+  
   return categoryAlias?.[1];
 }
 
-export function parseQuestion(question: string): ParsedQuestion {
+export function parseQuestion(question: string, synonyms?: Record<string, string[]>): ParsedQuestion {
   const normalizedQuestion = question.trim().toLowerCase();
   const categoryToken = normalizedQuestion.match(/\b(braids?|hair|nails?|manicure|pedicure|barber(?:ing|s)?|makeup|facials?|skincare|tattoos?)\b/);
   const priceMatch = normalizedQuestion.match(/(?:under|below|less than)\s*r?\s*(\d+(?:\.\d+)?)/);
   const locationMatch = normalizedQuestion.match(/\bnear\s+(?!me\b)([a-z][a-z\s-]*?)(?=\s+(?:under|below|less than)\b|$)/);
   const weekdayMatch = normalizedQuestion.match(/\b(sunday|monday|tuesday|wednesday|thursday|friday|saturday)\b/);
-  const category = categoryToken ? categoryAliases[categoryToken[1]] : getFuzzyCategory(normalizedQuestion);
+  const category = categoryToken ? categoryAliases[categoryToken[1]] : getFuzzyCategory(normalizedQuestion, synonyms);
   const wantsNearby = /\b(near me|nearby|close to me|around me)\b/.test(normalizedQuestion);
   const searchTerms = normalizedQuestion
     .replace(categoryToken?.[0] || "", "")
@@ -284,14 +305,29 @@ export function getArtistMatches(posts: Post[]): ArtistMatch[] {
   return Array.from(artistsByKey.values());
 }
 
-export function matchesQuestion(post: Post, parsedQuestion: ParsedQuestion) {
+export function matchesQuestion(post: Post, parsedQuestion: ParsedQuestion, synonyms?: Record<string, string[]>) {
   const matchesCategory = !parsedQuestion.category || post.category.toLowerCase() === parsedQuestion.category.toLowerCase();
   const matchesLocation = !parsedQuestion.location || textMatchesTerm(post.location, parsedQuestion.location);
   const matchesPrice = parsedQuestion.maxPrice == null || Number(post.price) <= parsedQuestion.maxPrice;
   const searchableText = [post.creator, post.handle, post.location, post.service, post.category, post.caption]
     .join(" ")
     .toLowerCase();
-  const matchesSearch = parsedQuestion.searchTerms.every((term) => textMatchesTerm(searchableText, term));
+  
+  // Check if search terms match directly or via synonyms
+  const matchesSearch = parsedQuestion.searchTerms.every((term) => {
+    if (textMatchesTerm(searchableText, term)) return true;
+    // Check if term or its synonyms match
+    if (synonyms) {
+      for (const [synTerm, synList] of Object.entries(synonyms)) {
+        if ((isFuzzyMatch(term, synTerm) || synList.some((s) => isFuzzyMatch(term, s))) &&
+            (textMatchesTerm(searchableText, synTerm) || synList.some((s) => textMatchesTerm(searchableText, s)))) {
+          return true;
+        }
+      }
+    }
+    return false;
+  });
+  
   return matchesCategory && matchesLocation && matchesPrice && matchesSearch;
 }
 
@@ -313,13 +349,140 @@ export function mergeNearbyArtist(artist: NearbyArtist, postMatch?: ArtistMatch)
   };
 }
 
+// ─── Session Context & Smart Suggestions ──────────────────────────────────────
+
+export function getSessionContext(): SessionContext {
+  try {
+    const stored = window.localStorage.getItem(sessionContextKey);
+    return stored ? (JSON.parse(stored) as SessionContext) : { queryCount: 0, noResultsCount: 0 };
+  } catch {
+    return { queryCount: 0, noResultsCount: 0 };
+  }
+}
+
+export function updateSessionContext(updates: Partial<SessionContext>): void {
+  const context = getSessionContext();
+  const updated = { ...context, ...updates, queryCount: context.queryCount + 1 };
+  try {
+    window.localStorage.setItem(sessionContextKey, JSON.stringify(updated));
+  } catch {
+    // Silently fail if storage is full
+  }
+}
+
+export function generateSmartQuickReplies(
+  parsed: ParsedQuestion,
+  resultCount: number,
+  sessionContext: SessionContext,
+): string[] {
+  // If no results, suggest refinements based on what they searched for
+  if (resultCount === 0) {
+    const replies: string[] = [];
+    
+    // No budget specified → suggest budget refinement
+    if (!parsed.maxPrice && parsed.category) {
+      replies.push(`${parsed.category} under R500`);
+      replies.push(`${parsed.category} under R1000`);
+    } else if (parsed.maxPrice) {
+      // Budget was too strict, suggest higher
+      replies.push(`${parsed.category || "Services"} under R${parsed.maxPrice + 500}`);
+    }
+    
+    // If they searched in a location, suggest broader search
+    if (parsed.location && parsed.location !== "me") {
+      replies.push(`Browse the full feed`);
+    } else if (parsed.wantsNearby) {
+      // Near me search failed, suggest non-location search
+      replies.push(`${parsed.category || "Services"} anywhere`);
+    }
+    
+    if (replies.length < 2) {
+      replies.push(...fallbackSuggestions.slice(0, 3 - replies.length));
+    }
+    return replies.slice(0, 3);
+  }
+
+  // After successful results, suggest follow-ups
+  const replies: string[] = [];
+  
+  // Suggest budget refinement (cheaper or pricier options)
+  if (parsed.category) {
+    if (parsed.maxPrice) {
+      // Already has budget, suggest cheaper option
+      replies.push(`${parsed.category} under R${Math.max(300, parsed.maxPrice - 200)}`);
+    } else {
+      // No budget specified, suggest budget-restricted option
+      replies.push(`${parsed.category} under R300`);
+    }
+  }
+  
+  // Suggest location-based refinement
+  if (!parsed.wantsNearby && !parsed.location) {
+    // They didn't search nearby, suggest it
+    replies.push(`Show ${parsed.category || "services"} near me`);
+  } else if (parsed.wantsNearby && sessionContext.lastLocation) {
+    // They searched nearby, suggest different location
+    replies.push(`${parsed.category || "Services"} in ${sessionContext.lastLocation}`);
+  }
+
+  // Suggest related categories
+  if (parsed.category && parsed.category === "Hair") {
+    if (!replies.some((r) => r.includes("Barbering"))) {
+      replies.push("Try Barbering");
+    }
+  } else if (parsed.category && parsed.category === "Makeup") {
+    if (!replies.some((r) => r.includes("Skincare"))) {
+      replies.push("Try Skincare");
+    }
+  }
+
+  if (replies.length < 2) {
+    replies.push("Browse the full feed");
+  }
+
+  return replies.slice(0, 3);
+}
+
+export function applySessionContextToQuery(
+  question: string,
+  sessionContext: SessionContext,
+): string {
+  // Detect simple refinement queries and expand them with context
+  const normalized = question.toLowerCase().trim();
+  
+  // "Cheaper" or "Less expensive" → expand with previous category
+  if (/^(cheap|cheaper|less expensive|lower budget|reduce budget)/i.test(normalized) && sessionContext.lastCategory) {
+    const newPrice = sessionContext.lastMaxPrice ? Math.max(300, sessionContext.lastMaxPrice - 200) : 300;
+    return `${sessionContext.lastCategory} under R${newPrice}`;
+  }
+  
+  // "More expensive" or "Higher budget" → expand with previous category
+  if (/^(expensive|more expensive|higher budget|increase budget)/i.test(normalized) && sessionContext.lastCategory) {
+    const newPrice = sessionContext.lastMaxPrice ? sessionContext.lastMaxPrice + 500 : 1000;
+    return `${sessionContext.lastCategory} under R${newPrice}`;
+  }
+  
+  // "Different location" or "Another area" → expand with previous category
+  if (/^(different location|another (area|city|place)|in|near)/i.test(normalized) && sessionContext.lastCategory) {
+    const location = normalized.replace(/^(different location|another (area|city|place))\s+/i, "");
+    if (location && location.length > 2) {
+      return `${sessionContext.lastCategory} in ${location}`;
+    }
+  }
+  
+  // No refinement detected, return original question
+  return question;
+}
+
 export async function answerQuestion(
   question: string,
   posts: Post[],
   currentUser: CurrentUser | null,
+  synonyms?: Record<string, string[]>,
 ): Promise<Pick<ChatMessage, "text" | "matches" | "quickReplies" | "fullResultCount" | "fullResultQuery">> {
-  const parsedQuestion = parseQuestion(question);
-  const matchingPosts = posts.filter((post) => matchesQuestion(post, parsedQuestion));
+  const parsedQuestion = parseQuestion(question, synonyms);
+  const matchingPosts = posts.filter((post) => matchesQuestion(post, parsedQuestion, synonyms));
+  const sessionContext = getSessionContext();
 
   if (parsedQuestion.wantsNearby) {
     if (currentUser?.latitude == null || currentUser.longitude == null) {
@@ -348,9 +511,15 @@ export async function answerQuestion(
         });
 
       if (nearbyMatches.length > 0) {
+        updateSessionContext({
+          lastCategory: parsedQuestion.category,
+          lastLocation: parsedQuestion.location,
+          lastMaxPrice: parsedQuestion.maxPrice,
+        });
         return {
           text: `Here are ${Math.min(nearbyMatches.length, 3)} nearby artist${nearbyMatches.length === 1 ? "" : "s"} within 50 km.`,
           matches: withBookingPreference(nearbyMatches.slice(0, 3), parsedQuestion),
+          quickReplies: generateSmartQuickReplies(parsedQuestion, nearbyMatches.length, sessionContext),
           fullResultCount: nearbyMatches.length > 3 ? nearbyMatches.length : undefined,
           fullResultQuery: question,
         };
@@ -361,18 +530,25 @@ export async function answerQuestion(
   }
 
   if (matchingPosts.length === 0) {
+    updateSessionContext({ noResultsCount: sessionContext.noResultsCount + 1 });
     return {
       text: "I could not find a matching artist yet. Try a broader location, category, or budget.",
-      quickReplies: fallbackSuggestions,
+      quickReplies: generateSmartQuickReplies(parsedQuestion, 0, sessionContext),
     };
   }
 
   const allArtistMatches = getArtistMatches(matchingPosts);
   const matches = withBookingPreference(allArtistMatches.slice(0, 3), parsedQuestion);
+  updateSessionContext({
+    lastCategory: parsedQuestion.category,
+    lastLocation: parsedQuestion.location,
+    lastMaxPrice: parsedQuestion.maxPrice,
+  });
   const suffix = matchingPosts.length > matches.length ? ` I found ${matchingPosts.length} matching looks in total.` : "";
   return {
     text: `Here are ${matches.length} matching artist${matches.length === 1 ? "" : "s"}.${suffix}`,
     matches,
+    quickReplies: generateSmartQuickReplies(parsedQuestion, allArtistMatches.length, sessionContext),
     fullResultCount: allArtistMatches.length > 3 ? allArtistMatches.length : undefined,
     fullResultQuery: question,
   };

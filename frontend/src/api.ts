@@ -301,3 +301,10 @@ export const deleteAccount = async (): Promise<void> => {
     throw new Error(errorData.error || "Unable to delete account.");
   }
 };
+
+export const getSearchSynonyms = async (): Promise<Record<string, string[]>> => {
+  const response = await fetch("/api/search-synonyms/");
+  if (!response.ok) throw new Error("Unable to load search synonyms.");
+  const data = (await response.json()) as { synonyms: Array<{ term: string; synonyms: string[] }> };
+  return Object.fromEntries(data.synonyms.map((item) => [item.term, item.synonyms]));
+};

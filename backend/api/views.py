@@ -15,7 +15,7 @@ from django.views.decorators.csrf import csrf_exempt
 
 from .geo import haversine_km, parse_optional_coordinate
 from .category_model import classifier
-from .models import AvailabilitySlot, Booking, Message, Post, ServiceOffering, UserProfile
+from .models import AvailabilitySlot, Booking, Message, Post, ServiceOffering, UserProfile, SearchSynonym
 from .storage import is_configured, upload_media
 
 
@@ -238,6 +238,15 @@ def health(request):
 
 def categories(request):
     return JsonResponse({"categories": CATEGORIES})
+
+
+def search_synonyms(request):
+    """Return all search synonyms for NLP matching."""
+    if request.method != "GET":
+        return JsonResponse({"error": "Method not allowed."}, status=405)
+    
+    synonyms = SearchSynonym.objects.all().values("term", "synonyms")
+    return JsonResponse({"synonyms": list(synonyms)})
 
 
 @csrf_exempt
