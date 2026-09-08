@@ -730,12 +730,9 @@ export default function BookingModal({
                           {(() => {
                             if (availableDates.length === 0) return null;
 
-                            // Get the first and last available dates
+                            // Get the first available date
                             const firstAvailableDate = new Date(
                               slots[0].startsAt,
-                            );
-                            const lastAvailableDate = new Date(
-                              slots[slots.length - 1].startsAt,
                             );
 
                             // Start from the beginning of the month of the first available date
