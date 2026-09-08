@@ -74,9 +74,9 @@ const formatGoogleCalendarUrl = ({
       new Date(dateStr).toISOString().replace(/-|:|\.\d\d\d/g, "");
     const dates = `${formatIso(startsAt)}/${formatIso(endsAt)}`;
     return `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(
-      title
+      title,
     )}&dates=${dates}&details=${encodeURIComponent(
-      details
+      details,
     )}&location=${encodeURIComponent(location)}`;
   } catch {
     return "#";
@@ -112,7 +112,7 @@ export default function BookingModal({
 
   // Selections
   const [selectedServiceId, setSelectedServiceId] = useState<string>(
-    initialServiceId || ""
+    initialServiceId || "",
   );
   const [selectedDateKey, setSelectedDateKey] = useState<string>("");
   const [selectedSlotId, setSelectedSlotId] = useState<string>("");
@@ -126,7 +126,9 @@ export default function BookingModal({
   // Booking submission & result
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
-  const [confirmedBooking, setConfirmedBooking] = useState<Booking | null>(null);
+  const [confirmedBooking, setConfirmedBooking] = useState<Booking | null>(
+    null,
+  );
 
   // Close on Escape key
   useEffect(() => {
@@ -157,21 +159,29 @@ export default function BookingModal({
         setSlots(availableSlots);
 
         // Preselect service
-        if (initialServiceId && fetchedServices.some((s) => String(s.id) === initialServiceId)) {
+        if (
+          initialServiceId &&
+          fetchedServices.some((s) => String(s.id) === initialServiceId)
+        ) {
           setSelectedServiceId(initialServiceId);
         } else if (fetchedServices.length > 0) {
           // If initialServiceName matches, use it; otherwise default to first
           const matched = initialServiceName
             ? fetchedServices.find(
-                (s) => s.name.toLowerCase() === initialServiceName.toLowerCase()
+                (s) =>
+                  s.name.toLowerCase() === initialServiceName.toLowerCase(),
               )
             : null;
-          setSelectedServiceId(String(matched ? matched.id : fetchedServices[0].id));
+          setSelectedServiceId(
+            String(matched ? matched.id : fetchedServices[0].id),
+          );
         }
 
         // Group slots by formatted date key
         if (availableSlots.length > 0) {
-          const firstSlotDate = new Date(availableSlots[0].startsAt).toLocaleDateString("en-ZA", {
+          const firstSlotDate = new Date(
+            availableSlots[0].startsAt,
+          ).toLocaleDateString("en-ZA", {
             weekday: "short",
             day: "numeric",
             month: "short",
@@ -201,7 +211,7 @@ export default function BookingModal({
   const availableDates = useMemo(() => Object.keys(slotsByDate), [slotsByDate]);
   const currentDaySlots = useMemo(
     () => (selectedDateKey ? slotsByDate[selectedDateKey] || [] : []),
-    [selectedDateKey, slotsByDate]
+    [selectedDateKey, slotsByDate],
   );
 
   // Group current day's slots into Morning, Afternoon, and Evening
@@ -225,14 +235,16 @@ export default function BookingModal({
   }, [currentDaySlots]);
 
   // Pricing & Duration calculation
-  const selectedService = services.find((s) => String(s.id) === selectedServiceId);
+  const selectedService = services.find(
+    (s) => String(s.id) === selectedServiceId,
+  );
   const currentServiceName =
     selectedService?.name || initialServiceName || "Signature Styling";
   const currentPrice = selectedService?.price
     ? `R ${selectedService.price}`
     : initialPrice
-    ? `R ${initialPrice}`
-    : "Price on request";
+      ? `R ${initialPrice}`
+      : "Price on request";
   const currentDuration = selectedService?.durationMinutes
     ? formatDurationMinutes(selectedService.durationMinutes)
     : formatDurationMinutes(initialDurationMinutes);
@@ -245,7 +257,7 @@ export default function BookingModal({
           .replace(tag, "")
           .replace(/\s*,\s*,/g, ",")
           .replace(/^,\s*|,\s*$/g, "")
-          .trim()
+          .trim(),
       );
     } else {
       setNotes((prev) => (prev ? `${prev.trim()}, ${tag}` : tag));
@@ -256,7 +268,7 @@ export default function BookingModal({
   const whatsappNumberClean = (creatorPhone || "").replace(/\D/g, "");
   const whatsappLink = whatsappNumberClean
     ? `https://wa.me/${whatsappNumberClean}?text=${encodeURIComponent(
-        `Hi ${creatorName}! I saw your work on Glam SA and I'd like to ask about booking "${currentServiceName}".`
+        `Hi ${creatorName}! I saw your work on Glam SA and I'd like to ask about booking "${currentServiceName}".`,
       )}`
     : null;
 
@@ -279,7 +291,9 @@ export default function BookingModal({
       setInquirySent(true);
       setInquiryText("");
     } catch (err) {
-      setErrorMessage(err instanceof Error ? err.message : "Unable to send message.");
+      setErrorMessage(
+        err instanceof Error ? err.message : "Unable to send message.",
+      );
     } finally {
       setIsInquiring(false);
     }
@@ -298,7 +312,8 @@ export default function BookingModal({
     }
 
     // Need a valid service ID; fallback to selectedServiceId or first service
-    const serviceIdNum = Number(selectedServiceId) || (services[0] ? services[0].id : null);
+    const serviceIdNum =
+      Number(selectedServiceId) || (services[0] ? services[0].id : null);
     if (!serviceIdNum) {
       setErrorMessage("Please select a valid service to book.");
       return;
@@ -322,7 +337,7 @@ export default function BookingModal({
       setErrorMessage(
         err instanceof Error
           ? err.message
-          : "That time slot is no longer available. Please choose another."
+          : "That time slot is no longer available. Please choose another.",
       );
     } finally {
       setIsSubmitting(false);
@@ -350,7 +365,8 @@ export default function BookingModal({
               <h3>Join Glam SA to Book</h3>
               <p>
                 Sign in or register a free client account to book directly with{" "}
-                <strong>{creatorName}</strong>, manage your appointments, and chat.
+                <strong>{creatorName}</strong>, manage your appointments, and
+                chat.
               </p>
               <div className="glam-auth-actions-stack">
                 <button
@@ -447,8 +463,9 @@ export default function BookingModal({
               </div>
               <h2>Appointment Requested!</h2>
               <p className="glam-success-desc">
-                Your appointment request has been sent to <strong>{creatorName}</strong>.
-                You will be notified once confirmed.
+                Your appointment request has been sent to{" "}
+                <strong>{creatorName}</strong>. You will be notified once
+                confirmed.
               </p>
 
               <div className="glam-success-summary-card">
@@ -463,18 +480,23 @@ export default function BookingModal({
                 <div className="glam-summary-row">
                   <span className="summary-label">Date & Time:</span>
                   <strong>
-                    {new Date(confirmedBooking.startsAt).toLocaleString("en-ZA", {
-                      weekday: "short",
-                      day: "numeric",
-                      month: "short",
-                      hour: "2-digit",
-                      minute: "2-digit",
-                    })}
+                    {new Date(confirmedBooking.startsAt).toLocaleString(
+                      "en-ZA",
+                      {
+                        weekday: "short",
+                        day: "numeric",
+                        month: "short",
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      },
+                    )}
                   </strong>
                 </div>
                 <div className="glam-summary-row">
                   <span className="summary-label">Estimated Total:</span>
-                  <strong className="summary-price">R {confirmedBooking.price}</strong>
+                  <strong className="summary-price">
+                    R {confirmedBooking.price}
+                  </strong>
                 </div>
                 {creatorLocation && (
                   <div className="glam-summary-row">
@@ -514,14 +536,18 @@ export default function BookingModal({
                     href={`https://wa.me/${whatsappNumberClean}?text=${encodeURIComponent(
                       `Hi ${creatorName}! I just submitted an appointment request on Glam SA for "${
                         confirmedBooking.serviceName
-                      }" on ${new Date(confirmedBooking.startsAt).toLocaleDateString("en-ZA", {
+                      }" on ${new Date(
+                        confirmedBooking.startsAt,
+                      ).toLocaleDateString("en-ZA", {
                         weekday: "short",
                         day: "numeric",
                         month: "short",
-                      })} at ${new Date(confirmedBooking.startsAt).toLocaleTimeString("en-ZA", {
+                      })} at ${new Date(
+                        confirmedBooking.startsAt,
+                      ).toLocaleTimeString("en-ZA", {
                         hour: "2-digit",
                         minute: "2-digit",
-                      })}. Excited to see you!`
+                      })}. Excited to see you!`,
                     )}`}
                     target="_blank"
                     rel="noreferrer"
@@ -542,7 +568,11 @@ export default function BookingModal({
                   <IconCalendar size={16} /> View in My Appointments
                 </button>
 
-                <button type="button" className="btn-ghost btn-block" onClick={onClose}>
+                <button
+                  type="button"
+                  className="btn-ghost btn-block"
+                  onClick={onClose}
+                >
                   Done
                 </button>
               </div>
@@ -567,11 +597,14 @@ export default function BookingModal({
                 </div>
 
                 {isLoadingData ? (
-                  <div className="glam-loading-pill">Loading menu & availability...</div>
+                  <div className="glam-loading-pill">
+                    Loading menu & availability...
+                  </div>
                 ) : services.length > 0 ? (
                   <div className="glam-services-chips-grid">
                     {services.map((service) => {
-                      const isSelected = String(service.id) === selectedServiceId;
+                      const isSelected =
+                        String(service.id) === selectedServiceId;
                       return (
                         <button
                           key={service.id}
@@ -579,20 +612,28 @@ export default function BookingModal({
                           className={`glam-service-card-item ${
                             isSelected ? "selected" : ""
                           }`}
-                          onClick={() => setSelectedServiceId(String(service.id))}
+                          onClick={() =>
+                            setSelectedServiceId(String(service.id))
+                          }
                         >
                           <div className="glam-service-card-top">
                             <div className="glam-service-radio">
-                              {isSelected && <span className="glam-radio-dot" />}
+                              {isSelected && (
+                                <span className="glam-radio-dot" />
+                              )}
                             </div>
-                            <strong className="glam-service-name">{service.name}</strong>
+                            <strong className="glam-service-name">
+                              {service.name}
+                            </strong>
                           </div>
                           <div className="glam-service-card-bottom">
                             <span className="glam-service-duration">
                               <IconClock size={12} />
                               {formatDurationMinutes(service.durationMinutes)}
                             </span>
-                            <span className="glam-service-price">R {service.price}</span>
+                            <span className="glam-service-price">
+                              R {service.price}
+                            </span>
                           </div>
                         </button>
                       );
@@ -637,8 +678,9 @@ export default function BookingModal({
                     <div>
                       <strong>No Pre-Set Calendar Slots Right Now</strong>
                       <p>
-                        {creatorName} accepts appointment requests via direct messaging or
-                        WhatsApp. You can send a request with your desired time below.
+                        {creatorName} accepts appointment requests via direct
+                        messaging or WhatsApp. You can send a request with your
+                        desired time below.
                       </p>
                     </div>
                     <div className="glam-no-slots-actions">
@@ -663,38 +705,143 @@ export default function BookingModal({
                   </div>
                 ) : (
                   <>
-                    {/* Horizontal Date Pills */}
-                    <div className="glam-date-strip">
-                      {availableDates.map((dateKey) => {
-                        const isSelected = dateKey === selectedDateKey;
-                        const count = slotsByDate[dateKey]?.length || 0;
-                        const parts = dateKey.split(" ");
-                        const weekday = parts[0];
-                        const dayNum = parts[1];
-                        const month = parts[2];
+                    {/* Calendar Grid View */}
+                    <div className="glam-calendar-container">
+                      <div className="glam-calendar-grid">
+                        {/* Weekday headers */}
+                        <div className="glam-calendar-weekdays">
+                          {[
+                            "Sun",
+                            "Mon",
+                            "Tue",
+                            "Wed",
+                            "Thu",
+                            "Fri",
+                            "Sat",
+                          ].map((day) => (
+                            <div key={day} className="glam-weekday-label">
+                              {day}
+                            </div>
+                          ))}
+                        </div>
 
-                        return (
-                          <button
-                            key={dateKey}
-                            type="button"
-                            className={`glam-date-pill-card ${
-                              isSelected ? "active" : ""
-                            }`}
-                            onClick={() => {
-                              setSelectedDateKey(dateKey);
-                              const firstSlot = slotsByDate[dateKey]?.[0];
-                              if (firstSlot) setSelectedSlotId(String(firstSlot.id));
-                            }}
-                          >
-                            <span className="date-weekday">{weekday}</span>
-                            <strong className="date-day-number">{dayNum}</strong>
-                            <span className="date-month">{month}</span>
-                            <span className="date-slot-indicator">
-                              {count} slot{count > 1 ? "s" : ""}
-                            </span>
-                          </button>
-                        );
-                      })}
+                        {/* Calendar dates */}
+                        <div className="glam-calendar-dates">
+                          {(() => {
+                            if (availableDates.length === 0) return null;
+
+                            // Get the first and last available dates
+                            const firstAvailableDate = new Date(
+                              slots[0].startsAt,
+                            );
+                            const lastAvailableDate = new Date(
+                              slots[slots.length - 1].startsAt,
+                            );
+
+                            // Start from the beginning of the month of the first available date
+                            const startOfMonth = new Date(
+                              firstAvailableDate.getFullYear(),
+                              firstAvailableDate.getMonth(),
+                              1,
+                            );
+
+                            // Find what day of week the month starts on
+                            const startDayOfWeek = startOfMonth.getDay();
+
+                            // Calculate how many days to show
+                            const daysInMonth = new Date(
+                              firstAvailableDate.getFullYear(),
+                              firstAvailableDate.getMonth() + 1,
+                              0,
+                            ).getDate();
+                            const totalCells =
+                              Math.ceil((startDayOfWeek + daysInMonth) / 7) * 7;
+
+                            const calendarDays = [];
+
+                            for (let i = 0; i < totalCells; i++) {
+                              const dayNum = i - startDayOfWeek + 1;
+
+                              if (dayNum < 1 || dayNum > daysInMonth) {
+                                // Empty cell
+                                calendarDays.push(
+                                  <div
+                                    key={`empty-${i}`}
+                                    className="glam-calendar-day empty"
+                                  />,
+                                );
+                              } else {
+                                const currentDate = new Date(
+                                  firstAvailableDate.getFullYear(),
+                                  firstAvailableDate.getMonth(),
+                                  dayNum,
+                                );
+                                const dateKey = currentDate.toLocaleDateString(
+                                  "en-ZA",
+                                  {
+                                    weekday: "short",
+                                    day: "numeric",
+                                    month: "short",
+                                  },
+                                );
+
+                                const hasSlots =
+                                  slotsByDate[dateKey]?.length > 0;
+                                const isSelected = dateKey === selectedDateKey;
+                                const isToday =
+                                  currentDate.toDateString() ===
+                                  new Date().toDateString();
+                                const slotCount =
+                                  slotsByDate[dateKey]?.length || 0;
+
+                                calendarDays.push(
+                                  <button
+                                    key={dateKey}
+                                    type="button"
+                                    disabled={!hasSlots}
+                                    className={`glam-calendar-day ${hasSlots ? "available" : "unavailable"} ${isSelected ? "selected" : ""} ${isToday ? "today" : ""}`}
+                                    onClick={() => {
+                                      if (hasSlots) {
+                                        setSelectedDateKey(dateKey);
+                                        const firstSlot =
+                                          slotsByDate[dateKey]?.[0];
+                                        if (firstSlot)
+                                          setSelectedSlotId(
+                                            String(firstSlot.id),
+                                          );
+                                      }
+                                    }}
+                                  >
+                                    <span className="day-number">{dayNum}</span>
+                                    {hasSlots && (
+                                      <span className="slot-dots">
+                                        {slotCount}
+                                      </span>
+                                    )}
+                                  </button>,
+                                );
+                              }
+                            }
+
+                            return calendarDays;
+                          })()}
+                        </div>
+                      </div>
+
+                      {/* Month/Year Header */}
+                      {slots.length > 0 && (
+                        <div className="glam-calendar-header">
+                          <h4>
+                            {new Date(slots[0].startsAt).toLocaleDateString(
+                              "en-ZA",
+                              {
+                                month: "long",
+                                year: "numeric",
+                              },
+                            )}
+                          </h4>
+                        </div>
+                      )}
                     </div>
 
                     {/* Categorized Time Slots */}
@@ -706,11 +853,14 @@ export default function BookingModal({
                           </span>
                           <div className="glam-time-chips-wrap">
                             {categorizedSlots.morning.map((slot) => {
-                              const isSelected = String(slot.id) === selectedSlotId;
-                              const timeStr = new Date(slot.startsAt).toLocaleTimeString(
-                                "en-ZA",
-                                { hour: "2-digit", minute: "2-digit" }
-                              );
+                              const isSelected =
+                                String(slot.id) === selectedSlotId;
+                              const timeStr = new Date(
+                                slot.startsAt,
+                              ).toLocaleTimeString("en-ZA", {
+                                hour: "2-digit",
+                                minute: "2-digit",
+                              });
                               return (
                                 <button
                                   key={slot.id}
@@ -718,7 +868,9 @@ export default function BookingModal({
                                   className={`glam-time-chip ${
                                     isSelected ? "selected" : ""
                                   }`}
-                                  onClick={() => setSelectedSlotId(String(slot.id))}
+                                  onClick={() =>
+                                    setSelectedSlotId(String(slot.id))
+                                  }
                                 >
                                   <IconClock size={12} />
                                   <span>{timeStr}</span>
@@ -737,11 +889,14 @@ export default function BookingModal({
                           </span>
                           <div className="glam-time-chips-wrap">
                             {categorizedSlots.afternoon.map((slot) => {
-                              const isSelected = String(slot.id) === selectedSlotId;
-                              const timeStr = new Date(slot.startsAt).toLocaleTimeString(
-                                "en-ZA",
-                                { hour: "2-digit", minute: "2-digit" }
-                              );
+                              const isSelected =
+                                String(slot.id) === selectedSlotId;
+                              const timeStr = new Date(
+                                slot.startsAt,
+                              ).toLocaleTimeString("en-ZA", {
+                                hour: "2-digit",
+                                minute: "2-digit",
+                              });
                               return (
                                 <button
                                   key={slot.id}
@@ -749,7 +904,9 @@ export default function BookingModal({
                                   className={`glam-time-chip ${
                                     isSelected ? "selected" : ""
                                   }`}
-                                  onClick={() => setSelectedSlotId(String(slot.id))}
+                                  onClick={() =>
+                                    setSelectedSlotId(String(slot.id))
+                                  }
                                 >
                                   <IconClock size={12} />
                                   <span>{timeStr}</span>
@@ -768,11 +925,14 @@ export default function BookingModal({
                           </span>
                           <div className="glam-time-chips-wrap">
                             {categorizedSlots.evening.map((slot) => {
-                              const isSelected = String(slot.id) === selectedSlotId;
-                              const timeStr = new Date(slot.startsAt).toLocaleTimeString(
-                                "en-ZA",
-                                { hour: "2-digit", minute: "2-digit" }
-                              );
+                              const isSelected =
+                                String(slot.id) === selectedSlotId;
+                              const timeStr = new Date(
+                                slot.startsAt,
+                              ).toLocaleTimeString("en-ZA", {
+                                hour: "2-digit",
+                                minute: "2-digit",
+                              });
                               return (
                                 <button
                                   key={slot.id}
@@ -780,7 +940,9 @@ export default function BookingModal({
                                   className={`glam-time-chip ${
                                     isSelected ? "selected" : ""
                                   }`}
-                                  onClick={() => setSelectedSlotId(String(slot.id))}
+                                  onClick={() =>
+                                    setSelectedSlotId(String(slot.id))
+                                  }
                                 >
                                   <IconClock size={12} />
                                   <span>{timeStr}</span>
@@ -843,8 +1005,12 @@ export default function BookingModal({
                 <div className="glam-footer-price-summary">
                   <span className="summary-total-label">Estimated Total:</span>
                   <div className="summary-price-line">
-                    <strong className="summary-total-price">{currentPrice}</strong>
-                    <span className="summary-duration">({currentDuration})</span>
+                    <strong className="summary-total-price">
+                      {currentPrice}
+                    </strong>
+                    <span className="summary-duration">
+                      ({currentDuration})
+                    </span>
                   </div>
                   <small className="summary-payment-terms">
                     Pay at appointment · No upfront deposit required
@@ -873,8 +1039,8 @@ export default function BookingModal({
                ───────────────────────────────────────────────────────────── */
             <div className="glam-inquire-flow">
               <p className="glam-inquire-desc">
-                Have custom questions, group bookings, or need a specific time not listed?
-                Contact <strong>{creatorName}</strong> directly.
+                Have custom questions, group bookings, or need a specific time
+                not listed? Contact <strong>{creatorName}</strong> directly.
               </p>
 
               <div className="glam-inquire-channels">
@@ -885,11 +1051,13 @@ export default function BookingModal({
                     rel="noreferrer"
                     className="btn-whatsapp"
                   >
-                    <IconWhatsApp size={18} /> Chat with {creatorName} on WhatsApp
+                    <IconWhatsApp size={18} /> Chat with {creatorName} on
+                    WhatsApp
                   </a>
                 ) : (
                   <div className="whatsapp-unavailable-notice">
-                    <IconWhatsApp size={16} /> Stylist hasn't enabled direct WhatsApp inquiries.
+                    <IconWhatsApp size={16} /> Stylist hasn't enabled direct
+                    WhatsApp inquiries.
                   </div>
                 )}
 
@@ -916,7 +1084,8 @@ export default function BookingModal({
 
                 {inquirySent && (
                   <p className="glam-inquiry-status-msg">
-                    <IconCheck size={14} /> Message sent! View responses in your Messages tab.
+                    <IconCheck size={14} /> Message sent! View responses in your
+                    Messages tab.
                   </p>
                 )}
 

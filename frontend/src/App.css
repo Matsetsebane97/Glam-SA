@@ -3469,6 +3469,7 @@ body {
 }
 
 /* ─ Actions ─────────────────────────────────────────────────────────────── */
+.post-actions {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -7310,6 +7311,123 @@ body {
 
 .glam-date-strip::-webkit-scrollbar {
   display: none;
+}
+
+/* Calendar Grid Container */
+.glam-calendar-container {
+  margin-top: 12px;
+  position: relative;
+}
+
+.glam-calendar-header {
+  margin-bottom: 12px;
+  text-align: center;
+}
+
+.glam-calendar-header h4 {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text, #f8fafc);
+  letter-spacing: 0.3px;
+}
+
+.glam-calendar-grid {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  padding: 12px;
+}
+
+.glam-calendar-weekdays {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+  margin-bottom: 8px;
+}
+
+.glam-weekday-label {
+  text-align: center;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--text-muted, #94a3b8);
+  letter-spacing: 0.5px;
+  padding: 4px 0;
+}
+
+.glam-calendar-dates {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 6px;
+}
+
+.glam-calendar-day {
+  aspect-ratio: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+  border: 1px solid transparent;
+  background: transparent;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+  padding: 6px 4px;
+}
+
+.glam-calendar-day.empty {
+  pointer-events: none;
+  opacity: 0;
+}
+
+.glam-calendar-day.unavailable {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.glam-calendar-day.unavailable .day-number {
+  color: var(--text-muted, #64748b);
+}
+
+.glam-calendar-day.available {
+  background: rgba(255, 255, 255, 0.04);
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+.glam-calendar-day.available:hover {
+  background: rgba(194, 111, 62, 0.08);
+  border-color: rgba(194, 111, 62, 0.3);
+  transform: scale(1.05);
+}
+
+.glam-calendar-day.selected {
+  background: rgba(194, 111, 62, 0.2);
+  border-color: var(--accent, #c26f3e);
+  box-shadow: 0 0 0 3px rgba(194, 111, 62, 0.15);
+}
+
+.glam-calendar-day.today {
+  border-color: var(--accent, #c26f3e);
+  border-width: 2px;
+}
+
+.glam-calendar-day .day-number {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text, #f8fafc);
+  line-height: 1;
+}
+
+.glam-calendar-day .slot-dots {
+  font-size: 8px;
+  font-weight: 700;
+  color: var(--accent, #c26f3e);
+  margin-top: 2px;
+  padding: 1px 4px;
+  background: rgba(194, 111, 62, 0.15);
+  border-radius: 6px;
+  line-height: 1;
 }
 
 .glam-date-pill-card {
