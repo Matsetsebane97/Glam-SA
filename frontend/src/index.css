@@ -307,3 +307,65 @@ em {
   50% { transform: scale(1.35); }
   100% { transform: scale(1); }
 }
+
+/* Text Visibility Fixes - Override hardcoded fallback colors */
+/* These ensure text is visible in both light and dark themes */
+
+/* Secondary text - should be visible but less prominent */
+.glam-booking-tabs button:not(.active),
+.glam-flow-hint,
+.bcard-look-preview span,
+.bcard-party-label,
+.bcard-notes-label,
+.active-slots-header small,
+.slot-chip span,
+.no-slots-note,
+.glam-service-duration,
+.glam-no-slots-box p,
+.summary-duration,
+.summary-payment-terms,
+.summary-label,
+.glam-success-desc,
+.glam-auth-modal-card p,
+.date-weekday,
+.date-month,
+.quick-tag-note,
+.chip-service-info small,
+.glam-default-service-card small,
+.client-hub-subtitle,
+.role-selector-sub,
+.feature-card p,
+.booking-card-info small {
+  color: var(--ink-secondary) !important;
+}
+
+/* Period labels and section headers */
+.period-label {
+  color: var(--ink-primary) !important;
+  opacity: 0.8;
+}
+
+/* Ensure all body text is visible */
+body,
+p,
+span,
+div,
+label {
+  color: var(--ink-primary);
+}
+
+/* Input placeholders */
+input::placeholder,
+textarea::placeholder {
+  color: var(--ink-muted);
+  opacity: 1;
+}
+
+/* Make sure links are visible */
+a {
+  color: var(--ink-primary);
+}
+
+a:hover {
+  color: var(--accent-primary);
+}

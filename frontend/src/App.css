@@ -6560,7 +6560,7 @@ body {
   border-radius: var(--radius-md, 8px) var(--radius-md, 8px) 0 0;
   border: none;
   background: transparent;
-  color: var(--text-muted, #94a3b8);
+  color: var(--ink-secondary);
   font-weight: 600;
   font-size: 14px;
   cursor: pointer;
@@ -6569,7 +6569,7 @@ body {
 }
 
 .inbox-tab-btn:hover {
-  color: var(--text, #f8fafc);
+  color: var(--ink-primary);
   background: rgba(255, 255, 255, 0.04);
 }
 
@@ -6588,7 +6588,7 @@ body {
   font-size: 11px;
   font-weight: 700;
   background: rgba(255, 255, 255, 0.1);
-  color: var(--text, #f8fafc);
+  color: var(--ink-primary);
 }
 
 .tab-count-badge.badge-pending {
@@ -6622,8 +6622,8 @@ body {
   padding: 6px 14px;
   border-radius: 999px;
   border: 1px solid var(--border-subtle, rgba(255, 255, 255, 0.12));
-  background: var(--surface, rgba(255, 255, 255, 0.03));
-  color: var(--text-muted, #94a3b8);
+  background: var(--bg-surface);
+  color: var(--ink-secondary);
   font-size: 13px;
   font-weight: 500;
   cursor: pointer;
@@ -6632,7 +6632,7 @@ body {
 
 .booking-pill-btn:hover {
   background: rgba(255, 255, 255, 0.08);
-  color: var(--text, #f8fafc);
+  color: var(--ink-primary);
 }
 
 .booking-pill-btn.active {
@@ -6703,7 +6703,7 @@ body {
   margin: 0 0 4px;
   font-size: 16px;
   font-weight: 600;
-  color: var(--text, #f8fafc);
+  color: var(--ink-primary);
 }
 
 .bcard-price {
@@ -6763,7 +6763,7 @@ body {
 
 .bcard-look-preview span {
   font-size: 12px;
-  color: var(--text-muted, #94a3b8);
+  color: var(--ink-secondary);
 }
 
 .bcard-body {
@@ -6777,7 +6777,7 @@ body {
   align-items: center;
   gap: 8px;
   font-size: 13px;
-  color: var(--text, #f8fafc);
+  color: var(--ink-primary);
 }
 
 .bcard-party-avatar {
@@ -6801,7 +6801,7 @@ body {
 }
 
 .bcard-party-label {
-  color: var(--text-muted, #94a3b8);
+  color: var(--ink-secondary);
   font-size: 12px;
   margin-right: 4px;
 }
@@ -6816,13 +6816,13 @@ body {
 
 .bcard-notes-label {
   font-weight: 600;
-  color: var(--text-muted, #94a3b8);
+  color: var(--ink-secondary);
   margin-right: 4px;
 }
 
 .bcard-notes-box p {
   margin: 2px 0 0;
-  color: var(--text, #f8fafc);
+  color: var(--ink-primary);
   font-style: italic;
 }
 
@@ -6867,7 +6867,7 @@ body {
   padding: 6px 10px;
   border-radius: var(--radius-sm, 6px);
   background: transparent;
-  color: var(--text, #f8fafc);
+  color: var(--ink-primary);
   border: 1px solid var(--border-subtle, rgba(255, 255, 255, 0.15));
   font-size: 12px;
   font-weight: 500;
@@ -6904,7 +6904,7 @@ body {
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
-  background: var(--surface, rgba(255, 255, 255, 0.03));
+  background: var(--bg-surface);
   border: 1px solid var(--border-subtle, rgba(255, 255, 255, 0.08));
   border-radius: var(--radius-lg, 14px);
   padding: 24px;
@@ -6913,13 +6913,13 @@ body {
 .availability-gen-form h3 {
   margin: 0 0 4px;
   font-size: 17px;
-  color: var(--text, #f8fafc);
+  color: var(--ink-primary);
 }
 
 .availability-gen-desc {
   margin: 0 0 16px;
   font-size: 13px;
-  color: var(--text-muted, #94a3b8);
+  color: var(--ink-secondary);
 }
 
 .availability-fields-grid {
@@ -6943,11 +6943,11 @@ body {
 .active-slots-header h3 {
   margin: 0;
   font-size: 15px;
-  color: var(--text, #f8fafc);
+  color: var(--ink-primary);
 }
 
 .active-slots-header small {
-  color: var(--text-muted, #94a3b8);
+  color: var(--ink-secondary);
 }
 
 .slots-chips-container {
@@ -6972,7 +6972,7 @@ body {
 
 .slot-chip.available {
   border-color: rgba(16, 185, 129, 0.3);
-  color: var(--text, #f8fafc);
+  color: var(--ink-primary);
 }
 
 .slot-chip.booked {
@@ -6988,12 +6988,12 @@ body {
 
 .slot-chip strong {
   font-weight: 600;
-  color: var(--text, #f8fafc);
+  color: var(--ink-primary);
 }
 
 .slot-chip span {
   font-size: 11px;
-  color: var(--text-muted, #94a3b8);
+  color: var(--ink-secondary);
 }
 
 .slot-booked-tag {
@@ -7019,7 +7019,7 @@ body {
 
 .no-slots-note {
   font-size: 13px;
-  color: var(--text-muted, #94a3b8);
+  color: var(--ink-secondary);
   font-style: italic;
 }
 
@@ -7051,11 +7051,9 @@ body {
 }
 
 .glam-booking-sheet {
-  background: #181914;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  box-shadow:
-    0 24px 48px -12px rgba(0, 0, 0, 0.8),
-    0 0 0 1px rgba(255, 255, 255, 0.05);
+  background: var(--bg-surface-elevated);
+  border: 1px solid var(--border-medium);
+  box-shadow: var(--shadow-lg);
   border-radius: var(--radius-xl, 20px);
   width: 100%;
   max-width: 540px;
@@ -7083,7 +7081,8 @@ body {
   align-items: center;
   justify-content: space-between;
   padding: 18px 20px 14px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+  border-bottom: 1px solid var(--border-subtle);
+  background: var(--bg-surface);
 }
 
 .glam-sheet-artist {
@@ -7116,19 +7115,19 @@ body {
   margin: 0;
   font-size: 16px;
   font-weight: 700;
-  color: var(--text, #f8fafc);
+  color: var(--ink-primary);
 }
 
 .glam-artist-sub {
   margin: 2px 0 0;
   font-size: 13px;
-  color: var(--text-muted, #94a3b8);
+  color: var(--ink-secondary);
 }
 
 .glam-modal-close {
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  color: var(--text-muted, #94a3b8);
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-medium);
+  color: var(--ink-secondary);
   width: 32px;
   height: 32px;
   border-radius: 50%;
@@ -7141,15 +7140,15 @@ body {
 }
 
 .glam-modal-close:hover {
-  background: rgba(255, 255, 255, 0.14);
-  color: var(--text, #f8fafc);
+  background: var(--bg-muted);
+  color: var(--ink-primary);
   transform: scale(1.05);
 }
 
 .glam-booking-tabs {
   display: flex;
-  background: rgba(0, 0, 0, 0.25);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  background: var(--bg-secondary);
+  border-bottom: 1px solid var(--border-subtle);
   padding: 4px 16px 0;
   gap: 8px;
 }
@@ -7165,14 +7164,14 @@ body {
   font-weight: 600;
   border: none;
   background: transparent;
-  color: var(--text-muted, #94a3b8);
+  color: var(--ink-secondary);
   border-bottom: 2px solid transparent;
   cursor: pointer;
   transition: all 0.15s ease;
 }
 
 .glam-booking-tab:hover {
-  color: var(--text, #f8fafc);
+  color: var(--ink-primary);
 }
 
 .glam-booking-tab.active {
@@ -7205,13 +7204,13 @@ body {
   align-items: center;
   font-size: 13px;
   font-weight: 600;
-  color: var(--text, #f8fafc);
+  color: var(--ink-primary);
 }
 
 .glam-flow-hint {
   font-size: 11px;
   font-weight: normal;
-  color: var(--text-muted, #94a3b8);
+  color: var(--ink-secondary);
 }
 
 /* Services Chips Grid */
@@ -7248,12 +7247,12 @@ body {
 .chip-service-info strong {
   display: block;
   font-size: 13px;
-  color: var(--text, #f8fafc);
+  color: var(--ink-primary);
 }
 
 .chip-service-info small {
   font-size: 11px;
-  color: var(--text-muted, #94a3b8);
+  color: var(--ink-secondary);
 }
 
 .chip-service-price {
@@ -7276,12 +7275,12 @@ body {
 .glam-default-service-card strong {
   display: block;
   font-size: 14px;
-  color: var(--text, #f8fafc);
+  color: var(--ink-primary);
 }
 
 .glam-default-service-card small {
   font-size: 12px;
-  color: var(--text-muted, #94a3b8);
+  color: var(--ink-secondary);
 }
 
 /* No Slots Box */
@@ -7293,7 +7292,7 @@ body {
   display: flex;
   flex-direction: column;
   gap: 12px;
-  color: var(--text, #f8fafc);
+  color: var(--ink-primary);
 }
 
 .glam-no-slots-box strong {
@@ -7306,7 +7305,7 @@ body {
 .glam-no-slots-box p {
   margin: 0;
   font-size: 12px;
-  color: var(--text-muted, #94a3b8);
+  color: var(--ink-secondary);
   line-height: 1.4;
 }
 
@@ -7516,21 +7515,21 @@ body {
   font-size: 10px;
   font-weight: 600;
   text-transform: uppercase;
-  color: var(--text-muted, #94a3b8);
+  color: var(--ink-secondary);
   letter-spacing: 0.5px;
 }
 
 .date-day-number {
   font-size: 18px;
   font-weight: 800;
-  color: var(--text, #f8fafc);
+  color: var(--ink-primary);
   margin: 2px 0;
   line-height: 1.1;
 }
 
 .date-month {
   font-size: 10px;
-  color: var(--text-muted, #94a3b8);
+  color: var(--ink-secondary);
 }
 
 .date-slot-indicator {
@@ -7628,14 +7627,14 @@ body {
   font-size: 11px;
   background: rgba(255, 255, 255, 0.04);
   border: 1px dashed rgba(255, 255, 255, 0.15);
-  color: var(--text-muted, #94a3b8);
+  color: var(--ink-secondary);
   cursor: pointer;
   transition: all 0.15s ease;
 }
 
 .glam-quick-tag-chip:hover {
   border-color: var(--accent, #c26f3e);
-  color: var(--text, #f8fafc);
+  color: var(--ink-primary);
 }
 
 .glam-quick-tag-chip.applied {
@@ -7703,7 +7702,7 @@ body {
 
 .glam-service-name {
   font-size: 13px;
-  color: var(--text, #f8fafc);
+  color: var(--ink-primary);
   font-weight: 600;
 }
 
@@ -7716,7 +7715,7 @@ body {
 
 .glam-service-duration {
   font-size: 11px;
-  color: var(--text-muted, #94a3b8);
+  color: var(--ink-secondary);
   display: inline-flex;
   align-items: center;
   gap: 4px;
@@ -7731,7 +7730,7 @@ body {
 .glam-loading-pill {
   padding: 12px;
   font-size: 13px;
-  color: var(--text-muted, #94a3b8);
+  color: var(--ink-secondary);
   text-align: center;
   background: rgba(255, 255, 255, 0.02);
   border-radius: 8px;
@@ -7743,7 +7742,7 @@ body {
   border-radius: var(--radius-md, 10px);
   background: rgba(0, 0, 0, 0.3);
   border: 1px solid rgba(255, 255, 255, 0.1);
-  color: var(--text, #f8fafc);
+  color: var(--ink-primary);
   padding: 10px 12px;
   font-size: 13px;
   font-family: inherit;
@@ -7775,7 +7774,7 @@ body {
   font-size: 11px;
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  color: var(--text-muted, #94a3b8);
+  color: var(--ink-secondary);
 }
 
 .summary-price-line {
@@ -7792,12 +7791,12 @@ body {
 
 .summary-duration {
   font-size: 12px;
-  color: var(--text-muted, #94a3b8);
+  color: var(--ink-secondary);
 }
 
 .summary-payment-terms {
   font-size: 11px;
-  color: var(--text-muted, #94a3b8);
+  color: var(--ink-secondary);
   margin-top: 2px;
   display: block;
 }
@@ -7850,13 +7849,13 @@ body {
 .glam-booking-success-view h2 {
   margin: 0;
   font-size: 20px;
-  color: var(--text, #f8fafc);
+  color: var(--ink-primary);
 }
 
 .glam-success-desc {
   margin: 0 0 8px;
   font-size: 13px;
-  color: var(--text-muted, #94a3b8);
+  color: var(--ink-secondary);
   max-width: 360px;
 }
 
@@ -7876,11 +7875,11 @@ body {
   display: flex;
   justify-content: space-between;
   font-size: 13px;
-  color: var(--text, #f8fafc);
+  color: var(--ink-primary);
 }
 
 .summary-label {
-  color: var(--text-muted, #94a3b8);
+  color: var(--ink-secondary);
 }
 
 .summary-price {
@@ -7906,7 +7905,7 @@ body {
 .glam-inquire-desc {
   margin: 0;
   font-size: 13px;
-  color: var(--text-muted, #94a3b8);
+  color: var(--ink-secondary);
 }
 
 .glam-inquire-channels {
@@ -7924,7 +7923,7 @@ body {
   background: rgba(255, 255, 255, 0.03);
   border: 1px solid rgba(255, 255, 255, 0.06);
   font-size: 12px;
-  color: var(--text-muted, #94a3b8);
+  color: var(--ink-secondary);
 }
 
 .glam-inquire-divider {
@@ -7932,7 +7931,7 @@ body {
   align-items: center;
   text-align: center;
   font-size: 11px;
-  color: var(--text-muted, #94a3b8);
+  color: var(--ink-secondary);
   margin: 4px 0;
 }
 
@@ -7995,13 +7994,13 @@ body {
 .glam-auth-modal-card h3 {
   margin: 0 0 8px;
   font-size: 18px;
-  color: var(--text, #f8fafc);
+  color: var(--ink-primary);
 }
 
 .glam-auth-modal-card p {
   margin: 0 0 20px;
   font-size: 13px;
-  color: var(--text-muted, #94a3b8);
+  color: var(--ink-secondary);
   line-height: 1.5;
 }
 
@@ -8062,7 +8061,7 @@ body {
   border-radius: 8px;
   background: rgba(255, 255, 255, 0.06);
   border: 1px solid rgba(255, 255, 255, 0.1);
-  color: var(--text, #f8fafc);
+  color: var(--ink-primary);
   font-size: 13px;
   font-weight: 500;
   cursor: pointer;
@@ -8167,7 +8166,7 @@ body {
 
 .role-selector-sub {
   font-size: 13px;
-  color: var(--ink-muted, #64748b);
+  color: var(--ink-secondary);
   margin: 0;
   line-height: 1.4;
 }
@@ -8221,7 +8220,7 @@ body {
 .account-role-toggle-btn .role-btn-desc {
   font-size: 12px;
   line-height: 1.45;
-  color: var(--ink-muted, #64748b);
+  color: var(--ink-secondary);
 }
 
 /* Client Profile Hub */
@@ -8242,7 +8241,7 @@ body {
 
 .client-hub-subtitle {
   font-size: 14px;
-  color: var(--ink-muted, #64748b);
+  color: var(--ink-secondary);
   margin: 0;
   max-width: 620px;
 }
@@ -8304,7 +8303,11 @@ body {
 .client-hub-card p {
   font-size: 13px;
   line-height: 1.5;
-  color: var(--ink-muted, #64748b);
+  color: var(--ink-secondary);
   margin: 0;
   flex: 1;
 }
+
+
+
+
