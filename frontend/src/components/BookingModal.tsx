@@ -177,18 +177,10 @@ export default function BookingModal({
           );
         }
 
-        // Group slots by formatted date key
-        if (availableSlots.length > 0) {
-          const firstSlotDate = new Date(
-            availableSlots[0].startsAt,
-          ).toLocaleDateString("en-ZA", {
-            weekday: "short",
-            day: "numeric",
-            month: "short",
-          });
-          setSelectedDateKey(firstSlotDate);
-          setSelectedSlotId(String(availableSlots[0].id));
-        }
+        // Don't auto-select date - let user choose from calendar
+        // Just clear any previous selections
+        setSelectedDateKey("");
+        setSelectedSlotId("");
       })
       .catch(() => setErrorMessage("Unable to load stylist calendar."))
       .finally(() => setIsLoadingData(false));
@@ -661,11 +653,11 @@ export default function BookingModal({
                 <div className="glam-flow-header-row">
                   <label className="glam-flow-label">
                     <span className="flow-step-num">2</span>
-                    <span>Choose Date & Time</span>
+                    <span>Choose Date</span>
                   </label>
                   {slots.length > 0 && (
                     <span className="glam-flow-hint">
-                      {slots.length} open slot{slots.length > 1 ? "s" : ""}
+                      {availableDates.length} day{availableDates.length > 1 ? "s" : ""} available
                     </span>
                   )}
                 </div>
@@ -707,6 +699,18 @@ export default function BookingModal({
                   <>
                     {/* Calendar Grid View */}
                     <div className="glam-calendar-container">
+                      {/* Month/Year Header */}
+                      {slots.length > 0 && (
+                        <div className="glam-calendar-header">
+                          <h4>
+                            {new Date(slots[0].startsAt).toLocaleDateString("en-ZA", {
+                              month: "long",
+                              year: "numeric",
+                            })}
+                          </h4>
+                        </div>
+                      )}
+                      
                       <div className="glam-calendar-grid">
                         {/* Weekday headers */}
                         <div className="glam-calendar-weekdays">
@@ -841,51 +845,64 @@ export default function BookingModal({
                       )}
                     </div>
 
-                    {/* Categorized Time Slots */}
-                    <div className="glam-time-periods-container">
-                      {categorizedSlots.morning.length > 0 && (
-                        <div className="glam-time-period-group">
-                          <span className="period-label">
-                            <IconSun size={14} /> Morning
+                    {/* Step 3: Time Slots (Only show after date selection) */}
+                    {selectedDateKey && currentDaySlots.length > 0 && (
+                      <div className="glam-time-selection-section">
+                        <div className="glam-flow-header-row">
+                          <label className="glam-flow-label">
+                            <span className="flow-step-num">3</span>
+                            <span>Choose Time</span>
+                          </label>
+                          <span className="glam-flow-hint">
+                            {currentDaySlots.length} slot{currentDaySlots.length > 1 ? "s" : ""} on {selectedDateKey}
                           </span>
-                          <div className="glam-time-chips-wrap">
-                            {categorizedSlots.morning.map((slot) => {
-                              const isSelected =
-                                String(slot.id) === selectedSlotId;
-                              const timeStr = new Date(
-                                slot.startsAt,
-                              ).toLocaleTimeString("en-ZA", {
-                                hour: "2-digit",
-                                minute: "2-digit",
-                              });
-                              return (
-                                <button
-                                  key={slot.id}
-                                  type="button"
-                                  className={`glam-time-chip ${
-                                    isSelected ? "selected" : ""
-                                  }`}
-                                  onClick={() =>
-                                    setSelectedSlotId(String(slot.id))
-                                  }
-                                >
-                                  <IconClock size={12} />
-                                  <span>{timeStr}</span>
-                                  {isSelected && <IconCheck size={12} />}
-                                </button>
-                              );
-                            })}
-                          </div>
                         </div>
-                      )}
 
-                      {categorizedSlots.afternoon.length > 0 && (
-                        <div className="glam-time-period-group">
-                          <span className="period-label">
-                            <IconSun size={14} /> Afternoon
-                          </span>
-                          <div className="glam-time-chips-wrap">
-                            {categorizedSlots.afternoon.map((slot) => {
+                        {/* Categorized Time Slots */}
+                        <div className="glam-time-periods-container">
+                          {categorizedSlots.morning.length > 0 && (
+                            <div className="glam-time-period-group">
+                              <span className="period-label">
+                                <IconSun size={14} /> Morning
+                              </span>
+                              <div className="glam-time-chips-wrap">
+                                {categorizedSlots.morning.map((slot) => {
+                                  const isSelected =
+                                    String(slot.id) === selectedSlotId;
+                                  const timeStr = new Date(
+                                    slot.startsAt,
+                                  ).toLocaleTimeString("en-ZA", {
+                                    hour: "2-digit",
+                                    minute: "2-digit",
+                                  });
+                                  return (
+                                    <button
+                                      key={slot.id}
+                                      type="button"
+                                      className={`glam-time-chip ${
+                                        isSelected ? "selected" : ""
+                                      }`}
+                                      onClick={() =>
+                                        setSelectedSlotId(String(slot.id))
+                                      }
+                                    >
+                                      <IconClock size={12} />
+                                      <span>{timeStr}</span>
+                                      {isSelected && <IconCheck size={12} />}
+                                    </button>
+                                  );
+                                })}
+                              </div>
+                            </div>
+                          )}
+
+                          {categorizedSlots.afternoon.length > 0 && (
+                            <div className="glam-time-period-group">
+                              <span className="period-label">
+                                <IconSun size={14} /> Afternoon
+                              </span>
+                              <div className="glam-time-chips-wrap">
+                                {categorizedSlots.afternoon.map((slot) => {
                               const isSelected =
                                 String(slot.id) === selectedSlotId;
                               const timeStr = new Date(
@@ -950,46 +967,50 @@ export default function BookingModal({
                           </div>
                         </div>
                       )}
-                    </div>
+                        </div>
+                      </div>
+                    )}
                   </>
                 )}
               </div>
 
-              {/* Step 3: Special Requests / Notes & Quick Tags */}
-              <div className="glam-flow-section">
-                <div className="glam-flow-header-row">
-                  <label className="glam-flow-label">
-                    <span className="flow-step-num">3</span>
-                    <span>Notes & Preferences (Optional)</span>
-                  </label>
-                </div>
+              {/* Step 4: Special Requests / Notes & Quick Tags (Only show after time selection) */}
+              {selectedDateKey && selectedSlotId && (
+                <div className="glam-flow-section">
+                  <div className="glam-flow-header-row">
+                    <label className="glam-flow-label">
+                      <span className="flow-step-num">4</span>
+                      <span>Notes & Preferences (Optional)</span>
+                    </label>
+                  </div>
 
-                {/* Quick Add Chips */}
-                <div className="glam-quick-tags-row">
-                  {QUICK_TAGS.map((tag) => {
-                    const isApplied = notes.includes(tag);
-                    return (
-                      <button
-                        key={tag}
-                        type="button"
-                        className={`glam-quick-tag-chip ${isApplied ? "applied" : ""}`}
-                        onClick={() => toggleQuickTag(tag)}
-                      >
-                        {isApplied ? "✓ " : "+ "}
-                        {tag}
-                      </button>
-                    );
-                  })}
-                </div>
+                  {/* Quick Add Chips */}
+                  <div className="glam-quick-tags-row">
+                    {QUICK_TAGS.map((tag) => {
+                      const isApplied = notes.includes(tag);
+                      return (
+                        <button
+                          key={tag}
+                          type="button"
+                          className={`glam-quick-tag-chip ${isApplied ? "applied" : ""}`}
+                          onClick={() => toggleQuickTag(tag)}
+                        >
+                          {isApplied ? "✓ " : "+ "}
+                          {tag}
+                        </button>
+                      );
+                    })}
+                  </div>
 
-                <textarea
-                  className="glam-booking-notes"
-                  rows={2}
-                  placeholder="e.g. Hair length, preferred tone, specific styling reference, or salon visit details..."
-                  value={notes}
-                  onChange={(e) => setNotes(e.target.value)}
-                />
-              </div>
+                  <textarea
+                    className="glam-booking-notes"
+                    rows={2}
+                    placeholder="e.g. Hair length, preferred tone, specific styling reference, or salon visit details..."
+                    value={notes}
+                    onChange={(e) => setNotes(e.target.value)}
+                  />
+                </div>
+              )}
 
               {errorMessage && (
                 <div className="profile-error" role="alert">

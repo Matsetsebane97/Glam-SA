@@ -7488,11 +7488,17 @@ body {
 }
 
 /* Categorized Time Slots */
+.glam-time-selection-section {
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
 .glam-time-periods-container {
   display: flex;
   flex-direction: column;
   gap: 12px;
-  margin-top: 6px;
+  margin-top: 12px;
 }
 
 .glam-time-period-group {
