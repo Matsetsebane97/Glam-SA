@@ -3020,6 +3020,7 @@ body {
   border-radius: var(--radius-sm);
   background: transparent;
   text-align: left;
+  position: relative;
 }
 .notification-item:hover {
   background: var(--bg-secondary);
@@ -3040,6 +3041,22 @@ body {
   display: grid;
   min-width: 0;
   gap: 2px;
+  flex: 1;
+}
+
+.notification-unread-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  border-radius: 10px;
+  background: var(--accent, #c26f3e);
+  color: #ffffff;
+  font-size: 10px;
+  font-weight: 700;
+  flex-shrink: 0;
 }
 .notification-copy strong,
 .notification-copy span {

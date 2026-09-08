@@ -36,7 +36,7 @@ function Topbar({ currentUser, query, onQueryChange, onNavigate }: TopbarProps) 
     }
   }, [query]);
 
-  // Conversations are the app's actionable notifications: each one represents a booking thread.
+  // Conversations with unread messages are the app's actionable notifications
   useEffect(() => {
     if (!currentUser) {
       setNotifications([]);
@@ -45,7 +45,13 @@ function Topbar({ currentUser, query, onQueryChange, onNavigate }: TopbarProps) 
 
     setIsLoadingNotifications(true);
     void getConversations()
-      .then(setNotifications)
+      .then((conversations) => {
+        // Filter to only show conversations with unread messages
+        const unreadConversations = conversations.filter(
+          (conv) => (conv.unreadCount ?? 0) > 0
+        );
+        setNotifications(unreadConversations);
+      })
       .catch(() => setNotifications([]))
       .finally(() => setIsLoadingNotifications(false));
   }, [currentUser]);
@@ -129,29 +135,55 @@ function Topbar({ currentUser, query, onQueryChange, onNavigate }: TopbarProps) 
             <div className="notification-dropdown">
               <div className="notification-header">
                 <strong>Notifications</strong>
-                {notifications.length > 0 && <span>{notifications.length} active</span>}
+                {notifications.length > 0 && (
+                  <span>
+                    {notifications.reduce((sum, n) => sum + (n.unreadCount ?? 0), 0)} unread
+                  </span>
+                )}
               </div>
               {!currentUser && (
-                <div className="notification-empty"><p>Sign in to see booking notifications.</p></div>
+                <div className="notification-empty">
+                  <p>Sign in to see booking notifications.</p>
+                </div>
               )}
               {currentUser && isLoadingNotifications && (
-                <div className="notification-empty"><p>Loading notifications...</p></div>
+                <div className="notification-empty">
+                  <p>Loading notifications...</p>
+                </div>
               )}
               {currentUser && !isLoadingNotifications && notifications.length === 0 && (
-                <div className="notification-empty"><p>No booking notifications yet.</p></div>
+                <div className="notification-empty">
+                  <p>No unread notifications.</p>
+                </div>
               )}
               {currentUser && !isLoadingNotifications && notifications.length > 0 && (
                 <div className="notification-list">
                   {notifications.slice(0, 5).map((notification) => (
-                    <button className="notification-item" type="button" key={notification.userId} onClick={openConversation}>
-                      <span className="notification-avatar">{notification.name.charAt(0).toUpperCase()}</span>
+                    <button
+                      className="notification-item"
+                      type="button"
+                      key={notification.userId}
+                      onClick={openConversation}
+                    >
+                      <span className="notification-avatar">
+                        {notification.name.charAt(0).toUpperCase()}
+                      </span>
                       <span className="notification-copy">
                         <strong>{notification.name}</strong>
                         <span>{notification.lastMessage}</span>
                       </span>
+                      {notification.unreadCount && notification.unreadCount > 0 && (
+                        <span className="notification-unread-badge">
+                          {notification.unreadCount}
+                        </span>
+                      )}
                     </button>
                   ))}
-                  <button className="notification-view-all" type="button" onClick={openConversation}>
+                  <button
+                    className="notification-view-all"
+                    type="button"
+                    onClick={openConversation}
+                  >
                     View all messages
                   </button>
                 </div>

@@ -816,6 +816,14 @@ def messages(request, recipient_id=None):
                 sender__in=[request.user, recipient_id],
                 recipient__in=[request.user, recipient_id],
             ).select_related("sender", "recipient", "post")
+            
+            # Mark messages as read when viewing conversation
+            Message.objects.filter(
+                recipient=request.user,
+                sender_id=recipient_id,
+                is_read=False
+            ).update(is_read=True)
+            
             return JsonResponse({"messages": [_message_as_dict(message) for message in messages_queryset]})
 
         messages_queryset = Message.objects.filter(
@@ -828,6 +836,14 @@ def messages(request, recipient_id=None):
         conversations = []
         for message in sorted(latest_by_user.values(), key=lambda item: item.created_at, reverse=True):
             other_user = message.recipient if message.sender_id == request.user.id else message.sender
+            
+            # Count unread messages from this conversation
+            unread_count = Message.objects.filter(
+                sender=other_user,
+                recipient=request.user,
+                is_read=False
+            ).count()
+            
             conversations.append({
                 "userId": other_user.id,
                 "name": other_user.get_full_name() or other_user.username,
@@ -835,6 +851,7 @@ def messages(request, recipient_id=None):
                 "lastMessage": message.body,
                 "createdAt": message.created_at.isoformat(),
                 "postService": message.post.service if message.post else "Booking inquiry",
+                "unreadCount": unread_count,
             })
         return JsonResponse({"conversations": conversations})
 
@@ -874,6 +891,7 @@ def _message_as_dict(message):
         "body": message.body,
         "createdAt": message.created_at.isoformat(),
         "postService": message.post.service if message.post else "Booking inquiry",
+        "isRead": message.is_read,
     }
 
 

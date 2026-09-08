@@ -49,6 +49,7 @@ export type Conversation = {
   lastMessage: string;
   createdAt: string;
   postService: string;
+  unreadCount?: number;
 };
 
 export type ServiceOffering = {
@@ -92,6 +93,7 @@ export type Message = {
   body: string;
   createdAt: string;
   postService: string;
+  isRead?: boolean;
 };
 
 export type NearbyArtist = {
