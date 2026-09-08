@@ -26,6 +26,19 @@ import {
 } from "./Icons";
 import { formatDurationMinutes } from "../utils/assistantLogic";
 
+// Calendar navigation icons
+const IconChevronLeft = ({ size = 16 }: { size?: number }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+    <path d="M15 18l-6-6 6-6" />
+  </svg>
+);
+
+const IconChevronRight = ({ size = 16 }: { size?: number }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+    <path d="M9 18l6-6-6-6" />
+  </svg>
+);
+
 export interface BookingModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -104,6 +117,9 @@ export default function BookingModal({
   // Navigation & tabs
   const [activeTab, setActiveTab] = useState<"book" | "inquire">("book");
   const [showAuthGate, setShowAuthGate] = useState(false);
+
+  // Calendar navigation
+  const [calendarMonth, setCalendarMonth] = useState<Date>(new Date());
 
   // Services & Availability data
   const [services, setServices] = useState<ServiceOffering[]>([]);
@@ -697,32 +713,49 @@ export default function BookingModal({
                   </div>
                 ) : (
                   <>
-                    {/* Calendar Grid View */}
-                    <div className="glam-calendar-container">
-                      {/* Month/Year Header */}
-                      {slots.length > 0 && (
-                        <div className="glam-calendar-header">
-                          <h4>
-                            {new Date(slots[0].startsAt).toLocaleDateString("en-ZA", {
-                              month: "long",
-                              year: "numeric",
-                            })}
-                          </h4>
-                        </div>
-                      )}
-                      
+                    {/* Full Calendar View */}
+                    <div className="glam-full-calendar">
+                      {/* Calendar Header with Month Navigation */}
+                      <div className="glam-calendar-nav-header">
+                        <button
+                          type="button"
+                          className="calendar-nav-btn"
+                          onClick={() => {
+                            const newMonth = new Date(calendarMonth);
+                            newMonth.setMonth(newMonth.getMonth() - 1);
+                            setCalendarMonth(newMonth);
+                          }}
+                          aria-label="Previous month"
+                        >
+                          <IconChevronLeft size={20} />
+                        </button>
+                        
+                        <h3 className="calendar-month-title">
+                          {calendarMonth.toLocaleDateString("en-ZA", {
+                            month: "long",
+                            year: "numeric",
+                          })}
+                        </h3>
+                        
+                        <button
+                          type="button"
+                          className="calendar-nav-btn"
+                          onClick={() => {
+                            const newMonth = new Date(calendarMonth);
+                            newMonth.setMonth(newMonth.getMonth() + 1);
+                            setCalendarMonth(newMonth);
+                          }}
+                          aria-label="Next month"
+                        >
+                          <IconChevronRight size={20} />
+                        </button>
+                      </div>
+
+                      {/* Calendar Grid */}
                       <div className="glam-calendar-grid">
                         {/* Weekday headers */}
                         <div className="glam-calendar-weekdays">
-                          {[
-                            "Sun",
-                            "Mon",
-                            "Tue",
-                            "Wed",
-                            "Thu",
-                            "Fri",
-                            "Sat",
-                          ].map((day) => (
+                          {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((day) => (
                             <div key={day} className="glam-weekday-label">
                               {day}
                             </div>
@@ -732,94 +765,76 @@ export default function BookingModal({
                         {/* Calendar dates */}
                         <div className="glam-calendar-dates">
                           {(() => {
-                            if (availableDates.length === 0) return null;
-
-                            // Get the first available date
-                            const firstAvailableDate = new Date(
-                              slots[0].startsAt,
-                            );
-
-                            // Start from the beginning of the month of the first available date
-                            const startOfMonth = new Date(
-                              firstAvailableDate.getFullYear(),
-                              firstAvailableDate.getMonth(),
-                              1,
-                            );
-
-                            // Find what day of week the month starts on
-                            const startDayOfWeek = startOfMonth.getDay();
-
-                            // Calculate how many days to show
-                            const daysInMonth = new Date(
-                              firstAvailableDate.getFullYear(),
-                              firstAvailableDate.getMonth() + 1,
-                              0,
-                            ).getDate();
-                            const totalCells =
-                              Math.ceil((startDayOfWeek + daysInMonth) / 7) * 7;
-
+                            const year = calendarMonth.getFullYear();
+                            const month = calendarMonth.getMonth();
+                            
+                            // First day of the month
+                            const firstDay = new Date(year, month, 1);
+                            const startDayOfWeek = firstDay.getDay();
+                            
+                            // Last day of the month
+                            const lastDay = new Date(year, month + 1, 0);
+                            const daysInMonth = lastDay.getDate();
+                            
+                            // Total cells needed
+                            const totalCells = Math.ceil((startDayOfWeek + daysInMonth) / 7) * 7;
+                            
                             const calendarDays = [];
+                            const today = new Date();
+                            today.setHours(0, 0, 0, 0);
 
                             for (let i = 0; i < totalCells; i++) {
                               const dayNum = i - startDayOfWeek + 1;
 
                               if (dayNum < 1 || dayNum > daysInMonth) {
-                                // Empty cell
+                                // Empty cell for days outside current month
                                 calendarDays.push(
                                   <div
                                     key={`empty-${i}`}
                                     className="glam-calendar-day empty"
-                                  />,
+                                  />
                                 );
                               } else {
-                                const currentDate = new Date(
-                                  firstAvailableDate.getFullYear(),
-                                  firstAvailableDate.getMonth(),
-                                  dayNum,
-                                );
-                                const dateKey = currentDate.toLocaleDateString(
-                                  "en-ZA",
-                                  {
-                                    weekday: "short",
-                                    day: "numeric",
-                                    month: "short",
-                                  },
-                                );
+                                const currentDate = new Date(year, month, dayNum);
+                                currentDate.setHours(0, 0, 0, 0);
+                                
+                                const dateKey = currentDate.toLocaleDateString("en-ZA", {
+                                  weekday: "short",
+                                  day: "numeric",
+                                  month: "short",
+                                });
 
-                                const hasSlots =
-                                  slotsByDate[dateKey]?.length > 0;
+                                const hasSlots = slotsByDate[dateKey]?.length > 0;
                                 const isSelected = dateKey === selectedDateKey;
-                                const isToday =
-                                  currentDate.toDateString() ===
-                                  new Date().toDateString();
-                                const slotCount =
-                                  slotsByDate[dateKey]?.length || 0;
+                                const isToday = currentDate.getTime() === today.getTime();
+                                const isPast = currentDate < today;
+                                const slotCount = slotsByDate[dateKey]?.length || 0;
 
                                 calendarDays.push(
                                   <button
                                     key={dateKey}
                                     type="button"
-                                    disabled={!hasSlots}
-                                    className={`glam-calendar-day ${hasSlots ? "available" : "unavailable"} ${isSelected ? "selected" : ""} ${isToday ? "today" : ""}`}
+                                    disabled={!hasSlots || isPast}
+                                    className={`glam-calendar-day ${
+                                      hasSlots && !isPast ? "available" : "unavailable"
+                                    } ${isSelected ? "selected" : ""} ${
+                                      isToday ? "today" : ""
+                                    } ${isPast ? "past" : ""}`}
                                     onClick={() => {
-                                      if (hasSlots) {
+                                      if (hasSlots && !isPast) {
                                         setSelectedDateKey(dateKey);
-                                        const firstSlot =
-                                          slotsByDate[dateKey]?.[0];
-                                        if (firstSlot)
-                                          setSelectedSlotId(
-                                            String(firstSlot.id),
-                                          );
+                                        // Clear time slot selection to force user to choose
+                                        setSelectedSlotId("");
                                       }
                                     }}
                                   >
                                     <span className="day-number">{dayNum}</span>
-                                    {hasSlots && (
-                                      <span className="slot-dots">
-                                        {slotCount}
+                                    {hasSlots && !isPast && (
+                                      <span className="slot-indicator">
+                                        {slotCount} slot{slotCount > 1 ? "s" : ""}
                                       </span>
                                     )}
-                                  </button>,
+                                  </button>
                                 );
                               }
                             }
@@ -828,21 +843,6 @@ export default function BookingModal({
                           })()}
                         </div>
                       </div>
-
-                      {/* Month/Year Header */}
-                      {slots.length > 0 && (
-                        <div className="glam-calendar-header">
-                          <h4>
-                            {new Date(slots[0].startsAt).toLocaleDateString(
-                              "en-ZA",
-                              {
-                                month: "long",
-                                year: "numeric",
-                              },
-                            )}
-                          </h4>
-                        </div>
-                      )}
                     </div>
 
                     {/* Step 3: Time Slots (Only show after date selection) */}

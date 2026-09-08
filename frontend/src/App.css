@@ -7313,29 +7313,51 @@ body {
   display: none;
 }
 
-/* Calendar Grid Container */
-.glam-calendar-container {
-  margin-top: 12px;
-  position: relative;
+/* Full Calendar Container */
+.glam-full-calendar {
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 16px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
 }
 
-.glam-calendar-header {
-  margin-bottom: 12px;
-  text-align: center;
+.glam-calendar-nav-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+  padding: 0 4px;
 }
 
-.glam-calendar-header h4 {
-  font-size: 15px;
+.calendar-nav-btn {
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  border: 1px solid var(--border-medium);
+  background: #ffffff;
+  color: var(--ink-primary);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.calendar-nav-btn:hover {
+  background: var(--bg-secondary);
+  border-color: var(--ink-primary);
+}
+
+.calendar-month-title {
+  font-size: 17px;
   font-weight: 700;
-  color: var(--text, #f8fafc);
+  color: var(--ink-primary);
+  margin: 0;
   letter-spacing: 0.3px;
 }
 
 .glam-calendar-grid {
-  background: rgba(255, 255, 255, 0.02);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 12px;
-  padding: 12px;
+  background: #ffffff;
 }
 
 .glam-calendar-weekdays {
@@ -7347,12 +7369,12 @@ body {
 
 .glam-weekday-label {
   text-align: center;
-  font-size: 10px;
+  font-size: 11px;
   font-weight: 700;
   text-transform: uppercase;
-  color: var(--text-muted, #94a3b8);
+  color: var(--ink-secondary);
   letter-spacing: 0.5px;
-  padding: 4px 0;
+  padding: 8px 0;
 }
 
 .glam-calendar-dates {
@@ -7363,13 +7385,15 @@ body {
 
 .glam-calendar-day {
   aspect-ratio: 1;
+  min-height: 52px;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
+  gap: 2px;
   border-radius: 10px;
-  border: 1px solid transparent;
-  background: transparent;
+  border: 2px solid transparent;
+  background: #f8f9fa;
   cursor: pointer;
   transition: all 0.2s ease;
   position: relative;
@@ -7379,32 +7403,47 @@ body {
 .glam-calendar-day.empty {
   pointer-events: none;
   opacity: 0;
+  background: transparent;
 }
 
-.glam-calendar-day.unavailable {
-  opacity: 0.3;
+.glam-calendar-day.unavailable,
+.glam-calendar-day.past {
+  opacity: 0.35;
   cursor: not-allowed;
+  background: #f1f3f5;
 }
 
-.glam-calendar-day.unavailable .day-number {
-  color: var(--text-muted, #64748b);
+.glam-calendar-day.unavailable .day-number,
+.glam-calendar-day.past .day-number {
+  color: var(--ink-muted);
 }
 
 .glam-calendar-day.available {
-  background: rgba(255, 255, 255, 0.04);
-  border-color: rgba(255, 255, 255, 0.1);
+  background: #ffffff;
+  border-color: var(--border-medium);
 }
 
 .glam-calendar-day.available:hover {
-  background: rgba(194, 111, 62, 0.08);
-  border-color: rgba(194, 111, 62, 0.3);
-  transform: scale(1.05);
+  background: #fff8f3;
+  border-color: var(--accent, #c26f3e);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(194, 111, 62, 0.15);
 }
 
 .glam-calendar-day.selected {
-  background: rgba(194, 111, 62, 0.2);
+  background: var(--accent, #c26f3e);
   border-color: var(--accent, #c26f3e);
-  box-shadow: 0 0 0 3px rgba(194, 111, 62, 0.15);
+  box-shadow: 0 4px 16px rgba(194, 111, 62, 0.3);
+}
+
+.glam-calendar-day.selected .day-number {
+  color: #ffffff;
+  font-weight: 800;
+}
+
+.glam-calendar-day.selected .slot-indicator {
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.25);
 }
 
 .glam-calendar-day.today {
@@ -7413,21 +7452,21 @@ body {
 }
 
 .glam-calendar-day .day-number {
-  font-size: 13px;
+  font-size: 15px;
   font-weight: 700;
-  color: var(--text, #f8fafc);
+  color: var(--ink-primary);
   line-height: 1;
 }
 
-.glam-calendar-day .slot-dots {
-  font-size: 8px;
-  font-weight: 700;
+.glam-calendar-day .slot-indicator {
+  font-size: 9px;
+  font-weight: 600;
   color: var(--accent, #c26f3e);
-  margin-top: 2px;
-  padding: 1px 4px;
-  background: rgba(194, 111, 62, 0.15);
+  padding: 2px 5px;
+  background: rgba(194, 111, 62, 0.12);
   border-radius: 6px;
   line-height: 1;
+  white-space: nowrap;
 }
 
 .glam-date-pill-card {
@@ -7487,32 +7526,38 @@ body {
   margin-top: 4px;
 }
 
-/* Categorized Time Slots */
+/* Time Selection Section */
 .glam-time-selection-section {
-  margin-top: 20px;
-  padding-top: 20px;
-  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  margin-top: 24px;
+  padding: 20px;
+  background: #ffffff;
+  border-radius: 12px;
+  border: 2px solid var(--accent, #c26f3e);
+  box-shadow: 0 2px 8px rgba(194, 111, 62, 0.12);
 }
 
 .glam-time-periods-container {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 16px;
   margin-top: 12px;
 }
 
 .glam-time-period-group {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 8px;
 }
 
 .period-label {
-  font-size: 11px;
-  font-weight: 600;
+  font-size: 12px;
+  font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  color: var(--text-muted, #94a3b8);
+  color: var(--ink-secondary);
+  display: flex;
+  align-items: center;
+  gap: 6px;
 }
 
 .glam-time-chips-wrap {
@@ -7525,29 +7570,32 @@ body {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 8px 12px;
-  border-radius: 8px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  background: rgba(255, 255, 255, 0.03);
-  color: var(--text, #f8fafc);
-  font-size: 12px;
-  font-weight: 500;
+  padding: 10px 14px;
+  border-radius: 10px;
+  border: 2px solid var(--border-medium);
+  background: #ffffff;
+  color: var(--ink-primary);
+  font-size: 13px;
+  font-weight: 600;
   cursor: pointer;
-  transition: all 0.15s ease;
+  transition: all 0.2s ease;
 }
 
 .glam-time-chip:hover {
-  background: rgba(255, 255, 255, 0.08);
-  border-color: rgba(255, 255, 255, 0.2);
+  border-color: var(--accent, #c26f3e);
+  background: #fff8f3;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(194, 111, 62, 0.15);
 }
 
 .glam-time-chip.selected {
+  background: var(--accent, #c26f3e);
   border-color: var(--accent, #c26f3e);
-  background: rgba(194, 111, 62, 0.16);
-  color: var(--accent, #c26f3e);
-  font-weight: 600;
-  box-shadow: 0 2px 8px rgba(194, 111, 62, 0.2);
+  color: #ffffff;
+  box-shadow: 0 4px 16px rgba(194, 111, 62, 0.3);
 }
+
+/* Quick Tags Row */
 
 /* Quick Tags for Booking Notes */
 .glam-quick-tags-row {
