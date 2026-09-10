@@ -1,4 +1,4 @@
-// Shared navigation and fallback display values used by the app shell.
+// Shared navigation, location options, and fallback display values used by the app shell.
 import type { NavItem } from "./types";
 
 export const brandLogoUrl = `${import.meta.env.BASE_URL}logo-mark.svg`;

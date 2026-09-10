@@ -1,3 +1,5 @@
+// Public creator profiles combine portfolio work, structured location, and
+// feedback from completed client bookings.
 import { useEffect, useState } from "react";
 import { deletePost, getMyPosts, getUserProfile, updatePost } from "../api";
 import BookingModal from "../components/BookingModal";

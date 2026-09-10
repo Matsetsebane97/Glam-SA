@@ -1,4 +1,5 @@
 // Browser geolocation wrapper with user-friendly error messages.
+// Reverse geocoding creates a display label; raw coordinates remain the source for distance calculations.
 export type Coordinates = {
   latitude: number;
   longitude: number;

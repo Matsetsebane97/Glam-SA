@@ -1,3 +1,5 @@
+// Staff-only monitoring surface. Mutating actions are confirmed here and
+// authorized again by the backend before changing an account.
 import { useEffect, useState } from "react";
 import { deleteAdminUser, getAdminDashboard, updateAdminUser, type AdminDashboardData } from "../api";
 import { IconCalendar, IconGrid, IconMessage, IconSparkles, IconUpload, IconUser } from "../components/Icons";

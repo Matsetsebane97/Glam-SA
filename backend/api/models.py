@@ -1,4 +1,8 @@
-"""Database models for creator profiles, portfolio posts, and messages."""
+"""Database models for creator profiles, portfolio posts, and messages.
+
+The profile stores both human-readable address parts and GPS coordinates:
+address parts are displayed publicly, while coordinates power distance search.
+"""
 
 from django.db import models
 from django.contrib.auth.models import User

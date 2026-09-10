@@ -1,4 +1,5 @@
 // Centralizes browser requests so pages share one API contract.
+// Keep secrets out of this file: the browser should only call relative API routes.
 import type { AvailabilitySlot, Booking, Conversation, Coordinates, CurrentUser, Message, NearbyArtist, Post, Review, ServiceOffering, UserProfile } from "./types";
 
 type CurrentUserResponse = {
@@ -97,6 +98,7 @@ export type AdminDashboardData = {
 };
 
 export const getAdminDashboard = async (): Promise<AdminDashboardData> => {
+  // The backend performs the real staff check; this call is never trusted as a UI-only guard.
   const response = await fetch("/api/admin/dashboard/");
   const data = (await response.json().catch(() => ({}))) as AdminDashboardData & { error?: string };
   if (!response.ok) throw new Error(data.error || "Unable to load the admin dashboard.");

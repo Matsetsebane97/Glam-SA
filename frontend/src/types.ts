@@ -1,4 +1,5 @@
 // Frontend representations of data returned by the Django API.
+// Optional fields preserve compatibility with profiles created before newer migrations.
 export type Post = {
   id: number;
   ownerId?: number;

@@ -2,6 +2,9 @@ from django.contrib import admin
 
 from .models import AvailabilitySlot, Booking, Message, Post, Review, ServiceOffering, UserProfile
 
+# Django Admin remains the full management surface; the React dashboard is a
+# safer monitoring layer for the most common operational tasks.
+
 
 @admin.register(Post)
 class PostAdmin(admin.ModelAdmin):

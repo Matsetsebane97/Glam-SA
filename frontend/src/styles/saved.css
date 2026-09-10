@@ -1,3 +1,4 @@
+/* Saved collection presentation; persistence is handled by savedPosts.ts. */
 .saved-page {
   width: min(1180px, 100%);
   margin: 0 auto;

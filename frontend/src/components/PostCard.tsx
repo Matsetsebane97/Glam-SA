@@ -1,3 +1,5 @@
+// A portfolio card owns lightweight interaction state, while bookings and likes
+// are persisted through the API and saved looks are persisted per browser user.
 import { useEffect, useState } from "react";
 import {
   IconBookmark,

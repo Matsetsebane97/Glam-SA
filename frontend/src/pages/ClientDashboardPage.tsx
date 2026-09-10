@@ -1,3 +1,4 @@
+// Client workspace for appointments, saved inspiration, reviews, and calendar export.
 import { useEffect, useMemo, useState } from "react";
 import { createReview, getBookings } from "../api";
 import { IconBookmark, IconCalendar, IconClock, IconStar } from "../components/Icons";
@@ -17,6 +18,8 @@ function icsEscape(value: string) {
 }
 
 function downloadCalendarEvent(booking: Booking) {
+  // ICS keeps reminders in the user's own calendar app instead of requiring
+  // a background notification service from Bridgy.
   const toCalendarDate = (value: string) => new Date(value).toISOString().replace(/[-:]/g, "").replace(/\.\d{3}Z$/, "Z");
   const content = [
     "BEGIN:VCALENDAR",
@@ -80,6 +83,8 @@ function ClientDashboardPage({ currentUser, posts, onNavigate }: ClientDashboard
   const reviewableBookings = bookings.filter((booking) => booking.status === "completed" && !booking.review);
 
   const toggleReminder = (bookingId: number) => {
+    // This preference controls the dashboard state; calendar alarms are added
+    // when the appointment is exported.
     const enabled = !reminders.includes(bookingId);
     if (enabled) localStorage.setItem(reminderKey(bookingId), "on");
     else localStorage.removeItem(reminderKey(bookingId));

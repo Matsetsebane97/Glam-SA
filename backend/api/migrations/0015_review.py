@@ -4,6 +4,7 @@ import django.db.models.deletion
 
 
 class Migration(migrations.Migration):
+    # A review belongs to one completed booking, preventing duplicate reviews.
     dependencies = [
         ("api", "0014_rename_hair_category"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),

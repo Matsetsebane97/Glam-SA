@@ -1,3 +1,4 @@
+// Account settings also owns creator availability and the public address fields.
 import { useEffect, useState } from "react";
 import type { FormEvent } from "react";
 import {

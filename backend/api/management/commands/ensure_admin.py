@@ -5,6 +5,8 @@ from django.core.management.base import BaseCommand, CommandError
 
 
 class Command(BaseCommand):
+    # Credentials come from the environment so no administrator password is
+    # stored in source control or bundled into the frontend.
     help = "Create or update the administrator configured through environment variables."
 
     def handle(self, *args, **options):

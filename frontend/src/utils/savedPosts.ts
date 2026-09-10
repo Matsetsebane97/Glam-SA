@@ -1,3 +1,5 @@
+// Browser-local saved looks. The user ID keeps one account's collection
+// separate from another account using the same device.
 import type { Post } from "../types";
 
 export const SAVED_POSTS_EVENT = "glam:saved-posts-changed";

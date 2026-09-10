@@ -1,4 +1,8 @@
-"""HTTP handlers for authentication, discovery, portfolios, messaging, and search functionality."""
+"""HTTP handlers for authentication, discovery, portfolios, messaging, and search.
+
+Keep permission checks close to each handler because these endpoints are also
+called directly by the browser outside the Django admin interface.
+"""
 
 import json
 from decimal import Decimal, InvalidOperation
@@ -58,6 +62,8 @@ def _parse_coordinate(value, name):
 
 @csrf_exempt
 def signup(request):
+    # Signup requires both a public address and private-ish GPS coordinates:
+    # the address is displayed, while coordinates are used only for proximity.
     if request.method != "POST":
         return JsonResponse({"error": "Method not allowed."}, status=405)
 
@@ -247,6 +253,8 @@ def admin_dashboard(request):
 
 @csrf_exempt
 def admin_user_detail(request, user_id):
+    # Suspension is reversible; permanent deletion is intentionally restricted
+    # to superusers and never allows an administrator to remove themselves.
     if not request.user.is_authenticated or not request.user.is_staff:
         return JsonResponse({"error": "Administrator access is required."}, status=403)
     if request.user.id == user_id:

@@ -2,6 +2,8 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
+    # Keep address fields separate so display formatting can change without
+    # losing the original province, city, or suburb values.
     dependencies = [("api", "0015_review")]
 
     operations = [

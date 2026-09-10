@@ -1,3 +1,5 @@
+/* Dashboard styles are kept separate from the global shell so client flows
+   can evolve without making the main application stylesheet larger. */
 .client-dashboard,
 .client-dashboard-empty {
   width: min(1080px, 100%);

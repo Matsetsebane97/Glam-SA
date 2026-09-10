@@ -89,8 +89,8 @@ function parseSmartQuery(query: string) {
 }
 
 function App() {
-
-
+  // The lightweight pathname router keeps the app dependency-free while still
+  // supporting direct links to protected pages.
   const [activeCategory, setActiveCategory] = useState("For you");
   const [nearbyOnly, setNearbyOnly] = useState(false);
   const [query, setQuery] = useState("");

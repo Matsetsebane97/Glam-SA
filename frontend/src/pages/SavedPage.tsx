@@ -1,3 +1,5 @@
+// Saved looks are intentionally kept close to the feed experience and scoped
+// to the signed-in browser user until server-side collections are introduced.
 import { useEffect, useState } from "react";
 import PostCard from "../components/PostCard";
 import { IconBookmark } from "../components/Icons";

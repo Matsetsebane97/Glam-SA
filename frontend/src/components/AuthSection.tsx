@@ -1,4 +1,5 @@
 // Handles sign-in and sign-up form state shared by the auth page.
+// GPS coordinates are captured separately from the public Province/City/Suburb address.
 import { useState } from "react";
 import type { ChangeEvent, FormEvent } from "react";
 import { IconCheck, IconPin } from "./Icons";
@@ -86,6 +87,7 @@ function AuthSection({ onSuccess }: AuthSectionProps) {
   };
 
   const submit = async (event: FormEvent<HTMLFormElement>) => {
+    // The browser validates required address fields; the backend validates them again.
     event.preventDefault();
     setMessage("");
 

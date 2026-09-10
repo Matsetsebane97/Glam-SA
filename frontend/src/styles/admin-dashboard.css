@@ -1,3 +1,4 @@
+/* Operational dashboard styles; detailed record editing remains in Django Admin. */
 .admin-page {
   width: min(1180px, 100%);
   margin: 0 auto;
