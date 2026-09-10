@@ -237,7 +237,7 @@ def health(request):
 
 
 def categories(request):
-    return JsonResponse({"categories": CATEGORIES})
+    return JsonResponse({"categories": [c for c in CATEGORIES if c != "For you"]})
 
 
 def search_synonyms(request):

@@ -10,7 +10,7 @@ type CategoryTabsProps = {
 const SKELETON_COUNT = 6;
 
 function CategoryTabs({ activeCategory, categories, isLoading, onSelectCategory }: CategoryTabsProps) {
-  const allCategories = ["For you", ...categories];
+  const allCategories = ["For you", ...categories.filter((cat) => cat !== "For you")];
 
   if (isLoading) {
     return (
