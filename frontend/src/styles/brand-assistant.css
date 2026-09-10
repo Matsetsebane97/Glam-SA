@@ -1705,6 +1705,12 @@ body {
     color 0.15s;
 }
 
+.assistant-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
 .assistant-header .icon-btn:hover {
   color: #f5f2ec;
   background: rgba(255, 255, 255, 0.1);
@@ -2049,6 +2055,51 @@ body {
   color: rgba(245, 242, 236, 0.5);
   font-size: 11px;
   line-height: 1.4;
+}
+
+/* The assistant has a dark presentation by default, so explicitly remap its
+   booking controls when the application switches to the light theme. */
+:root[data-theme="light"] .assistant-booking-panel {
+  background: var(--bg-secondary);
+  border-top-color: var(--border-subtle);
+}
+
+:root[data-theme="light"] .assistant-booking-field {
+  color: var(--ink-secondary);
+}
+
+:root[data-theme="light"] .assistant-booking-field select,
+:root[data-theme="light"] .assistant-booking-field textarea {
+  background: var(--bg-surface-elevated);
+  border-color: var(--border-medium);
+  color: var(--ink-primary);
+  color-scheme: light;
+}
+
+:root[data-theme="light"] .assistant-booking-field select option {
+  background: var(--bg-surface-elevated);
+  color: var(--ink-primary);
+}
+
+:root[data-theme="light"] .assistant-booking-field select:focus,
+:root[data-theme="light"] .assistant-booking-field textarea:focus {
+  border-color: var(--accent-primary);
+  box-shadow: 0 0 0 2px var(--accent-rose-bg);
+}
+
+:root[data-theme="light"] .assistant-booking-actions .btn-ghost {
+  border-color: var(--border-medium);
+  color: var(--ink-secondary);
+}
+
+:root[data-theme="light"] .assistant-booking-actions .btn-ghost:hover {
+  border-color: var(--accent-primary);
+  color: var(--ink-primary);
+  background: var(--bg-surface);
+}
+
+:root[data-theme="light"] .assistant-booking-status {
+  color: var(--ink-secondary);
 }
 
 /* Suggestions & quick replies */

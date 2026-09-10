@@ -1,6 +1,6 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { createBooking, getAvailability, getServices, getSearchSynonyms } from "../api";
-import { IconBookmark, IconChevronRight, IconClose, IconMessage, IconMic, IconPin, IconSend, IconSparkles, IconWhatsApp } from "./Icons";
+import { IconBookmark, IconChevronRight, IconClose, IconMessage, IconMic, IconPin, IconSend, IconSparkles, IconTrash, IconWhatsApp } from "./Icons";
 import type { AvailabilitySlot, CurrentUser, Post, ServiceOffering } from "../types";
 import { whatsappUrl } from "../utils/whatsapp";
 import {
@@ -84,17 +84,20 @@ function AssistantPanel({ posts, currentUser, onNavigate, onSearch }: AssistantP
   const [bookingPanels, setBookingPanels] = useState<Record<string, BookingPanelState>>({});
   const [showBookingAuthPopup, setShowBookingAuthPopup] = useState(false);
   const [synonyms, setSynonyms] = useState<Record<string, string[]> | undefined>(undefined);
+  const messagesRef = useRef<HTMLDivElement>(null);
 
-  // Load search synonyms on mount
-  const [synLoaded, setSynLoaded] = useState(false);
-  if (!synLoaded) {
-    setSynLoaded(true);
+  useEffect(() => {
     void getSearchSynonyms()
       .then(setSynonyms)
       .catch(() => {
         // Silently fail - continue without synonyms
       });
-  }
+  }, []);
+
+  useEffect(() => {
+    const messageArea = messagesRef.current;
+    if (messageArea) messageArea.scrollTo({ top: messageArea.scrollHeight, behavior: "smooth" });
+  }, [messages, isThinking]);
 
   const visiblePrompts = useMemo(() => {
     return [...recentSearches, ...assistantSuggestions.filter((s) => !recentSearches.includes(s))].slice(0, 4);
@@ -109,6 +112,16 @@ function AssistantPanel({ posts, currentUser, onNavigate, onSearch }: AssistantP
   const browseFeed = () => {
     setIsOpen(false);
     onNavigate("/");
+  };
+
+  const resetConversation = () => {
+    setMessages([
+      { id: Date.now(), author: "assistant", text: "Tell me what you are looking for: a service, artist, location, or budget." },
+    ]);
+    setDraft("");
+    setVoiceStatus("");
+    setActiveBookingArtistId(null);
+    setBookingPanels({});
   };
 
   const openFullResults = (query: string) => {
@@ -185,9 +198,22 @@ function AssistantPanel({ posts, currentUser, onNavigate, onSearch }: AssistantP
     // Apply session context for multi-turn refinements (e.g., "cheaper" → expand with last category)
     const sessionContext = getSessionContext();
     const expandedQuestion = applySessionContextToQuery(question, sessionContext);
-    const answer = await answerQuestion(expandedQuestion, posts, currentUser, synonyms);
-    setMessages((current) => [...current, { id: Date.now() + 1, author: "assistant", ...answer }]);
-    setIsThinking(false);
+    try {
+      const answer = await answerQuestion(expandedQuestion, posts, currentUser, synonyms);
+      setMessages((current) => [...current, { id: Date.now() + 1, author: "assistant", ...answer }]);
+    } catch {
+      setMessages((current) => [
+        ...current,
+        {
+          id: Date.now() + 1,
+          author: "assistant",
+          text: "I hit a snag while searching. Try a simpler request like ‘bridal near me’ or ‘nails under R500.’",
+          quickReplies: assistantSuggestions,
+        },
+      ]);
+    } finally {
+      setIsThinking(false);
+    }
   };
 
   const openProfile = (artist: ArtistMatch) => {
@@ -294,18 +320,23 @@ function AssistantPanel({ posts, currentUser, onNavigate, onSearch }: AssistantP
                 <IconSparkles size={16} />
               </div>
               <div>
-                <strong>Glam Assistant</strong>
+                <strong>Ask Glam</strong>
                 <span style={{ display: "flex", alignItems: "center", gap: "5px" }}>
                   <span className="assistant-online-dot" />
-                  Discovery help
+                  Beauty discovery help
                 </span>
               </div>
             </div>
-            <button className="icon-btn" type="button" onClick={() => setIsOpen(false)} aria-label="Close assistant">
-              <IconClose size={16} />
-            </button>
+            <div className="assistant-header-actions">
+              <button className="icon-btn" type="button" onClick={resetConversation} aria-label="Start a new Ask Glam conversation" title="New conversation">
+                <IconTrash size={15} />
+              </button>
+              <button className="icon-btn" type="button" onClick={() => setIsOpen(false)} aria-label="Close Ask Glam">
+                <IconClose size={16} />
+              </button>
+            </div>
           </header>
-          <div className="assistant-messages" aria-live="polite">
+          <div className="assistant-messages" aria-live="polite" ref={messagesRef}>
             {messages.map((message) => (
               <div className={`assistant-message ${message.author}`} key={message.id}>
                 <span>{message.text}</span>
@@ -476,7 +507,7 @@ function AssistantPanel({ posts, currentUser, onNavigate, onSearch }: AssistantP
               value={draft}
               onChange={(e) => setDraft(e.target.value)}
               placeholder="Try: makeup near Sandton under R800"
-              aria-label="Ask Glam SA assistant"
+              aria-label="Ask Glam"
             />
             <button className="icon-btn assistant-voice-btn" type="button" onClick={startVoiceSearch} aria-label="Start voice search">
               <IconMic size={15} />
