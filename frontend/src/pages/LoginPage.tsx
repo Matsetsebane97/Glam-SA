@@ -1,4 +1,4 @@
-// Auth page wrapper for switching between sign-in and sign-up states.
+// Login page — full-bleed cinematic split: editorial left, glass auth card right.
 import AuthSection from "../components/AuthSection";
 import { IconCompass, IconHeart, IconUpload } from "../components/Icons";
 import { brandLogoUrl } from "../constants";
@@ -10,57 +10,73 @@ type LoginPageProps = {
 function LoginPage({ onNavigate }: LoginPageProps) {
   return (
     <main className="auth-page">
-      <button className="btn-ghost back-link auth-back" type="button" onClick={() => onNavigate("/")}>
+      {/* Subtle back link */}
+      <button className="auth-back-link" type="button" onClick={() => onNavigate("/")}>
         ← Back to Feed
       </button>
 
-      <div className="auth-page-grid">
+      <div className="auth-split">
+        {/* Left — editorial hero */}
         <section className="auth-hero">
+          {/* Decorative background orbs */}
+          <div className="auth-hero-orb auth-hero-orb-1" aria-hidden="true" />
+          <div className="auth-hero-orb auth-hero-orb-2" aria-hidden="true" />
+
+          {/* Brand badge */}
           <div className="auth-brand-badge">
             <img className="auth-hero-logo" src={brandLogoUrl} alt="Glam SA logo" />
-            <span className="brand-badge-name">Glam SA</span>
+            <span>Glam SA</span>
           </div>
 
-          <div className="eyebrow">
-            <span>SOUTH AFRICA'S BEAUTY SANCTUARY</span>
-          </div>
+          <div className="eyebrow accent">South Africa's Beauty Sanctuary</div>
 
-          <h1>
-            Your beauty world, <em>curated for you</em>
+          <h1 className="auth-hero-headline">
+            Your beauty world,{" "}
+            <em>curated for you</em>
           </h1>
 
           <p className="auth-hero-desc">
-            Save the looks that stop you mid-scroll, find verified braiders and artists near you, and showcase your artistry to South Africa.
+            Save the looks that stop you mid-scroll, find verified braiders and artists near you,
+            and showcase your artistry to South Africa.
           </p>
 
-          <div className="auth-feature-list">
-            <div className="auth-feature-item">
-              <div className="auth-feat-icon"><IconCompass size={18} /></div>
+          <div className="auth-feature-grid">
+            <div className="auth-feature-card">
+              <div className="auth-feature-icon">
+                <IconCompass size={18} />
+              </div>
               <div>
-                <strong>Local Radar Discovery</strong>
-                <p>Find top-rated hair stylists, nail technicians, and barbers in your radius.</p>
+                <strong>Local Radar</strong>
+                <p>Find top-rated stylists, nail techs, and barbers in your radius.</p>
               </div>
             </div>
 
-            <div className="auth-feature-item">
-              <div className="auth-feat-icon"><IconUpload size={18} /></div>
+            <div className="auth-feature-card">
+              <div className="auth-feature-icon">
+                <IconUpload size={18} />
+              </div>
               <div>
                 <strong>Creator Portfolio</strong>
-                <p>Upload photos and videos with zero compression to build your client pipeline.</p>
+                <p>Upload photos and videos with zero compression to grow your clientele.</p>
               </div>
             </div>
 
-            <div className="auth-feature-item">
-              <div className="auth-feat-icon"><IconHeart size={18} /></div>
+            <div className="auth-feature-card">
+              <div className="auth-feature-icon">
+                <IconHeart size={18} />
+              </div>
               <div>
-                <strong>Moodboards & Direct Booking</strong>
-                <p>Organize inspiration collections and message artists via WhatsApp.</p>
+                <strong>Direct Booking</strong>
+                <p>Organise inspiration and message artists directly via WhatsApp.</p>
               </div>
             </div>
           </div>
         </section>
 
-        <AuthSection onSuccess={() => onNavigate("/")} />
+        {/* Right — auth card */}
+        <div className="auth-card-wrap">
+          <AuthSection onSuccess={() => onNavigate("/")} />
+        </div>
       </div>
     </main>
   );

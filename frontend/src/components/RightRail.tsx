@@ -1,3 +1,4 @@
+// Right rail — dark glass panels for nearby artists and brand footer.
 import { useEffect, useState } from "react";
 import { getNearbyArtists } from "../api";
 import { IconChevronRight, IconCompass, IconPin, IconVerified } from "./Icons";
@@ -13,44 +14,36 @@ function RightRail({ currentUser, onNavigate }: RightRailProps) {
   const [artists, setArtists] = useState<NearbyArtist[]>([]);
 
   useEffect(() => {
-    if (currentUser?.latitude == null || currentUser?.longitude == null) {
-      return;
-    }
-
-    void getNearbyArtists({
-      latitude: currentUser.latitude,
-      longitude: currentUser.longitude,
-      radius: 50,
-    })
-      .then((nearby) => nearby.filter((artist) => artist.handle !== currentUser.handle).slice(0, 5))
+    if (currentUser?.latitude == null || currentUser?.longitude == null) return;
+    void getNearbyArtists({ latitude: currentUser.latitude, longitude: currentUser.longitude, radius: 50 })
+      .then((nearby) => nearby.filter((a) => a.handle !== currentUser.handle).slice(0, 5))
       .then(setArtists)
       .catch(() => setArtists([]));
   }, [currentUser?.latitude, currentUser?.longitude, currentUser?.handle]);
 
   return (
     <aside className="right-rail">
-      {/* Local Talent Radar */}
-      <section className="rail-card">
-        <div className="rail-card-head">
-          <div className="rail-title-row">
-            <IconCompass size={18} />
+      {/* Nearby artists card */}
+      <section className="rail-panel">
+        <div className="rail-panel-head">
+          <div className="rail-panel-title">
+            <IconCompass size={16} />
             <h3>Artists Near You</h3>
           </div>
+          {currentUser?.locationLabel && (
+            <div className="rail-location-tag">
+              <IconPin size={11} />
+              <span>{currentUser.locationLabel}</span>
+            </div>
+          )}
         </div>
 
-        {currentUser?.locationLabel && (
-          <div className="rail-location-indicator">
-            <IconPin size={13} />
-            <span>{currentUser.locationLabel}</span>
-          </div>
-        )}
-
         {artists.length === 0 ? (
-          <div className="rail-empty-box">
+          <div className="rail-empty">
             <p>
               {currentUser?.latitude != null
-                ? "No other artists registered nearby yet."
-                : "Enable GPS location to discover beauty artists in your area."}
+                ? "No other artists nearby yet."
+                : "Enable location to discover nearby beauty artists."}
             </p>
           </div>
         ) : (
@@ -58,51 +51,54 @@ function RightRail({ currentUser, onNavigate }: RightRailProps) {
             {artists.map((artist) => (
               <li
                 key={artist.id}
-                className="rail-artist-item"
+                className="rail-artist-row"
                 role="button"
                 tabIndex={0}
                 onClick={() => onNavigate(`/profile/${artist.id}`)}
-                onKeyDown={(event) => {
-                  if (event.key === "Enter" || event.key === " ") {
-                    onNavigate(`/profile/${artist.id}`);
-                  }
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") onNavigate(`/profile/${artist.id}`);
                 }}
               >
                 <div className="rail-artist-avatar" aria-hidden="true">
                   {artist.name.charAt(0).toUpperCase()}
                 </div>
                 <div className="rail-artist-meta">
-                  <div className="rail-artist-name-row">
+                  <div className="rail-artist-name">
                     <strong>{artist.name}</strong>
-                    <IconVerified size={12} />
+                    <IconVerified size={11} />
                   </div>
-                  <span>{formatDistance(artist.distanceKm)} · {artist.postCount} {artist.postCount === 1 ? "look" : "looks"}</span>
+                  <span className="rail-artist-info">
+                    {formatDistance(artist.distanceKm)} · {artist.postCount}{" "}
+                    {artist.postCount === 1 ? "look" : "looks"}
+                  </span>
                 </div>
+                <IconChevronRight size={14} className="rail-artist-chevron" />
               </li>
             ))}
           </ul>
         )}
 
         <button
-          className="rail-explore-btn"
+          className="rail-map-btn"
           type="button"
           onClick={() => onNavigate("/discover")}
         >
+          <IconCompass size={14} />
           <span>View on Map</span>
-          <IconChevronRight size={16} />
+          <IconChevronRight size={13} />
         </button>
       </section>
 
-      {/* Brand Footer */}
+      {/* Brand footer */}
       <footer className="rail-footer">
-        <div className="footer-links">
+        <div className="rail-footer-links">
           <button type="button" onClick={() => onNavigate("/about")}>About</button>
-          <span>·</span>
+          <span aria-hidden="true">·</span>
           <button type="button" onClick={() => onNavigate("/terms")}>Terms</button>
-          <span>·</span>
+          <span aria-hidden="true">·</span>
           <button type="button" onClick={() => onNavigate("/privacy")}>Privacy</button>
         </div>
-        <p className="footer-copy">© 2026 Glam SA</p>
+        <p className="rail-footer-copy">© 2026 Glam SA</p>
       </footer>
     </aside>
   );

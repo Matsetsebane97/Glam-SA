@@ -1,4 +1,4 @@
-// Desktop navigation and the signed-in user's quick profile summary.
+// Desktop navigation — icon-rail with labels, rose-gold active states, avatar cluster at bottom.
 import type { ReactNode } from "react";
 import { brandLogoUrl, navItems } from "../constants";
 import {
@@ -34,142 +34,116 @@ function Sidebar({ activeNav, currentUser, onNavigate, onLogout }: SidebarProps)
 
   return (
     <aside className="sidebar">
-      <div className="sidebar-top">
-        {/* Brand Header */}
-        <div className="brand" onClick={() => onNavigate("/")} style={{ cursor: "pointer" }}>
-          <div className="brand-logo-container">
-            <img className="brand-logo" src={brandLogoUrl} alt="Glam SA logo" />
-          </div>
-          <div className="brand-text">
-            <strong>Glam SA</strong>
-            <span className="brand-subtitle">Beauty & Hair Community</span>
-          </div>
+      {/* Brand logo mark */}
+      <div className="sidebar-brand" onClick={() => onNavigate("/")} role="button" tabIndex={0} aria-label="Go to home">
+        <div className="sidebar-logo-ring">
+          <img className="sidebar-logo-img" src={brandLogoUrl} alt="Glam SA logo" />
         </div>
-
-        {/* Primary Navigation */}
-        <nav className="main-nav" aria-label="Main navigation">
-          {visibleNavItems.map((item) => {
-            const isActive = activeNav === item;
-
-            return (
-              <button
-                key={item}
-                className={`nav-item ${isActive ? "active" : ""}`}
-                onClick={() => {
-                  if (item === "Upload") onNavigate("/upload");
-                  if (item === "Home") onNavigate("/");
-                  if (item === "Discover") onNavigate("/discover");
-                  if (item === "Messages") onNavigate("/messages");
-                }}
-              >
-                <span className="nav-icon" aria-hidden="true">
-                  {navIcons[item]}
-                </span>
-                <span className="nav-label">
-                  {item === "Messages" && isClient ? "Appointments" : item}
-                </span>
-                {isActive && <div className="nav-active-indicator" />}
-              </button>
-            );
-          })}
-        </nav>
-
-        {/* Quick Action Buttons (Tailored to Role) */}
-        <div className="sidebar-action-wrap">
-          {isClient ? (
-            <>
-              <button
-                className="btn-primary sidebar-create-btn"
-                type="button"
-                onClick={() => onNavigate("/discover")}
-              >
-                <IconCompass size={18} />
-                <span>Find Nearby Artists</span>
-              </button>
-              <button
-                className="btn-ghost sidebar-map-btn"
-                type="button"
-                onClick={() => onNavigate("/messages")}
-              >
-                <IconCalendar size={18} />
-                <span>My Appointments</span>
-              </button>
-            </>
-          ) : (
-            <>
-              <button
-                className="btn-primary sidebar-create-btn"
-                type="button"
-                onClick={() => onNavigate("/upload")}
-              >
-                <IconUpload size={18} />
-                <span>Share Your Look</span>
-              </button>
-              <button
-                className="btn-ghost sidebar-map-btn"
-                type="button"
-                onClick={() => onNavigate("/discover")}
-              >
-                <IconCompass size={18} />
-                <span>Find an Artist on Map</span>
-              </button>
-            </>
-          )}
+        <div className="sidebar-brand-text">
+          <span className="sidebar-brand-name">Glam SA</span>
+          <span className="sidebar-brand-sub">Beauty Community</span>
         </div>
       </div>
 
-      {/* User Profile Card */}
-      <div className="sidebar-bottom">
-        <div className="profile-card">
-          <div className="profile-avatar" aria-hidden="true">
-            {(currentUser?.name || "G").charAt(0).toUpperCase()}
-          </div>
-          <div className="profile-info">
-            <div className="profile-name-row">
-              <strong>{currentUser ? currentUser.name : "Guest Visitor"}</strong>
-              {isCreator && <IconVerified size={13} />}
-            </div>
-            {currentUser && (
-              <div className="profile-role-row">
-                <span className={`user-role-badge ${currentUser.accountType || "creator"}`}>
-                  {currentUser.accountType === "client" ? (
-                    <>
-                      <IconUser size={12} /> Client
-                    </>
-                  ) : (
-                    <>
-                      <IconSparkles size={12} /> Creator
-                    </>
-                  )}
-                </span>
-              </div>
-            )}
-            <small className="profile-handle">
-              {currentUser ? currentUser.handle : "Sign in to save looks"}
-            </small>
-            {currentUser?.locationLabel && (
-              <small className="profile-location">{currentUser.locationLabel}</small>
-            )}
-          </div>
-          <div className="profile-card-actions">
+      {/* Primary nav */}
+      <nav className="sidebar-nav" aria-label="Main navigation">
+        {visibleNavItems.map((item) => {
+          const isActive = activeNav === item;
+          return (
             <button
-              className="btn-outline-sm profile-btn"
-              type="button"
-              onClick={() => onNavigate(currentUser ? "/profile" : "/login")}
+              key={item}
+              className={`sidebar-nav-item${isActive ? " active" : ""}`}
+              onClick={() => {
+                if (item === "Upload") onNavigate("/upload");
+                if (item === "Home") onNavigate("/");
+                if (item === "Discover") onNavigate("/discover");
+                if (item === "Messages") onNavigate("/messages");
+              }}
             >
-              {currentUser ? "Account" : "Join"}
+              <span className="sidebar-nav-icon">{navIcons[item]}</span>
+              <span className="sidebar-nav-label">
+                {item === "Messages" && isClient ? "Appointments" : item}
+              </span>
+              {isActive && <span className="sidebar-nav-pip" aria-hidden="true" />}
             </button>
-            {currentUser && (
-              <button className="btn-outline-sm profile-btn" type="button" onClick={() => onNavigate("/settings")}>
-                Settings
-              </button>
-            )}
-            {currentUser && (
-              <button className="btn-outline-sm sidebar-logout-btn" type="button" onClick={onLogout}>
-                Log out
-              </button>
-            )}
+          );
+        })}
+      </nav>
+
+      {/* Role-based CTA */}
+      <div className="sidebar-cta-group">
+        {isClient ? (
+          <>
+            <button className="sidebar-cta-primary" type="button" onClick={() => onNavigate("/discover")}>
+              <IconCompass size={17} />
+              <span>Find Artists</span>
+            </button>
+            <button className="sidebar-cta-ghost" type="button" onClick={() => onNavigate("/messages")}>
+              <IconCalendar size={16} />
+              <span>My Appointments</span>
+            </button>
+          </>
+        ) : (
+          <>
+            <button className="sidebar-cta-primary" type="button" onClick={() => onNavigate("/upload")}>
+              <IconUpload size={17} />
+              <span>Share Your Look</span>
+            </button>
+            <button className="sidebar-cta-ghost" type="button" onClick={() => onNavigate("/discover")}>
+              <IconCompass size={16} />
+              <span>Artist Map</span>
+            </button>
+          </>
+        )}
+      </div>
+
+      {/* User profile cluster */}
+      <div className="sidebar-profile-cluster">
+        <div
+          className="sidebar-profile-avatar"
+          aria-hidden="true"
+          onClick={() => onNavigate(currentUser ? "/profile" : "/login")}
+          style={{ cursor: "pointer" }}
+        >
+          {currentUser?.profilePhotoUrl ? (
+            <img src={currentUser.profilePhotoUrl} alt={currentUser.name} />
+          ) : (
+            <span>{(currentUser?.name || "G").charAt(0).toUpperCase()}</span>
+          )}
+        </div>
+
+        <div className="sidebar-profile-info">
+          <div className="sidebar-profile-name">
+            <strong>{currentUser ? currentUser.name : "Guest"}</strong>
+            {isCreator && <IconVerified size={13} />}
           </div>
+          {currentUser && (
+            <span className={`user-role-badge ${currentUser.accountType || "creator"}`}>
+              {currentUser.accountType === "client" ? (
+                <><IconUser size={10} /> Client</>
+              ) : (
+                <><IconSparkles size={10} /> Creator</>
+              )}
+            </span>
+          )}
+          <small className="sidebar-profile-handle">
+            {currentUser ? currentUser.handle : "Sign in to continue"}
+          </small>
+        </div>
+
+        <div className="sidebar-profile-actions">
+          <button
+            className="btn-outline-sm"
+            type="button"
+            onClick={() => onNavigate(currentUser ? "/profile" : "/login")}
+          >
+            {currentUser ? "Profile" : "Join"}
+          </button>
+          {currentUser && (
+            <button className="btn-outline-sm sidebar-logout-btn" type="button" onClick={onLogout}>
+              Out
+            </button>
+          )}
         </div>
       </div>
     </aside>

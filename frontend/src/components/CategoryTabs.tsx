@@ -1,4 +1,5 @@
-// Presents the service categories used to filter the feed.
+// Category pill slider — rose-gold active indicator, skeleton during load.
+
 type CategoryTabsProps = {
   activeCategory: string;
   categories: string[];
@@ -6,26 +7,37 @@ type CategoryTabsProps = {
   onSelectCategory: (category: string) => void;
 };
 
+const SKELETON_COUNT = 6;
+
 function CategoryTabs({ activeCategory, categories, isLoading, onSelectCategory }: CategoryTabsProps) {
-  const displayCategories = categories.length > 0 ? categories : ["For you", "Hair", "Nails", "Barbering", "Makeup", "Skincare", "Tattoos"];
+  const allCategories = ["For you", ...categories];
+
+  if (isLoading) {
+    return (
+      <div className="cat-tabs-scroll">
+        <div className="cat-tabs-row">
+          {Array.from({ length: SKELETON_COUNT }).map((_, i) => (
+            <div key={i} className="cat-tab-skeleton skeleton" style={{ width: `${60 + i * 12}px` }} />
+          ))}
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className="category-scroll-container">
-      <div className="category-row" role="tablist" aria-label="Style Categories">
-        {(isLoading ? ["Loading categories..."] : displayCategories).map((category) => {
-          const isActive = activeCategory === category;
-
+    <div className="cat-tabs-scroll">
+      <div className="cat-tabs-row" role="tablist" aria-label="Content categories">
+        {allCategories.map((cat) => {
+          const isActive = activeCategory === cat;
           return (
             <button
-              key={category}
-              disabled={isLoading}
+              key={cat}
               role="tab"
               aria-selected={isActive}
-              className={`category-pill ${isActive ? "active" : ""}`}
-              onClick={() => onSelectCategory(category)}
-              type="button"
+              className={`cat-tab-pill${isActive ? " active" : ""}`}
+              onClick={() => onSelectCategory(cat)}
             >
-              <span className="category-name">{category}</span>
+              {cat}
             </button>
           );
         })}

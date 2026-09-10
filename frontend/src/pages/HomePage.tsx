@@ -1,4 +1,4 @@
-// Main feed page combining stories, filters, and community posts.
+// Home feed — hero tagline, category pills, and 2-column editorial post grid.
 import CategoryTabs from "../components/CategoryTabs";
 import PostCard from "../components/PostCard";
 import { IconPin } from "../components/Icons";
@@ -7,7 +7,6 @@ import type { CurrentUser, Post } from "../types";
 type HomePageProps = {
   activeCategory: string;
   categories: string[];
-
   emptyCopy: string;
   error: string;
   hasLocation: boolean;
@@ -24,7 +23,6 @@ type HomePageProps = {
 function HomePage({
   activeCategory,
   categories,
-
   emptyCopy,
   error,
   hasLocation,
@@ -40,9 +38,8 @@ function HomePage({
   return (
     <div className="page-content home-page">
 
-
-      {/* Category Pills Slider */}
-      <section className="category-section">
+      {/* Category pill strip */}
+      <section className="home-cat-section">
         <CategoryTabs
           activeCategory={activeCategory}
           categories={categories}
@@ -51,44 +48,53 @@ function HomePage({
         />
       </section>
 
-      {/* Feed Controls Header */}
-      <section className="feed-header-bar">
-        <div className="feed-title-block">
+      {/* Feed header */}
+      <section className="home-feed-header">
+        <div className="home-feed-title">
           <h2>
-            {nearbyOnly ? "Talent Around You" : activeCategory === "For you" ? "All Styles" : activeCategory}
+            {nearbyOnly
+              ? "Talent Around You"
+              : activeCategory === "For you"
+              ? "All Styles"
+              : activeCategory}
           </h2>
-          <p>
+          <p className="home-feed-subtitle">
             {searchSummary
               ? `Smart search: ${searchSummary}`
               : nearbyOnly
-              ? "Showing creators within 50 km of your location"
-              : "Latest looks shared by South African beauty artists"}
+              ? "Creators within 50 km of you"
+              : "Latest looks from South African beauty artists"}
           </p>
         </div>
 
-        <div className="feed-controls">
+        <div className="home-feed-controls">
           {hasLocation && (
             <button
-              className={`feed-filter-btn ${nearbyOnly ? "active" : ""}`}
+              className={`home-nearby-btn${nearbyOnly ? " active" : ""}`}
               type="button"
               onClick={onToggleNearby}
             >
-              <IconPin size={14} />
-              <span>{nearbyOnly ? "Within 50km" : "Near me"}</span>
+              <IconPin size={13} />
+              <span>{nearbyOnly ? "Within 50 km" : "Near me"}</span>
             </button>
           )}
-
-          <div className="feed-post-count">
-            <span>{posts.length} {posts.length === 1 ? "look" : "looks"}</span>
-          </div>
+          <span className="home-post-count">
+            {posts.length} {posts.length === 1 ? "look" : "looks"}
+          </span>
         </div>
       </section>
 
-      {/* Posts Grid Feed */}
-      <div className="posts-container">
+      {/* Feed grid */}
+      <div className="home-feed-grid">
         {isLoading && (
-          <div className="empty-state">
-            <p>Loading community posts...</p>
+          <div className="home-skeleton-grid">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <div key={i} className="home-post-skeleton">
+                <div className="skeleton home-skeleton-media" />
+                <div className="skeleton home-skeleton-line" style={{ width: "70%" }} />
+                <div className="skeleton home-skeleton-line" style={{ width: "50%" }} />
+              </div>
+            ))}
           </div>
         )}
 
@@ -105,11 +111,7 @@ function HomePage({
           <div className="empty-state">
             <h3>No posts found</h3>
             <p>{emptyCopy}</p>
-            <button
-              className="btn-primary"
-              type="button"
-              onClick={() => onNavigate("/upload")}
-            >
+            <button className="btn-primary" type="button" onClick={() => onNavigate("/upload")}>
               Post the First Look
             </button>
           </div>

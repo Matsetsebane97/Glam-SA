@@ -1,4 +1,4 @@
-// Global search and account controls displayed above each page.
+// Global search and account controls — frosted glass sticky header.
 import { useEffect, useRef, useState } from "react";
 import { useTheme } from "../theme/ThemeContext";
 import { getConversations } from "../api";
@@ -18,48 +18,39 @@ function Topbar({ currentUser, query, onQueryChange, onNavigate }: TopbarProps) 
   const [showNotifications, setShowNotifications] = useState(false);
   const [notifications, setNotifications] = useState<Conversation[]>([]);
   const [isLoadingNotifications, setIsLoadingNotifications] = useState(false);
-  // Mobile search overlay state
+  const [searchFocused, setSearchFocused] = useState(false);
   const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
   const mobileInputRef = useRef<HTMLInputElement>(null);
+  const notifRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (mobileSearchOpen) {
-      // Small delay so the animation has started before we focus
       setTimeout(() => mobileInputRef.current?.focus(), 60);
     }
   }, [mobileSearchOpen]);
 
-  // Close search overlay when query is cleared via external means
+  // Close notification dropdown on outside click
   useEffect(() => {
-    if (!query && mobileSearchOpen) {
-      // Keep overlay open, user may still be typing
-    }
-  }, [query]);
+    const handleClick = (e: MouseEvent) => {
+      if (notifRef.current && !notifRef.current.contains(e.target as Node)) {
+        setShowNotifications(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClick);
+    return () => document.removeEventListener("mousedown", handleClick);
+  }, []);
 
-  // Conversations with unread messages are the app's actionable notifications
   useEffect(() => {
     if (!currentUser) {
       setNotifications([]);
       return;
     }
-
     setIsLoadingNotifications(true);
     void getConversations()
-      .then((conversations) => {
-        // Filter to only show conversations with unread messages
-        const unreadConversations = conversations.filter(
-          (conv) => (conv.unreadCount ?? 0) > 0
-        );
-        setNotifications(unreadConversations);
-      })
+      .then((convs) => setNotifications(convs.filter((c) => (c.unreadCount ?? 0) > 0)))
       .catch(() => setNotifications([]))
       .finally(() => setIsLoadingNotifications(false));
   }, [currentUser]);
-
-  const openConversation = () => {
-    setShowNotifications(false);
-    onNavigate("/messages");
-  };
 
   const closeMobileSearch = () => {
     setMobileSearchOpen(false);
@@ -68,123 +59,132 @@ function Topbar({ currentUser, query, onQueryChange, onNavigate }: TopbarProps) 
 
   return (
     <header className="topbar">
-      {/* Brand — shown on desktop and as centre anchor on mobile */}
-      <div className="mobile-brand" onClick={() => onNavigate("/")} style={{ cursor: "pointer" }}>
-        <img className="brand-logo" src={brandLogoUrl} alt="Glam SA logo" />
-        <span className="brand-title">Glam SA</span>
+      {/* Brand — centred on mobile, leftmost on desktop (sidebar has it) */}
+      <div className="topbar-brand" onClick={() => onNavigate("/")} role="button" tabIndex={0} aria-label="Go home">
+        <img className="topbar-logo" src={brandLogoUrl} alt="Glam SA" />
+        <span className="topbar-brand-name">Glam SA</span>
       </div>
 
-      {/* Desktop search bar — hidden on mobile */}
-      <div className="search-container">
-        <label className="search-box">
-          <IconSearch size={18} className="search-icon" />
+      {/* Desktop search */}
+      <div className={`topbar-search-wrap${searchFocused ? " focused" : ""}`}>
+        <label className="topbar-search-box">
+          <IconSearch size={17} className="topbar-search-icon" />
           <input
             type="search"
             value={query}
-            onChange={(event) => onQueryChange(event.target.value)}
-            placeholder="Search hair, braids, makeup, nails, barber..."
+            onChange={(e) => onQueryChange(e.target.value)}
+            onFocus={() => setSearchFocused(true)}
+            onBlur={() => setSearchFocused(false)}
+            placeholder="Search hair, braids, makeup, nails, barber…"
             aria-label="Search looks and artists"
+            className="topbar-search-input"
           />
           {query && (
             <button
-              className="search-clear-btn"
+              className="topbar-search-clear"
               type="button"
               onClick={() => onQueryChange("")}
               aria-label="Clear search"
             >
-              <IconClose size={14} />
+              <IconClose size={13} />
             </button>
           )}
         </label>
       </div>
 
-      {/* Right-side action cluster */}
+      {/* Right action cluster */}
       <div className="topbar-actions">
-        {/* Mobile-only search icon */}
+        {/* Mobile search toggle */}
         <button
-          className="icon-btn mobile-search-trigger"
-          aria-label="Open search"
+          className="topbar-icon-btn mobile-only"
+          aria-label="Search"
           type="button"
           onClick={() => setMobileSearchOpen(true)}
         >
-          <IconSearch size={19} />
+          <IconSearch size={18} />
         </button>
 
-        {/* Dark mode toggle */}
-        <button className="icon-btn" aria-label="Toggle dark mode" type="button" onClick={() => toggleTheme()}>
-          {theme === 'light' ? <IconMoon size={18} /> : <IconSun size={18} />}
+        {/* Theme toggle */}
+        <button
+          className="topbar-icon-btn"
+          aria-label={theme === "light" ? "Switch to dark mode" : "Switch to light mode"}
+          type="button"
+          onClick={toggleTheme}
+        >
+          {theme === "light" ? <IconMoon size={18} /> : <IconSun size={18} />}
         </button>
 
         {/* Notifications */}
-        <div className="notification-wrapper">
+        <div className="topbar-notif-wrap" ref={notifRef}>
           <button
-            className="icon-btn"
+            className="topbar-icon-btn"
             aria-label="Notifications"
             type="button"
-            onClick={() => setShowNotifications(!showNotifications)}
+            onClick={() => setShowNotifications((v) => !v)}
           >
-            <IconBell size={19} />
+            <IconBell size={18} />
             {notifications.length > 0 && (
-              <span className="notification-count">
-                {notifications.length > 9 ? "9+" : notifications.length}
-              </span>
+              <span className="topbar-notif-dot" aria-hidden="true" />
             )}
           </button>
 
           {showNotifications && (
-            <div className="notification-dropdown">
-              <div className="notification-header">
+            <div className="topbar-notif-dropdown" role="dialog" aria-label="Notifications">
+              <div className="topbar-notif-header">
                 <strong>Notifications</strong>
                 {notifications.length > 0 && (
-                  <span>
-                    {notifications.reduce((sum, n) => sum + (n.unreadCount ?? 0), 0)} unread
+                  <span className="topbar-notif-count">
+                    {notifications.reduce((s, n) => s + (n.unreadCount ?? 0), 0)} unread
                   </span>
                 )}
               </div>
+
               {!currentUser && (
-                <div className="notification-empty">
-                  <p>Sign in to see booking notifications.</p>
+                <div className="topbar-notif-empty">
+                  <p>Sign in to see notifications.</p>
                 </div>
               )}
               {currentUser && isLoadingNotifications && (
-                <div className="notification-empty">
-                  <p>Loading notifications...</p>
+                <div className="topbar-notif-empty">
+                  <p>Loading…</p>
                 </div>
               )}
               {currentUser && !isLoadingNotifications && notifications.length === 0 && (
-                <div className="notification-empty">
+                <div className="topbar-notif-empty">
                   <p>No unread notifications.</p>
                 </div>
               )}
               {currentUser && !isLoadingNotifications && notifications.length > 0 && (
-                <div className="notification-list">
-                  {notifications.slice(0, 5).map((notification) => (
+                <div className="topbar-notif-list">
+                  {notifications.slice(0, 5).map((n) => (
                     <button
-                      className="notification-item"
+                      key={n.userId}
+                      className="topbar-notif-item"
                       type="button"
-                      key={notification.userId}
-                      onClick={openConversation}
+                      onClick={() => {
+                        setShowNotifications(false);
+                        onNavigate("/messages");
+                      }}
                     >
-                      <span className="notification-avatar">
-                        {notification.name.charAt(0).toUpperCase()}
+                      <span className="topbar-notif-avatar">{n.name.charAt(0).toUpperCase()}</span>
+                      <span className="topbar-notif-copy">
+                        <strong>{n.name}</strong>
+                        <span>{n.lastMessage}</span>
                       </span>
-                      <span className="notification-copy">
-                        <strong>{notification.name}</strong>
-                        <span>{notification.lastMessage}</span>
-                      </span>
-                      {notification.unreadCount && notification.unreadCount > 0 && (
-                        <span className="notification-unread-badge">
-                          {notification.unreadCount}
-                        </span>
+                      {(n.unreadCount ?? 0) > 0 && (
+                        <span className="topbar-notif-badge">{n.unreadCount}</span>
                       )}
                     </button>
                   ))}
                   <button
-                    className="notification-view-all"
+                    className="topbar-notif-view-all"
                     type="button"
-                    onClick={openConversation}
+                    onClick={() => {
+                      setShowNotifications(false);
+                      onNavigate("/messages");
+                    }}
                   >
-                    View all messages
+                    View all messages →
                   </button>
                 </div>
               )}
@@ -192,9 +192,10 @@ function Topbar({ currentUser, query, onQueryChange, onNavigate }: TopbarProps) 
           )}
         </div>
 
+        {/* Auth / avatar */}
         {!currentUser ? (
           <button
-            className="btn-outline-sm mobile-auth-btn"
+            className="topbar-sign-in-btn"
             type="button"
             onClick={() => onNavigate("/login")}
           >
@@ -205,49 +206,43 @@ function Topbar({ currentUser, query, onQueryChange, onNavigate }: TopbarProps) 
             className="topbar-avatar-btn"
             type="button"
             onClick={() => onNavigate("/profile")}
-            title="My Profile"
+            title={`${currentUser.name} — My Profile`}
           >
-            {currentUser.name.charAt(0).toUpperCase()}
+            {currentUser.profilePhotoUrl ? (
+              <img src={currentUser.profilePhotoUrl} alt={currentUser.name} />
+            ) : (
+              currentUser.name.charAt(0).toUpperCase()
+            )}
           </button>
         )}
       </div>
 
       {/* Mobile full-screen search overlay */}
       {mobileSearchOpen && (
-        <div className="mobile-search-overlay" role="search" aria-label="Mobile search">
-          <div className="mobile-search-inner">
-            <label className="mobile-search-box">
-              <IconSearch size={20} className="search-icon" />
-              <input
-                ref={mobileInputRef}
-                type="search"
-                value={query}
-                onChange={(event) => onQueryChange(event.target.value)}
-                placeholder="Search hair, braids, makeup, nails…"
-                aria-label="Search looks and artists"
-              />
-              {query && (
-                <button
-                  className="search-clear-btn"
-                  type="button"
-                  onClick={() => onQueryChange("")}
-                  aria-label="Clear search"
-                >
-                  <IconClose size={16} />
-                </button>
-              )}
-            </label>
-            <button
-              className="mobile-search-cancel"
-              type="button"
-              onClick={closeMobileSearch}
-            >
-              Cancel
-            </button>
-          </div>
+        <div className="topbar-mobile-search" role="search" aria-label="Mobile search">
+          <label className="topbar-mobile-search-box">
+            <IconSearch size={19} />
+            <input
+              ref={mobileInputRef}
+              type="search"
+              value={query}
+              onChange={(e) => onQueryChange(e.target.value)}
+              placeholder="Search hair, braids, makeup…"
+              aria-label="Search"
+              className="topbar-search-input"
+            />
+            {query && (
+              <button className="topbar-search-clear" type="button" onClick={() => onQueryChange("")} aria-label="Clear">
+                <IconClose size={15} />
+              </button>
+            )}
+          </label>
+          <button className="topbar-mobile-cancel" type="button" onClick={closeMobileSearch}>
+            Cancel
+          </button>
           {query && (
-            <p className="mobile-search-hint">
-              Showing results for <strong>"{query}"</strong> — scroll down to see them
+            <p className="topbar-mobile-hint">
+              Showing results for <strong>"{query}"</strong>
             </p>
           )}
         </div>
