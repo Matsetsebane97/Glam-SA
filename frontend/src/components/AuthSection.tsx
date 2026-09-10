@@ -328,7 +328,7 @@ function AuthSection({ onSuccess }: AuthSectionProps) {
                 disabled={isLocating}
               >
                 <IconPin size={16} />
-                <span>{isLocating ? "Acquiring GPS Signal..." : "Detect My City / Location"}</span>
+                <span>{isLocating ? "Acquiring GPS Signal..." : "Detect Province / City / Suburb"}</span>
               </button>
             )}
           </div>

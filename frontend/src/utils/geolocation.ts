@@ -28,23 +28,25 @@ async function reverseGeocode(latitude: number, longitude: number): Promise<stri
 
     const data = (await response.json()) as {
       address?: {
+        province?: string;
         state?: string;
-        state_district?: string;
         suburb?: string;
         neighbourhood?: string;
         quarter?: string;
         city?: string;
         town?: string;
         municipality?: string;
+        county?: string;
         village?: string;
       };
     };
     const address = data.address;
     if (!address) return formatCoordinates(latitude, longitude);
 
-    // Keep every saved location in the same province, city, suburb order.
-    const province = address.state || address.state_district;
-    const city = address.city || address.town || address.municipality || address.village;
+    // Keep every saved location in Province, City, Suburb order. Do not use
+    // ward or district fields because they are not useful public labels.
+    const province = address.province || address.state;
+    const city = address.city || address.town || address.municipality || address.county;
     const suburb = address.suburb || address.neighbourhood || address.quarter;
     const parts = [province, city, suburb].filter(
       (part, index, values): part is string => Boolean(part) && values.indexOf(part) === index,

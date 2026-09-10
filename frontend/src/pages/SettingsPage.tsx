@@ -349,7 +349,7 @@ function SettingsPage({ currentUser, onNavigate, onSaved }: SettingsPageProps) {
 
           <label className="studio-label">
             <span>
-              <IconPin size={14} /> Location
+              <IconPin size={14} /> Public location
             </span>
             <input
               className="studio-input"
@@ -359,6 +359,7 @@ function SettingsPage({ currentUser, onNavigate, onSaved }: SettingsPageProps) {
               autoComplete="address-level2"
               placeholder="e.g. Gauteng, Johannesburg, Sandton"
             />
+            <small className="field-help">Displayed as Province, City, Suburb. Ward details are not shown.</small>
           </label>
 
           <div
