@@ -55,9 +55,12 @@ export type SessionContext = {
 // ─── Constants ────────────────────────────────────────────────────────────────
 
 export const categoryAliases: Record<string, string> = {
-  braid: "Hair",
-  braids: "Hair",
-  hair: "Hair",
+  bridal: "Bridal",
+  wedding: "Bridal",
+  weddings: "Bridal",
+  braid: "Bridal",
+  braids: "Bridal",
+  hair: "Bridal",
   nail: "Nails",
   nails: "Nails",
   manicure: "Nails",
@@ -70,9 +73,33 @@ export const categoryAliases: Record<string, string> = {
   skincare: "Skincare",
   tattoo: "Tattoos",
   tattoos: "Tattoos",
+  lashes: "Lashes & Brows",
+  lash: "Lashes & Brows",
+  brows: "Lashes & Brows",
+  brow: "Lashes & Brows",
+  loc: "Locs & Dreadlocks",
+  locs: "Locs & Dreadlocks",
+  dreadlock: "Locs & Dreadlocks",
+  dreadlocks: "Locs & Dreadlocks",
+  wig: "Wigs & Weaves",
+  wigs: "Wigs & Weaves",
+  weave: "Wigs & Weaves",
+  weaves: "Wigs & Weaves",
+  natural: "Natural Hair",
+  "natural hair": "Natural Hair",
+  spa: "Spa & Wellness",
+  wellness: "Spa & Wellness",
+  massage: "Massage",
+  waxing: "Waxing & Hair Removal",
+  piercing: "Piercing",
+  "teeth whitening": "Teeth Whitening",
+  aesthetics: "Aesthetics & Injectables",
+  injectables: "Aesthetics & Injectables",
+  "men's grooming": "Men's Grooming",
+  "beauty courses": "Beauty Courses",
 };
 
-export const assistantSuggestions = ["Hair near me", "Nails under R500", "Makeup in Sandton", "Find artist Naledi"];
+export const assistantSuggestions = ["Bridal near me", "Nails under R500", "Makeup in Sandton", "Find artist Naledi"];
 export const fallbackSuggestions = ["Try a broader budget", "Search another area", "Browse the full feed"];
 export const recentSearchesKey = "glamAssistantRecentSearches";
 export const savedArtistsKey = "glamAssistantSavedArtists";
@@ -153,7 +180,7 @@ function getFuzzyCategory(normalizedQuestion: string, synonyms?: Record<string, 
 
 export function parseQuestion(question: string, synonyms?: Record<string, string[]>): ParsedQuestion {
   const normalizedQuestion = question.trim().toLowerCase();
-  const categoryToken = normalizedQuestion.match(/\b(braids?|hair|nails?|manicure|pedicure|barber(?:ing|s)?|makeup|facials?|skincare|tattoos?)\b/);
+  const categoryToken = normalizedQuestion.match(/\b(bridal|weddings?|braids?|hair|nails?|manicure|pedicure|barber(?:ing|s)?|makeup|facials?|skincare|tattoos?|lashes?|brows?|locs?|dreadlocks?|wigs?|weaves?|natural hair|spa|wellness|massage|waxing|piercing|teeth whitening|aesthetics|injectables|men's grooming|beauty courses)\b/);
   const priceMatch = normalizedQuestion.match(/(?:under|below|less than)\s*r?\s*(\d+(?:\.\d+)?)/);
   const locationMatch = normalizedQuestion.match(/\bnear\s+(?!me\b)([a-z][a-z\s-]*?)(?=\s+(?:under|below|less than)\b|$)/);
   const weekdayMatch = normalizedQuestion.match(/\b(sunday|monday|tuesday|wednesday|thursday|friday|saturday)\b/);
@@ -426,7 +453,7 @@ export function generateSmartQuickReplies(
   }
 
   // Suggest related categories
-  if (parsed.category && parsed.category === "Hair") {
+  if (parsed.category && parsed.category === "Bridal") {
     if (!replies.some((r) => r.includes("Barbering"))) {
       replies.push("Try Barbering");
     }

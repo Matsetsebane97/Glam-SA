@@ -32,7 +32,7 @@ const creatorSteps: Step[] = [
     eyebrow: "The Home Feed",
     title: "Discover stunning looks every day",
     description:
-      "Your home feed surfaces fresh portfolio work from creators across South Africa. Filter by category — Hair, Nails, Barbering, Makeup — or search by style, price, and city using the smart search bar at the top.",
+      "Your home feed surfaces fresh portfolio work from creators across South Africa. Filter by category — Bridal, Nails, Barbering, Makeup, and more — or search by style, price, and city using the smart search bar at the top.",
     ctaLabel: "Explore the feed",
     ctaPath: "/",
     illustration: "feed",
@@ -91,7 +91,7 @@ const clientSteps: Step[] = [
     eyebrow: "The Home Feed",
     title: "Browse stunning looks",
     description:
-      "Scroll through the home feed to see the latest portfolio work from verified artists. Filter by Hair, Nails, Makeup, and more — or use the search bar to find a specific style, location, or price range.",
+      "Scroll through the home feed to see the latest portfolio work from verified artists. Filter by Bridal, Nails, Makeup, and more — or use the search bar to find a specific style, location, or price range.",
     ctaLabel: "Browse the feed",
     ctaPath: "/",
     illustration: "feed",

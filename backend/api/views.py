@@ -19,7 +19,27 @@ from .models import AvailabilitySlot, Booking, Message, Post, ServiceOffering, U
 from .storage import is_configured, upload_media
 
 
-CATEGORIES = ["For you", "Hair", "Nails", "Barbering", "Makeup", "Skincare", "Tattoos"]
+CATEGORIES = [
+    "For you",
+    "Bridal",
+    "Nails",
+    "Barbering",
+    "Makeup",
+    "Skincare",
+    "Tattoos",
+    "Lashes & Brows",
+    "Locs & Dreadlocks",
+    "Wigs & Weaves",
+    "Natural Hair",
+    "Spa & Wellness",
+    "Massage",
+    "Waxing & Hair Removal",
+    "Piercing",
+    "Teeth Whitening",
+    "Aesthetics & Injectables",
+    "Men's Grooming",
+    "Beauty Courses",
+]
 
 
 def _parse_coordinate(value, name):

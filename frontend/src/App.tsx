@@ -21,10 +21,14 @@ import NotificationsPage from "./pages/NotificationsPage";
 import type { CurrentUser, Post } from "./types";
 
 const categoryAliases: Record<string, string> = {
-  braid: "Hair",
-  braids: "Hair",
-  hair: "Hair",
+  bridal: "Bridal",
+  wedding: "Bridal",
+  weddings: "Bridal",
+  braid: "Bridal",
+  braids: "Bridal",
+  hair: "Bridal",
   nails: "Nails",
+  nail: "Nails",
   manicure: "Nails",
   pedicure: "Nails",
   barber: "Barbering",
@@ -36,13 +40,37 @@ const categoryAliases: Record<string, string> = {
   facials: "Skincare",
   tattoo: "Tattoos",
   tattoos: "Tattoos",
+  lashes: "Lashes & Brows",
+  lash: "Lashes & Brows",
+  brows: "Lashes & Brows",
+  brow: "Lashes & Brows",
+  loc: "Locs & Dreadlocks",
+  locs: "Locs & Dreadlocks",
+  dreadlock: "Locs & Dreadlocks",
+  dreadlocks: "Locs & Dreadlocks",
+  wig: "Wigs & Weaves",
+  wigs: "Wigs & Weaves",
+  weave: "Wigs & Weaves",
+  weaves: "Wigs & Weaves",
+  natural: "Natural Hair",
+  "natural hair": "Natural Hair",
+  spa: "Spa & Wellness",
+  wellness: "Spa & Wellness",
+  massage: "Massage",
+  waxing: "Waxing & Hair Removal",
+  piercing: "Piercing",
+  "teeth whitening": "Teeth Whitening",
+  aesthetics: "Aesthetics & Injectables",
+  injectables: "Aesthetics & Injectables",
+  "men's grooming": "Men's Grooming",
+  "beauty courses": "Beauty Courses",
 };
 
 const searchStopWords = new Set(["a", "an", "and", "for", "in", "near", "the", "under", "below", "less", "than"]);
 
 function parseSmartQuery(query: string) {
   const normalizedQuery = query.trim().toLowerCase();
-  const categoryToken = normalizedQuery.match(/\b(braids?|hair|nails?|manicure|pedicure|barber(?:ing|s)?|makeup|skincare|facials?|tattoos?)\b/);
+  const categoryToken = normalizedQuery.match(/\b(bridal|weddings?|braids?|hair|nails?|manicure|pedicure|barber(?:ing|s)?|makeup|skincare|facials?|tattoos?|lashes?|brows?|locs?|dreadlocks?|wigs?|weaves?|natural hair|spa|wellness|massage|waxing|piercing|teeth whitening|aesthetics|injectables|men's grooming|beauty courses)\b/);
   const priceMatch = normalizedQuery.match(/(?:under|below|less than)\s*r?\s*(\d+(?:\.\d+)?)/);
   const nearMatch = normalizedQuery.match(/\bnear\s+([a-z][a-z\s-]*?)(?=\s+(?:under|below|less than)\b|$)/);
   const category = categoryToken ? categoryAliases[categoryToken[1]] : undefined;

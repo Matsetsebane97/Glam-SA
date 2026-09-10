@@ -4,6 +4,7 @@ import type { ChangeEvent, FormEvent } from "react";
 import { IconCheck, IconPin } from "./Icons";
 import { requestUserLocation, type GeolocationResult } from "../utils/geolocation";
 import { STORAGE_KEY as ONBOARDING_KEY } from "./OnboardingWalkthrough";
+import { fallbackCategories } from "../constants";
 
 type AuthMode = "login" | "signup";
 
@@ -11,7 +12,6 @@ type AuthSectionProps = {
   onSuccess?: () => void;
 };
 
-const creatorCategories = ["Hair", "Nails", "Barbering", "Makeup", "Skincare", "Tattoos"];
 const maxProfilePhotoBytes = 2 * 1024 * 1024;
 
 function AuthSection({ onSuccess }: AuthSectionProps) {
@@ -256,7 +256,7 @@ function AuthSection({ onSuccess }: AuthSectionProps) {
             <div className="studio-label auth-category-field">
               <span>Service Categories</span>
               <div className="auth-category-grid" role="group" aria-label="Creator service categories">
-                {creatorCategories.map((category) => (
+                {fallbackCategories.map((category) => (
                   <button
                     type="button"
                     key={category}

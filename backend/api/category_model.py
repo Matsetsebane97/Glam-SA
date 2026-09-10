@@ -4,7 +4,7 @@ from collections import Counter
 
 
 TRAINING_EXAMPLES = {
-    "Hair": (
+    "Bridal": (
         "braids knotless braids box braids cornrows hair extensions weave wig install wash cut blowout silk press relaxer dreadlocks locs twists"
     ),
     "Nails": (
@@ -22,6 +22,18 @@ TRAINING_EXAMPLES = {
     "Tattoos": (
         "tattoo ink fine line sleeve piercing floral tattoo lettering realism tattoo design"
     ),
+    "Lashes & Brows": "lashes lash extensions brows brow shaping microblading threading",
+    "Locs & Dreadlocks": "locs dreadlocks starter locs retwist loc styling",
+    "Wigs & Weaves": "wigs weaves wig install sew in closure frontal extensions",
+    "Natural Hair": "natural hair coils curls afro wash go twist out protective styling",
+    "Spa & Wellness": "spa wellness body treatment relaxation aromatherapy",
+    "Massage": "massage deep tissue swedish sports massage hot stone",
+    "Waxing & Hair Removal": "wax waxing hair removal sugaring threading",
+    "Piercing": "piercing ear nose body jewelry",
+    "Teeth Whitening": "teeth whitening smile whitening dental",
+    "Aesthetics & Injectables": "aesthetics injectables botox fillers skin rejuvenation",
+    "Men's Grooming": "men grooming beard shave haircut male grooming",
+    "Beauty Courses": "beauty course training workshop masterclass education",
 }
 
 
