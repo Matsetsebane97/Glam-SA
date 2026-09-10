@@ -111,7 +111,7 @@ export type NearbyArtist = {
   openSlotCount?: number;
 };
 
-export type NavItem = "Home" | "Discover" | "Messages" | "Upload";
+export type NavItem = "Home" | "Discover" | "Messages" | "Saved" | "Upload";
 
 export type Coordinates = {
   latitude: number;

@@ -15,6 +15,7 @@ import {
 import type { CurrentUser, Post } from "../types";
 import { formatDistance, formatDuration } from "../utils/geo";
 import { whatsappUrl } from "../utils/whatsapp";
+import { isPostSaved, toggleSavedPost, SAVED_POSTS_EVENT } from "../utils/savedPosts";
 import { createBooking, getAvailability, getServices, sendMessage, setPostLike } from "../api";
 import type { AvailabilitySlot, Booking, ServiceOffering } from "../types";
 
@@ -51,6 +52,13 @@ function PostCard({
   const [likesCount, setLikesCount] = useState(post.likesCount);
   const [isUpdatingLike, setIsUpdatingLike] = useState(false);
   const [isSaved, setIsSaved] = useState(false);
+
+  useEffect(() => {
+    const syncSavedState = () => setIsSaved(isPostSaved(currentUser?.id, post.id));
+    syncSavedState();
+    window.addEventListener(SAVED_POSTS_EVENT, syncSavedState);
+    return () => window.removeEventListener(SAVED_POSTS_EVENT, syncSavedState);
+  }, [currentUser?.id, post.id]);
 
   // Booking & Inquiry states
   const [showInquire, setShowInquire] = useState(initialShowBooking ?? false);
@@ -165,7 +173,7 @@ function PostCard({
       setAuthNotice("Sign in to save posts.");
       return;
     }
-    setIsSaved((current) => !current);
+    setIsSaved(toggleSavedPost(currentUser.id!, post));
     setAuthNotice("");
   };
 

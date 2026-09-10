@@ -3,6 +3,7 @@ import type { ReactNode } from "react";
 import { brandLogoUrl, navItems } from "../constants";
 import {
   IconCalendar,
+  IconBookmark,
   IconCompass,
   IconGrid,
   IconHome,
@@ -25,6 +26,7 @@ const navIcons: Record<NavItem, ReactNode> = {
   Home: <IconHome size={20} />,
   Discover: <IconCompass size={20} />,
   Messages: <IconMessage size={20} />,
+  Saved: <IconBookmark size={20} />,
   Upload: <IconUpload size={20} />,
 };
 
@@ -59,6 +61,7 @@ function Sidebar({ activeNav, currentUser, onNavigate, onLogout }: SidebarProps)
                 if (item === "Home") onNavigate("/");
                 if (item === "Discover") onNavigate("/discover");
                 if (item === "Messages") onNavigate("/messages");
+                if (item === "Saved") onNavigate("/saved");
               }}
             >
               <span className="sidebar-nav-icon">{navIcons[item]}</span>
