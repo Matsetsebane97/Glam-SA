@@ -16,6 +16,7 @@ urlpatterns = [
     path("auth/profile/", views.update_profile),
     path("admin/dashboard/", views.admin_dashboard),
     path("users/<int:user_id>/", views.user_profile),
+    path("reviews/", views.reviews),
     path("categories/", views.categories),
     path("search-synonyms/", views.search_synonyms),
     path("categories/suggest/", views.suggest_category),

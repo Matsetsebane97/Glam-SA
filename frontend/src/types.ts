@@ -38,10 +38,24 @@ export type CurrentUser = {
   whatsappNotifications?: boolean;
   isStaff?: boolean;
   isSuperuser?: boolean;
+  rating?: number | null;
+  reviewCount?: number;
+  reviews?: Review[];
 };
 
 export type UserProfile = Pick<CurrentUser, "id" | "name" | "handle" | "accountType" | "profilePhotoUrl" | "bio" | "serviceCategories" | "travelRadiusKm" | "locationLabel"> & {
   posts: Post[];
+  rating?: number | null;
+  reviewCount?: number;
+  reviews?: Review[];
+};
+
+export type Review = {
+  id: number;
+  rating: number;
+  comment: string;
+  authorName: string;
+  createdAt: string;
 };
 
 export type Conversation = {
@@ -86,6 +100,7 @@ export type Booking = {
   postId?: number | null;
   postImageUrl?: string;
   createdAt: string;
+  review?: { id: number; rating: number; comment: string } | null;
 };
 
 export type Message = {

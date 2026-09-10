@@ -15,7 +15,7 @@ from django.views.decorators.csrf import csrf_exempt
 
 from .geo import haversine_km, parse_optional_coordinate
 from .category_model import classifier
-from .models import AvailabilitySlot, Booking, Message, Post, ServiceOffering, UserProfile, SearchSynonym
+from .models import AvailabilitySlot, Booking, Message, Post, Review, ServiceOffering, UserProfile, SearchSynonym
 from .storage import is_configured, upload_media
 
 
@@ -297,6 +297,8 @@ def user_profile(request, user_id):
         return JsonResponse({"error": "User not found."}, status=404)
 
     profile = getattr(user, "profile", None)
+    reviews = Review.objects.filter(creator=user).select_related("client", "booking")
+    rating_total = sum(review.rating for review in reviews)
     return JsonResponse({
         "id": user.id,
         "name": user.get_full_name() or user.username,
@@ -308,8 +310,61 @@ def user_profile(request, user_id):
         "serviceCategories": [category for category in profile.service_categories.split(",") if category] if profile else [],
         "travelRadiusKm": profile.travel_radius_km if profile else 0,
         "locationLabel": profile.location_label if profile else "",
+        "rating": round(rating_total / len(reviews), 1) if reviews else None,
+        "reviewCount": len(reviews),
+        "reviews": [
+            {
+                "id": review.id,
+                "rating": review.rating,
+                "comment": review.comment,
+                "authorName": review.client.get_full_name() or review.client.username,
+                "createdAt": review.created_at.isoformat(),
+            }
+            for review in reviews[:12]
+        ],
         "posts": [post.as_dict() for post in user.posts.all()],
     })
+
+
+def reviews(request):
+    if request.method == "GET":
+        creator_id = request.GET.get("creatorId")
+        queryset = Review.objects.select_related("client").order_by("-created_at")
+        if creator_id:
+            queryset = queryset.filter(creator_id=creator_id)
+        return JsonResponse({"reviews": [
+            {
+                "id": review.id,
+                "rating": review.rating,
+                "comment": review.comment,
+                "authorName": review.client.get_full_name() or review.client.username,
+                "createdAt": review.created_at.isoformat(),
+            }
+            for review in queryset[:30]
+        ]})
+
+    if request.method != "POST" or not request.user.is_authenticated:
+        return JsonResponse({"error": "Sign in to leave a review."}, status=401)
+    try:
+        payload = json.loads(request.body or "{}")
+        booking = Booking.objects.get(id=payload.get("bookingId"), client=request.user)
+        rating = int(payload.get("rating"))
+    except (json.JSONDecodeError, Booking.DoesNotExist, TypeError, ValueError):
+        return JsonResponse({"error": "Choose a valid completed booking and rating."}, status=400)
+    if booking.status != "completed":
+        return JsonResponse({"error": "Reviews are available after the appointment is completed."}, status=400)
+    if rating < 1 or rating > 5:
+        return JsonResponse({"error": "Rating must be between 1 and 5."}, status=400)
+    if Review.objects.filter(booking=booking).exists():
+        return JsonResponse({"error": "You have already reviewed this booking."}, status=409)
+    review = Review.objects.create(
+        booking=booking,
+        client=request.user,
+        creator=booking.creator,
+        rating=rating,
+        comment=str(payload.get("comment") or "").strip()[:600],
+    )
+    return JsonResponse({"id": review.id, "rating": review.rating, "comment": review.comment}, status=201)
 
 
 def health(request):
@@ -596,6 +651,7 @@ def _booking_as_dict(booking, viewer):
     post_img = ""
     if booking.post:
         post_img = booking.post.media_file.url if booking.post.media_file else booking.post.image_url
+    review = Review.objects.filter(booking_id=booking.id).first()
     return {
         "id": booking.id,
         "clientId": booking.client_id,
@@ -613,6 +669,11 @@ def _booking_as_dict(booking, viewer):
         "postId": booking.post_id,
         "postImageUrl": post_img,
         "createdAt": booking.created_at.isoformat(),
+        "review": {
+            "id": review.id,
+            "rating": review.rating,
+            "comment": review.comment,
+        } if review else None,
     }
 
 

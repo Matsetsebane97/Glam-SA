@@ -9,6 +9,7 @@ import {
   IconGrid,
   IconPin,
   IconSparkles,
+  IconStar,
   IconTrash,
   IconUpload,
   IconUser,
@@ -199,6 +200,11 @@ function ProfilePage({ profileId, currentUser, onNavigate, onLogout }: ProfilePa
               <IconPin size={14} /> {profile.locationLabel}
             </p>
           )}
+          {isCreator && profile.reviewCount ? (
+            <p className="profile-hero-rating">
+              <IconStar size={14} fill="currentColor" /> {profile.rating?.toFixed(1)} · {profile.reviewCount} {profile.reviewCount === 1 ? "review" : "reviews"}
+            </p>
+          ) : null}
         </div>
         {canManageProfile && (
           <div className="profile-hero-actions">
@@ -295,6 +301,21 @@ function ProfilePage({ profileId, currentUser, onNavigate, onLogout }: ProfilePa
               {posts.length} {posts.length === 1 ? "look" : "looks"}
             </span>
           </div>
+
+          {profile.reviews && profile.reviews.length > 0 && (
+            <section className="profile-reviews-section">
+              <div className="eyebrow"><IconStar size={13} /> Client reviews</div>
+              <div className="profile-reviews-list">
+                {profile.reviews.slice(0, 3).map((review) => (
+                  <article className="profile-review-card" key={review.id}>
+                    <div className="profile-review-stars">{"★".repeat(review.rating)}<span>{review.rating}/5</span></div>
+                    {review.comment && <p>“{review.comment}”</p>}
+                    <small>{review.authorName}</small>
+                  </article>
+                ))}
+              </div>
+            </section>
+          )}
 
           {error && <div className="profile-error" role="alert">{error}</div>}
           {isLoading && <div className="empty-state"><p>Loading your portfolio...</p></div>}

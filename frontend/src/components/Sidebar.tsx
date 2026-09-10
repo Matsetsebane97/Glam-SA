@@ -76,6 +76,12 @@ function Sidebar({ activeNav, currentUser, onNavigate, onLogout }: SidebarProps)
 
       {/* Role-based CTA */}
       <div className="sidebar-cta-group">
+        {isClient && (
+          <button className="sidebar-cta-ghost" type="button" onClick={() => onNavigate("/dashboard")}>
+            <IconCalendar size={16} />
+            <span>Client dashboard</span>
+          </button>
+        )}
         {currentUser?.isStaff && (
           <button className="sidebar-cta-ghost" type="button" onClick={() => onNavigate("/admin-dashboard")}>
             <IconGrid size={16} />

@@ -1,5 +1,5 @@
 // Centralizes browser requests so pages share one API contract.
-import type { AvailabilitySlot, Booking, Conversation, Coordinates, CurrentUser, Message, NearbyArtist, Post, ServiceOffering, UserProfile } from "./types";
+import type { AvailabilitySlot, Booking, Conversation, Coordinates, CurrentUser, Message, NearbyArtist, Post, Review, ServiceOffering, UserProfile } from "./types";
 
 type CurrentUserResponse = {
   authenticated: boolean;
@@ -256,6 +256,17 @@ export const updateBookingStatus = async (
   });
   const data = (await response.json().catch(() => ({}))) as Booking & { error?: string };
   if (!response.ok) throw new Error(data.error || "Unable to update booking status.");
+  return data;
+};
+
+export const createReview = async (payload: { bookingId: number; rating: number; comment: string }): Promise<Review> => {
+  const response = await fetch("/api/reviews/", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  });
+  const data = (await response.json().catch(() => ({}))) as Review & { error?: string };
+  if (!response.ok) throw new Error(data.error || "Unable to submit your review.");
   return data;
 };
 

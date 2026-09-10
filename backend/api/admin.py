@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import AvailabilitySlot, Booking, Message, Post, ServiceOffering, UserProfile
+from .models import AvailabilitySlot, Booking, Message, Post, Review, ServiceOffering, UserProfile
 
 
 @admin.register(Post)
@@ -75,6 +75,14 @@ class BookingAdmin(admin.ModelAdmin):
     @admin.action(description="Cancel selected bookings")
     def mark_cancelled(self, request, queryset):
         queryset.update(status="cancelled")
+
+
+@admin.register(Review)
+class ReviewAdmin(admin.ModelAdmin):
+    list_display = ("booking", "client", "creator", "rating", "created_at")
+    list_filter = ("rating", "created_at")
+    search_fields = ("client__username", "creator__username", "comment")
+    readonly_fields = ("created_at",)
 
 
 admin.site.site_header = "Glam SA administration"

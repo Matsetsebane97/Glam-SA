@@ -98,6 +98,18 @@ class Booking(models.Model):
         ordering = ["-created_at"]
 
 
+class Review(models.Model):
+    booking = models.OneToOneField(Booking, on_delete=models.CASCADE, related_name="review")
+    client = models.ForeignKey(User, on_delete=models.CASCADE, related_name="reviews_written")
+    creator = models.ForeignKey(User, on_delete=models.CASCADE, related_name="reviews_received")
+    rating = models.PositiveSmallIntegerField()
+    comment = models.TextField(blank=True, max_length=600)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+
+
 class Message(models.Model):
     sender = models.ForeignKey(User, on_delete=models.CASCADE, related_name="sent_messages")
     recipient = models.ForeignKey(User, on_delete=models.CASCADE, related_name="received_messages")
