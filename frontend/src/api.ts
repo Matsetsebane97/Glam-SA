@@ -15,6 +15,9 @@ type CurrentUserResponse = {
   latitude?: number;
   longitude?: number;
   locationLabel?: string;
+  province?: string;
+  city?: string;
+  suburb?: string;
   emailNotifications?: boolean;
   whatsappNotifications?: boolean;
   isStaff?: boolean;
@@ -45,6 +48,9 @@ export const getCurrentUser = async (): Promise<CurrentUser | null> => {
     latitude: data.latitude,
     longitude: data.longitude,
     locationLabel: data.locationLabel,
+    province: data.province,
+    city: data.city,
+    suburb: data.suburb,
     emailNotifications: data.emailNotifications,
     whatsappNotifications: data.whatsappNotifications,
     isStaff: data.isStaff,
@@ -122,6 +128,9 @@ export const updateProfile = async (payload: {
   name: string;
   whatsappNumber: string;
   locationLabel: string;
+  province?: string;
+  city?: string;
+  suburb?: string;
   accountType?: "creator" | "client";
   emailNotifications?: boolean;
   whatsappNotifications?: boolean;

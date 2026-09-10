@@ -7,6 +7,7 @@ export type Post = {
   creator: string;
   handle: string;
   location: string;
+  creatorLocation?: string;
   service: string;
   category: string;
   price: string;
@@ -34,6 +35,9 @@ export type CurrentUser = {
   latitude?: number;
   longitude?: number;
   locationLabel?: string;
+  province?: string;
+  city?: string;
+  suburb?: string;
   emailNotifications?: boolean;
   whatsappNotifications?: boolean;
   isStaff?: boolean;

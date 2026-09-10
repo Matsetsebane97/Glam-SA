@@ -18,6 +18,7 @@ import {
   IconZap,
 } from "../components/Icons";
 import type { AvailabilitySlot, CurrentUser } from "../types";
+import { citiesByProvince, southAfricanProvinces } from "../constants";
 
 type SettingsPageProps = {
   currentUser: CurrentUser | null;
@@ -33,9 +34,9 @@ function SettingsPage({ currentUser, onNavigate, onSaved }: SettingsPageProps) {
   const [whatsappNumber, setWhatsappNumber] = useState(
     currentUser?.whatsappNumber || "",
   );
-  const [locationLabel, setLocationLabel] = useState(
-    currentUser?.locationLabel || "",
-  );
+  const [province, setProvince] = useState(currentUser?.province || "");
+  const [city, setCity] = useState(currentUser?.city || "");
+  const [suburb, setSuburb] = useState(currentUser?.suburb || "");
   const [accountType, setAccountType] = useState<"creator" | "client">(
     currentUser?.accountType || "creator",
   );
@@ -107,7 +108,10 @@ function SettingsPage({ currentUser, onNavigate, onSaved }: SettingsPageProps) {
       const updatedUser = await updateProfile({
         name: name.trim(),
         whatsappNumber: whatsappNumber.trim(),
-        locationLabel: locationLabel.trim(),
+        locationLabel: [province, city, suburb].filter(Boolean).join(", "),
+        province: province.trim(),
+        city: city.trim(),
+        suburb: suburb.trim(),
         accountType,
         emailNotifications,
         whatsappNotifications,
@@ -347,20 +351,21 @@ function SettingsPage({ currentUser, onNavigate, onSaved }: SettingsPageProps) {
             />
           </label>
 
-          <label className="studio-label">
-            <span>
-              <IconPin size={14} /> Public location
-            </span>
-            <input
-              className="studio-input"
-              value={locationLabel}
-              onChange={(event) => setLocationLabel(event.target.value)}
-              maxLength={120}
-              autoComplete="address-level2"
-              placeholder="e.g. Gauteng, Johannesburg, Sandton"
-            />
-            <small className="field-help">Displayed as Province, City, Suburb. Ward details are not shown.</small>
-          </label>
+          <div className="studio-label settings-address-fields">
+            <span><IconPin size={14} /> Public location</span>
+            <div className="settings-address-grid">
+              <select className="studio-input" value={province} onChange={(event) => { setProvince(event.target.value); setCity(""); }} autoComplete="address-level1">
+                <option value="">Select province</option>
+                {southAfricanProvinces.map((item) => <option key={item} value={item}>{item}</option>)}
+              </select>
+              <select className="studio-input" value={city} onChange={(event) => setCity(event.target.value)} autoComplete="address-level2" disabled={!province}>
+                <option value="">{province ? "Select city" : "Select province first"}</option>
+                {(citiesByProvince[province] || []).map((item) => <option key={item} value={item}>{item}</option>)}
+              </select>
+              <input className="studio-input" value={suburb} onChange={(event) => setSuburb(event.target.value)} maxLength={100} autoComplete="address-line2" placeholder="Suburb" />
+            </div>
+            <small className="field-help">Displayed as Province, City, Suburb. Coordinates are used separately for distance calculations.</small>
+          </div>
 
           <div
             className="settings-section-heading"

@@ -628,6 +628,31 @@
   }
 }
 
+.auth-address-fields {
+  display: grid;
+  gap: 12px;
+  padding: 14px;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  background: var(--bg-secondary);
+}
+
+.auth-address-heading {
+  display: grid;
+  gap: 3px;
+}
+
+.auth-address-heading strong {
+  color: var(--ink-primary);
+  font-size: 13px;
+}
+
+.auth-address-heading small {
+  color: var(--ink-muted);
+  font-size: 11px;
+  line-height: 1.4;
+}
+
 /* Signup is a long form on small screens: keep the form visible early and
    let the controls breathe instead of compressing the editorial layout. */
 @media (max-width: 520px) {

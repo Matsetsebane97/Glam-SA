@@ -69,7 +69,9 @@ def signup(request):
     name = payload.get("name", "").strip()
     email = payload.get("email", "").strip().lower()
     password = payload.get("password", "")
-    location_label = payload.get("locationLabel", "").strip()
+    province = str(payload.get("province") or "").strip()
+    city = str(payload.get("city") or "").strip()
+    suburb = str(payload.get("suburb") or "").strip()
     account_type = payload.get("accountType", "creator").strip().lower()
     whatsapp_number = payload.get("whatsappNumber", "").strip()
     profile_photo_url = str(payload.get("profilePhotoUrl") or "").strip()
@@ -79,6 +81,8 @@ def signup(request):
 
     if not name or not email or len(password) < 8:
         return JsonResponse({"error": "Name, email, and an 8-character password are required."}, status=400)
+    if not province or not city or not suburb:
+        return JsonResponse({"error": "Province, city, and suburb are required."}, status=400)
     if account_type not in ("creator", "client"):
         return JsonResponse({"error": "Choose whether you are signing up as a creator or client."}, status=400)
     if account_type == "creator" and not whatsapp_number:
@@ -130,7 +134,10 @@ def signup(request):
         travel_radius_km=travel_radius_km if account_type == "creator" else 0,
         latitude=latitude,
         longitude=longitude,
-        location_label=location_label,
+        location_label=", ".join([province, city, suburb]),
+        province=province[:80],
+        city=city[:100],
+        suburb=suburb[:100],
     )
     login(request, user)
     return JsonResponse({"message": "Your account is ready."}, status=201)
@@ -296,9 +303,12 @@ def update_profile(request):
     request.user.first_name = name
     request.user.save(update_fields=["first_name"])
     profile.whatsapp_number = str(payload.get("whatsappNumber") or "").strip()[:30]
-    profile.location_label = str(payload.get("locationLabel") or "").strip()[:120]
+    profile.province = str(payload.get("province") or profile.province).strip()[:80]
+    profile.city = str(payload.get("city") or profile.city).strip()[:100]
+    profile.suburb = str(payload.get("suburb") or profile.suburb).strip()[:100]
+    profile.location_label = ", ".join(part for part in [profile.province, profile.city, profile.suburb] if part)[:120]
     
-    update_fields = ["whatsapp_number", "location_label", "email_notifications", "whatsapp_notifications"]
+    update_fields = ["whatsapp_number", "location_label", "province", "city", "suburb", "email_notifications", "whatsapp_notifications"]
 
     if "accountType" in payload and payload["accountType"] in ("creator", "client"):
         profile.account_type = payload["accountType"]
@@ -343,6 +353,9 @@ def user_profile(request, user_id):
         "serviceCategories": [category for category in profile.service_categories.split(",") if category] if profile else [],
         "travelRadiusKm": profile.travel_radius_km if profile else 0,
         "locationLabel": profile.location_label if profile else "",
+        "province": profile.province if profile else "",
+        "city": profile.city if profile else "",
+        "suburb": profile.suburb if profile else "",
         "rating": round(rating_total / len(reviews), 1) if reviews else None,
         "reviewCount": len(reviews),
         "reviews": [

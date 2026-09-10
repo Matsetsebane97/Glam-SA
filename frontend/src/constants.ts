@@ -3,6 +3,23 @@ import type { NavItem } from "./types";
 
 export const brandLogoUrl = `${import.meta.env.BASE_URL}logo-mark.svg`;
 
+export const southAfricanProvinces = [
+  "Eastern Cape", "Free State", "Gauteng", "KwaZulu-Natal", "Limpopo",
+  "Mpumalanga", "Northern Cape", "North West", "Western Cape",
+];
+
+export const citiesByProvince: Record<string, string[]> = {
+  "Eastern Cape": ["East London", "Gqeberha", "Mthatha"],
+  "Free State": ["Bloemfontein", "Welkom"],
+  Gauteng: ["Johannesburg", "Pretoria", "Soweto", "Midrand", "Vanderbijlpark"],
+  "KwaZulu-Natal": ["Durban", "Pietermaritzburg", "Richards Bay"],
+  Limpopo: ["Polokwane", "Thohoyandou", "Tzaneen"],
+  Mpumalanga: ["Mbombela", "Emalahleni", "Secunda"],
+  "Northern Cape": ["Kimberley", "Upington"],
+  "North West": ["Mahikeng", "Rustenburg", "Klerksdorp"],
+  "Western Cape": ["Cape Town", "Stellenbosch", "George", "Paarl"],
+};
+
 export const navItems: NavItem[] = ["Home", "Discover", "Messages", "Saved", "Upload"];
 
 export const fallbackCategories = [

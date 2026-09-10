@@ -4,7 +4,7 @@ import type { ChangeEvent, FormEvent } from "react";
 import { IconCheck, IconPin } from "./Icons";
 import { requestUserLocation, type GeolocationResult } from "../utils/geolocation";
 import { STORAGE_KEY as ONBOARDING_KEY } from "./OnboardingWalkthrough";
-import { fallbackCategories } from "../constants";
+import { citiesByProvince, fallbackCategories, southAfricanProvinces } from "../constants";
 
 type AuthMode = "login" | "signup";
 
@@ -19,6 +19,9 @@ function AuthSection({ onSuccess }: AuthSectionProps) {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [province, setProvince] = useState("");
+  const [city, setCity] = useState("");
+  const [suburb, setSuburb] = useState("");
   const [accountType, setAccountType] = useState<"creator" | "client">("creator");
   const [whatsappNumber, setWhatsappNumber] = useState("");
   const [profilePhotoUrl, setProfilePhotoUrl] = useState("");
@@ -105,6 +108,9 @@ function AuthSection({ onSuccess }: AuthSectionProps) {
               email,
               password,
               accountType,
+              province,
+              city,
+              suburb,
               whatsappNumber,
               profilePhotoUrl,
               bio,
@@ -207,6 +213,54 @@ function AuthSection({ onSuccess }: AuthSectionProps) {
             className="studio-input"
           />
         </label>
+
+        {mode === "signup" && (
+          <div className="auth-address-fields">
+            <div className="auth-address-heading">
+              <strong>Physical address</strong>
+              <small>Used for your public location and local discovery.</small>
+            </div>
+            <label className="studio-label">
+              <span>Province</span>
+              <select
+                className="studio-input"
+                value={province}
+                onChange={(event) => { setProvince(event.target.value); setCity(""); }}
+                autoComplete="address-level1"
+                required
+              >
+                <option value="">Select province</option>
+                {southAfricanProvinces.map((item) => <option key={item} value={item}>{item}</option>)}
+              </select>
+            </label>
+            <label className="studio-label">
+              <span>City</span>
+              <select
+                className="studio-input"
+                value={city}
+                onChange={(event) => setCity(event.target.value)}
+                autoComplete="address-level2"
+                disabled={!province}
+                required
+              >
+                <option value="">{province ? "Select city" : "Select a province first"}</option>
+                {(citiesByProvince[province] || []).map((item) => <option key={item} value={item}>{item}</option>)}
+              </select>
+            </label>
+            <label className="studio-label">
+              <span>Suburb</span>
+              <input
+                className="studio-input"
+                value={suburb}
+                onChange={(event) => setSuburb(event.target.value)}
+                placeholder="e.g. Sandton"
+                autoComplete="address-line2"
+                maxLength={100}
+                required
+              />
+            </label>
+          </div>
+        )}
 
         {mode === "signup" && (
           <div className="account-type-choice" role="group" aria-label="Account type">

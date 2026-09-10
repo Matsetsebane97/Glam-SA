@@ -15,6 +15,9 @@ class UserProfile(models.Model):
     latitude = models.DecimalField(max_digits=9, decimal_places=6)
     longitude = models.DecimalField(max_digits=9, decimal_places=6)
     location_label = models.CharField(max_length=120, blank=True)
+    province = models.CharField(max_length=80, blank=True)
+    city = models.CharField(max_length=100, blank=True)
+    suburb = models.CharField(max_length=100, blank=True)
     location_captured_at = models.DateTimeField(auto_now_add=True)
     email_notifications = models.BooleanField(default=True)
     whatsapp_notifications = models.BooleanField(default=True)
@@ -30,6 +33,9 @@ class UserProfile(models.Model):
             "latitude": float(self.latitude),
             "longitude": float(self.longitude),
             "locationLabel": self.location_label,
+            "province": self.province,
+            "city": self.city,
+            "suburb": self.suburb,
             "emailNotifications": self.email_notifications,
             "whatsappNotifications": self.whatsapp_notifications,
         }
@@ -145,6 +151,11 @@ class Post(models.Model):
     def as_dict(self, distance_km=None):
         media_url = self.media_file.url if self.media_file else self.image_url
         owner_profile = getattr(self.owner, "profile", None) if self.owner_id else None
+        creator_location = ""
+        if owner_profile:
+            creator_location = ", ".join(
+                part for part in [owner_profile.province, owner_profile.city, owner_profile.suburb] if part
+            ) or owner_profile.location_label
         payload = {
             "id": self.id,
             "ownerId": self.owner_id,
@@ -162,6 +173,7 @@ class Post(models.Model):
             "createdAt": self.created_at.isoformat(),
             "likesCount": self.likes_count,
             "whatsappNumber": owner_profile.whatsapp_number if owner_profile else "",
+            "creatorLocation": creator_location,
         }
         if self.latitude is not None and self.longitude is not None:
             payload["latitude"] = float(self.latitude)

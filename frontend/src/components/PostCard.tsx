@@ -801,16 +801,16 @@ function PostCard({
             </div>
             <div className="post-meta-sub">
               <span className="post-handle">{post.handle}</span>
-              {post.distanceKm != null ? (
-                <span className="post-distance-badge">
-                  <IconPin size={10} />
-                  {formatDistance(post.distanceKm)}
-                </span>
-              ) : post.location ? (
-                <span className="post-location-tag">
-                  <IconPin size={10} />
-                  {post.location}
-                </span>
+                {post.distanceKm != null ? (
+                  <span className="post-distance-badge">
+                    <IconPin size={10} />
+                    {formatDistance(post.distanceKm)}
+                  </span>
+                ) : (post.creatorLocation || post.location) ? (
+                  <span className="post-location-tag">
+                    <IconPin size={10} />
+                    {post.creatorLocation || post.location}
+                  </span>
               ) : null}
             </div>
           </div>
