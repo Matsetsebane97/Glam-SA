@@ -1,10 +1,10 @@
 // Global search and account controls — frosted glass sticky header.
 import { useEffect, useRef, useState } from "react";
 import { useTheme } from "../theme/ThemeContext";
-import { getConversations } from "../api";
+import { getBookings, getConversations } from "../api";
 import { brandLogoUrl } from "../constants";
 import { IconBell, IconClose, IconMoon, IconSearch, IconSun } from "./Icons";
-import type { Conversation, CurrentUser } from "../types";
+import type { Booking, Conversation, CurrentUser } from "../types";
 
 type TopbarProps = {
   currentUser: CurrentUser | null;
@@ -17,6 +17,7 @@ function Topbar({ currentUser, query, onQueryChange, onNavigate }: TopbarProps) 
   const { theme, toggleTheme } = useTheme();
   const [showNotifications, setShowNotifications] = useState(false);
   const [notifications, setNotifications] = useState<Conversation[]>([]);
+  const [bookingNotifications, setBookingNotifications] = useState<Booking[]>([]);
   const [isLoadingNotifications, setIsLoadingNotifications] = useState(false);
   const [searchFocused, setSearchFocused] = useState(false);
   const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
@@ -43,14 +44,24 @@ function Topbar({ currentUser, query, onQueryChange, onNavigate }: TopbarProps) 
   useEffect(() => {
     if (!currentUser) {
       setNotifications([]);
+      setBookingNotifications([]);
       return;
     }
     setIsLoadingNotifications(true);
-    void getConversations()
-      .then((convs) => setNotifications(convs.filter((c) => (c.unreadCount ?? 0) > 0)))
-      .catch(() => setNotifications([]))
+    void Promise.all([getConversations(), getBookings()])
+      .then(([convs, bookings]) => {
+        setNotifications(convs.filter((c) => (c.unreadCount ?? 0) > 0));
+        setBookingNotifications(bookings.filter((booking) => booking.isCreator && booking.status === "requested"));
+      })
+      .catch(() => {
+        setNotifications([]);
+        setBookingNotifications([]);
+      })
       .finally(() => setIsLoadingNotifications(false));
   }, [currentUser]);
+
+  const unreadCount = notifications.reduce((total, item) => total + (item.unreadCount ?? 0), 0);
+  const notificationCount = unreadCount + bookingNotifications.length;
 
   const closeMobileSearch = () => {
     setMobileSearchOpen(false);
@@ -123,7 +134,7 @@ function Topbar({ currentUser, query, onQueryChange, onNavigate }: TopbarProps) 
             onClick={() => setShowNotifications((v) => !v)}
           >
             <IconBell size={18} />
-            {notifications.length > 0 && (
+            {notificationCount > 0 && (
               <span className="topbar-notif-dot" aria-hidden="true" />
             )}
           </button>
@@ -132,9 +143,9 @@ function Topbar({ currentUser, query, onQueryChange, onNavigate }: TopbarProps) 
             <div className="topbar-notif-dropdown" role="dialog" aria-label="Notifications">
               <div className="topbar-notif-header">
                 <strong>Notifications</strong>
-                {notifications.length > 0 && (
+                {notificationCount > 0 && (
                   <span className="topbar-notif-count">
-                    {notifications.reduce((s, n) => s + (n.unreadCount ?? 0), 0)} unread
+                    {notificationCount} new
                   </span>
                 )}
               </div>
@@ -149,13 +160,30 @@ function Topbar({ currentUser, query, onQueryChange, onNavigate }: TopbarProps) 
                   <p>Loading…</p>
                 </div>
               )}
-              {currentUser && !isLoadingNotifications && notifications.length === 0 && (
+              {currentUser && !isLoadingNotifications && notificationCount === 0 && (
                 <div className="topbar-notif-empty">
-                  <p>No unread notifications.</p>
+                  <p>No new notifications.</p>
                 </div>
               )}
-              {currentUser && !isLoadingNotifications && notifications.length > 0 && (
+              {currentUser && !isLoadingNotifications && notificationCount > 0 && (
                 <div className="topbar-notif-list">
+                  {bookingNotifications.slice(0, 2).map((booking) => (
+                    <button
+                      key={`booking-${booking.id}`}
+                      className="topbar-notif-item"
+                      type="button"
+                      onClick={() => {
+                        setShowNotifications(false);
+                        onNavigate("/messages");
+                      }}
+                    >
+                      <span className="topbar-notif-avatar">!</span>
+                      <span className="topbar-notif-copy">
+                        <strong>New booking request</strong>
+                        <span>{booking.serviceName} with {booking.otherUserName}</span>
+                      </span>
+                    </button>
+                  ))}
                   {notifications.slice(0, 5).map((n) => (
                     <button
                       key={n.userId}
@@ -184,7 +212,7 @@ function Topbar({ currentUser, query, onQueryChange, onNavigate }: TopbarProps) 
                       onNavigate("/messages");
                     }}
                   >
-                    View all messages →
+                    View all notifications →
                   </button>
                 </div>
               )}

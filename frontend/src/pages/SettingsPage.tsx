@@ -25,6 +25,9 @@ type SettingsPageProps = {
   onSaved: (updatedUser: CurrentUser) => void;
 };
 
+const escapeIcsText = (value: string) => value.replace(/[\\;,]/g, (character) => `\\${character}`).replace(/\r?\n/g, "\\n");
+const toIcsDate = (value: string) => new Date(value).toISOString().replace(/[-:]/g, "").replace(/\.\d{3}/, "");
+
 function SettingsPage({ currentUser, onNavigate, onSaved }: SettingsPageProps) {
   const [name, setName] = useState(currentUser?.name || "");
   const [whatsappNumber, setWhatsappNumber] = useState(
@@ -235,6 +238,33 @@ function SettingsPage({ currentUser, onNavigate, onSaved }: SettingsPageProps) {
     }
   };
 
+  const exportAvailabilityCalendar = () => {
+    const events = slots.map((slot) => [
+      "BEGIN:VEVENT",
+      `UID:glam-sa-availability-${slot.id}@glamsa`,
+      `DTSTAMP:${toIcsDate(new Date().toISOString())}Z`,
+      `DTSTART:${toIcsDate(slot.startsAt)}Z`,
+      `DTEND:${toIcsDate(slot.endsAt)}Z`,
+      `SUMMARY:${escapeIcsText(slot.isAvailable ? "Glam SA availability" : "Glam SA booked appointment")}`,
+      `DESCRIPTION:${escapeIcsText(slot.isAvailable ? "Available booking slot on Glam SA" : "This Glam SA slot is already booked")}`,
+      "END:VEVENT",
+    ].join("\r\n"));
+
+    if (events.length === 0) {
+      setSlotMessage("Generate at least one future slot before exporting your calendar.");
+      return;
+    }
+
+    const calendar = ["BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//Glam SA//Availability//EN", "CALSCALE:GREGORIAN", ...events, "END:VCALENDAR"].join("\r\n");
+    const url = URL.createObjectURL(new Blob([calendar], { type: "text/calendar;charset=utf-8" }));
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = "glam-sa-availability.ics";
+    link.click();
+    URL.revokeObjectURL(url);
+    setSlotMessage(`Exported ${events.length} calendar event(s).`);
+  };
+
   return (
     <section className="page-content settings-page">
       <div className="settings-header">
@@ -412,10 +442,15 @@ function SettingsPage({ currentUser, onNavigate, onSaved }: SettingsPageProps) {
               </div>
               <h2>Working Hours & Availability</h2>
             </div>
-            <p>
+            <div className="settings-scheduling-actions">
+              <button className="btn-outline-sm" type="button" onClick={exportAvailabilityCalendar}>
+                <IconCalendar size={15} /> Export calendar
+              </button>
+              <p>
               Clients can only request bookings during your active available
               slots. Generate recurring weekly hours below.
-            </p>
+              </p>
+            </div>
           </div>
 
           <div className="availability-generator-card">
