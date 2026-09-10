@@ -36,6 +36,8 @@ export type CurrentUser = {
   locationLabel?: string;
   emailNotifications?: boolean;
   whatsappNotifications?: boolean;
+  isStaff?: boolean;
+  isSuperuser?: boolean;
 };
 
 export type UserProfile = Pick<CurrentUser, "id" | "name" | "handle" | "accountType" | "profilePhotoUrl" | "bio" | "serviceCategories" | "travelRadiusKm" | "locationLabel"> & {

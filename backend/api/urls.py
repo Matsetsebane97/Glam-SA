@@ -14,6 +14,7 @@ urlpatterns = [
     path("auth/delete/", views.delete_account),
     path("auth/me/", views.current_user),
     path("auth/profile/", views.update_profile),
+    path("admin/dashboard/", views.admin_dashboard),
     path("users/<int:user_id>/", views.user_profile),
     path("categories/", views.categories),
     path("search-synonyms/", views.search_synonyms),

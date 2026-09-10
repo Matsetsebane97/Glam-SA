@@ -18,6 +18,7 @@ import MessagesPage from "./pages/MessagesPage";
 import SettingsPage from "./pages/SettingsPage";
 import InfoPage from "./pages/InfoPage";
 import NotificationsPage from "./pages/NotificationsPage";
+import AdminPage from "./pages/AdminPage";
 import type { CurrentUser, Post } from "./types";
 
 const categoryAliases: Record<string, string> = {
@@ -266,6 +267,10 @@ function App() {
 
     if (pathname === "/notifications") {
       return <NotificationsPage currentUser={currentUser} onNavigate={navigate} />;
+    }
+
+    if (pathname === "/admin-dashboard") {
+      return <AdminPage currentUser={currentUser} onNavigate={navigate} />;
     }
 
     if (pathname === "/about" || pathname === "/terms" || pathname === "/privacy") {

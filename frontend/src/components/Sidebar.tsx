@@ -4,6 +4,7 @@ import { brandLogoUrl, navItems } from "../constants";
 import {
   IconCalendar,
   IconCompass,
+  IconGrid,
   IconHome,
   IconMessage,
   IconSparkles,
@@ -72,6 +73,12 @@ function Sidebar({ activeNav, currentUser, onNavigate, onLogout }: SidebarProps)
 
       {/* Role-based CTA */}
       <div className="sidebar-cta-group">
+        {currentUser?.isStaff && (
+          <button className="sidebar-cta-ghost" type="button" onClick={() => onNavigate("/admin-dashboard")}>
+            <IconGrid size={16} />
+            <span>Admin dashboard</span>
+          </button>
+        )}
         {isClient ? (
           <>
             <button className="sidebar-cta-primary" type="button" onClick={() => onNavigate("/discover")}>

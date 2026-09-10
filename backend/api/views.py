@@ -169,6 +169,8 @@ def current_user(request):
         "id": request.user.id,
         "name": request.user.get_full_name() or request.user.username,
         "handle": f"@{request.user.username.split('@')[0]}",
+        "isStaff": request.user.is_staff,
+        "isSuperuser": request.user.is_superuser,
     }
 
     profile = getattr(request.user, "profile", None)
@@ -176,6 +178,64 @@ def current_user(request):
         payload.update(profile.as_dict())
 
     return JsonResponse(payload)
+
+
+def admin_dashboard(request):
+    """Return operational metrics for staff without exposing this endpoint publicly."""
+    if not request.user.is_authenticated or not request.user.is_staff:
+        return JsonResponse({"error": "Administrator access is required."}, status=403)
+
+    recent_users = []
+    for user in User.objects.select_related("profile").order_by("-date_joined")[:8]:
+        profile = getattr(user, "profile", None)
+        recent_users.append({
+            "id": user.id,
+            "name": user.get_full_name() or user.username,
+            "email": user.email,
+            "accountType": profile.account_type if profile else "unknown",
+            "location": profile.location_label if profile else "",
+            "joinedAt": user.date_joined.isoformat(),
+            "isActive": user.is_active,
+        })
+
+    recent_bookings = []
+    for booking in Booking.objects.select_related("client", "creator").order_by("-created_at")[:8]:
+        recent_bookings.append({
+            "id": booking.id,
+            "serviceName": booking.service_name,
+            "client": booking.client.get_full_name() or booking.client.username,
+            "creator": booking.creator.get_full_name() or booking.creator.username,
+            "price": str(booking.price),
+            "status": booking.status,
+            "createdAt": booking.created_at.isoformat(),
+        })
+
+    recent_posts = [
+        {
+            "id": post.id,
+            "creator": post.creator,
+            "service": post.service,
+            "category": post.category,
+            "createdAt": post.created_at.isoformat(),
+        }
+        for post in Post.objects.order_by("-created_at")[:8]
+    ]
+
+    return JsonResponse({
+        "stats": {
+            "users": User.objects.count(),
+            "creators": UserProfile.objects.filter(account_type="creator").count(),
+            "clients": UserProfile.objects.filter(account_type="client").count(),
+            "posts": Post.objects.count(),
+            "bookings": Booking.objects.count(),
+            "pendingBookings": Booking.objects.filter(status="requested").count(),
+            "unreadMessages": Message.objects.filter(is_read=False).count(),
+            "activeServices": ServiceOffering.objects.filter(is_active=True).count(),
+        },
+        "recentUsers": recent_users,
+        "recentBookings": recent_bookings,
+        "recentPosts": recent_posts,
+    })
 
 
 @csrf_exempt

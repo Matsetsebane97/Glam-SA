@@ -17,6 +17,8 @@ type CurrentUserResponse = {
   locationLabel?: string;
   emailNotifications?: boolean;
   whatsappNotifications?: boolean;
+  isStaff?: boolean;
+  isSuperuser?: boolean;
 };
 
 type PostQuery = Coordinates & {
@@ -45,7 +47,54 @@ export const getCurrentUser = async (): Promise<CurrentUser | null> => {
     locationLabel: data.locationLabel,
     emailNotifications: data.emailNotifications,
     whatsappNotifications: data.whatsappNotifications,
+    isStaff: data.isStaff,
+    isSuperuser: data.isSuperuser,
   };
+};
+
+export type AdminDashboardData = {
+  stats: {
+    users: number;
+    creators: number;
+    clients: number;
+    posts: number;
+    bookings: number;
+    pendingBookings: number;
+    unreadMessages: number;
+    activeServices: number;
+  };
+  recentUsers: Array<{
+    id: number;
+    name: string;
+    email: string;
+    accountType: string;
+    location: string;
+    joinedAt: string;
+    isActive: boolean;
+  }>;
+  recentBookings: Array<{
+    id: number;
+    serviceName: string;
+    client: string;
+    creator: string;
+    price: string;
+    status: string;
+    createdAt: string;
+  }>;
+  recentPosts: Array<{
+    id: number;
+    creator: string;
+    service: string;
+    category: string;
+    createdAt: string;
+  }>;
+};
+
+export const getAdminDashboard = async (): Promise<AdminDashboardData> => {
+  const response = await fetch("/api/admin/dashboard/");
+  const data = (await response.json().catch(() => ({}))) as AdminDashboardData & { error?: string };
+  if (!response.ok) throw new Error(data.error || "Unable to load the admin dashboard.");
+  return data;
 };
 
 export const logout = async (): Promise<void> => {
