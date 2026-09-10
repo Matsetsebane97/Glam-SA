@@ -363,44 +363,32 @@ function SettingsPage({ currentUser, onNavigate, onSaved }: SettingsPageProps) {
 
           <div
             className="settings-section-heading"
-            style={{ marginTop: "2rem" }}
+            data-settings-section="preferences"
           >
             <h3>Notification Preferences</h3>
           </div>
 
           <label
-            className="studio-label"
-            style={{
-              flexDirection: "row",
-              alignItems: "center",
-              gap: "0.5rem",
-              cursor: "pointer",
-            }}
+            className="studio-label settings-checkbox-row"
           >
             <input
               type="checkbox"
               checked={emailNotifications}
               onChange={(e) => setEmailNotifications(e.target.checked)}
             />
-            <span style={{ margin: 0, fontWeight: "normal" }}>
+            <span className="settings-checkbox-label">
               Receive email notifications
             </span>
           </label>
           <label
-            className="studio-label"
-            style={{
-              flexDirection: "row",
-              alignItems: "center",
-              gap: "0.5rem",
-              cursor: "pointer",
-            }}
+            className="studio-label settings-checkbox-row"
           >
             <input
               type="checkbox"
               checked={whatsappNotifications}
               onChange={(e) => setWhatsappNotifications(e.target.checked)}
             />
-            <span style={{ margin: 0, fontWeight: "normal" }}>
+            <span className="settings-checkbox-label">
               Receive WhatsApp notifications
             </span>
           </label>
@@ -553,9 +541,8 @@ function SettingsPage({ currentUser, onNavigate, onSaved }: SettingsPageProps) {
 
               <button
                 type="submit"
-                className="btn-primary"
                 disabled={isGeneratingSlots}
-                style={{ marginTop: "1rem" }}
+                className="btn-primary settings-generate-btn"
               >
                 <IconClock size={16} />
                 {isGeneratingSlots
@@ -681,14 +668,11 @@ function SettingsPage({ currentUser, onNavigate, onSaved }: SettingsPageProps) {
             </button>
           </form>
 
-          <div
-            className="settings-subform"
-            style={{ borderColor: "var(--danger-color, #ff4444)" }}
-          >
-            <h3 style={{ color: "var(--danger-color, #ff4444)" }}>
+          <div className="settings-subform settings-danger-subform">
+            <h3>
               Delete Account
             </h3>
-            <p className="settings-note" style={{ marginBottom: "1rem" }}>
+            <p className="settings-note settings-danger-copy">
               Once you delete your account, there is no going back. Please be
               certain.
             </p>

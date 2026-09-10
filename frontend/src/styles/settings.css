@@ -1,0 +1,320 @@
+/* Studio controls: a calm, sectioned workspace for profile and scheduling tasks. */
+.settings-page {
+  width: min(100%, 1080px);
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: 32px 40px 88px;
+  gap: 24px;
+}
+
+.settings-header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 32px;
+  padding-bottom: 8px;
+}
+
+.settings-header h1 {
+  margin-top: 8px;
+  font-size: clamp(28px, 3vw, 40px);
+  line-height: 1.08;
+}
+
+.settings-header > p {
+  max-width: 340px;
+  margin: 0 0 3px;
+  color: var(--ink-muted);
+  font-size: 13px;
+  line-height: 1.55;
+  text-align: right;
+}
+
+.settings-form {
+  display: block;
+  width: 100%;
+  max-width: none;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent !important;
+  box-shadow: none;
+}
+
+.account-role-selector-card,
+.settings-scheduling,
+.settings-subform {
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  background: var(--bg-surface);
+  box-shadow: var(--shadow-xs);
+}
+
+.account-role-selector-card {
+  display: grid;
+  grid-template-columns: minmax(180px, 0.7fr) minmax(0, 1.3fr);
+  gap: 24px;
+  align-items: center;
+  padding: 24px;
+}
+
+.studio-label-text {
+  display: block;
+  color: var(--ink-primary);
+  font-family: var(--font-heading);
+  font-size: 14px;
+  font-weight: 800;
+}
+
+.role-selector-sub {
+  max-width: 260px;
+  margin: 7px 0 0;
+  color: var(--ink-muted);
+  font-size: 12px;
+  line-height: 1.55;
+}
+
+.account-role-toggle-group {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.account-role-toggle-btn {
+  min-height: 112px;
+  padding: 15px;
+  border: 1px solid var(--border-medium);
+  border-radius: var(--radius-md);
+  background: var(--bg-secondary);
+  color: var(--ink-secondary);
+  text-align: left;
+  transition: border-color var(--transition-base), background var(--transition-base), color var(--transition-base);
+}
+
+.account-role-toggle-btn:hover,
+.account-role-toggle-btn.active {
+  border-color: var(--accent-primary);
+  background: var(--accent-gold-bg);
+  color: var(--ink-primary);
+}
+
+.role-btn-title {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  color: var(--ink-primary);
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.role-btn-desc {
+  margin-top: 8px;
+  color: var(--ink-muted);
+  font-size: 11px;
+  line-height: 1.45;
+}
+
+.settings-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px 20px;
+  margin-top: 18px;
+  padding: 24px;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  background: var(--bg-surface);
+  box-shadow: var(--shadow-xs);
+}
+
+.settings-grid > .settings-section-heading {
+  grid-column: 1 / -1;
+  margin-top: 4px;
+  padding-top: 18px;
+  border-top: 1px solid var(--border-subtle);
+}
+
+.settings-section-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.settings-section-heading h2,
+.settings-section-heading h3 {
+  margin: 0;
+  color: var(--ink-primary);
+}
+
+.settings-section-heading h2 {
+  font-size: 21px;
+}
+
+.settings-section-heading h3 {
+  font-size: 15px;
+}
+
+.settings-section-heading > p {
+  max-width: 380px;
+  margin: 0;
+  color: var(--ink-muted);
+  font-size: 12px;
+  line-height: 1.55;
+  text-align: right;
+}
+
+.settings-checkbox-row {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  min-height: 40px;
+  margin: 0;
+  cursor: pointer;
+}
+
+.settings-checkbox-row input {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--accent-primary);
+}
+
+.settings-checkbox-label {
+  margin: 0 !important;
+  color: var(--ink-secondary) !important;
+  font-size: 13px !important;
+  font-weight: 500 !important;
+}
+
+.settings-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 18px;
+  padding-top: 18px;
+  border-top: 1px solid var(--border-subtle);
+}
+
+.settings-scheduling {
+  padding: 24px;
+}
+
+.settings-scheduling > .settings-section-heading {
+  margin-bottom: 20px;
+}
+
+.settings-scheduling-actions {
+  align-items: flex-end;
+}
+
+.availability-generator-card {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.availability-gen-form {
+  padding: 20px;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  background: var(--bg-secondary);
+}
+
+.availability-fields-grid {
+  gap: 14px;
+}
+
+.settings-generate-btn {
+  margin-top: 18px;
+}
+
+.active-slots-preview {
+  margin-top: 22px;
+  padding-top: 20px;
+  border-top-color: var(--border-subtle);
+}
+
+.settings-booking-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+  margin-top: 20px;
+}
+
+.settings-subform {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 20px;
+}
+
+.settings-subform h3 {
+  margin: 0 0 3px;
+  color: var(--ink-primary);
+  font-size: 16px;
+}
+
+.settings-danger-subform {
+  border-color: color-mix(in srgb, var(--accent-rose) 40%, var(--border-subtle));
+}
+
+.settings-danger-subform h3 {
+  color: var(--accent-rose);
+}
+
+.settings-danger-copy {
+  margin: 0 0 4px;
+}
+
+@media (max-width: 820px) {
+  .settings-page {
+    padding: 24px 18px 76px;
+  }
+
+  .settings-header,
+  .settings-section-heading {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .settings-header > p,
+  .settings-section-heading > p {
+    max-width: none;
+    text-align: left;
+  }
+
+  .account-role-selector-card,
+  .settings-grid,
+  .settings-booking-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .settings-grid > .settings-section-heading {
+    grid-column: auto;
+  }
+
+  .settings-scheduling-actions {
+    align-items: flex-start;
+  }
+}
+
+@media (max-width: 520px) {
+  .account-role-selector-card,
+  .settings-grid,
+  .settings-scheduling {
+    padding: 16px;
+  }
+
+  .account-role-toggle-group {
+    grid-template-columns: 1fr;
+  }
+
+  .settings-actions {
+    flex-direction: column-reverse;
+  }
+
+  .settings-actions button {
+    width: 100%;
+  }
+}
