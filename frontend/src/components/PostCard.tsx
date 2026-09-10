@@ -18,6 +18,18 @@ import { whatsappUrl } from "../utils/whatsapp";
 import { createBooking, getAvailability, getServices, sendMessage, setPostLike } from "../api";
 import type { AvailabilitySlot, Booking, ServiceOffering } from "../types";
 
+const IconChevronLeft = ({ size = 16 }: { size?: number }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+    <path d="M15 18l-6-6 6-6" />
+  </svg>
+);
+
+const IconChevronRight = ({ size = 16 }: { size?: number }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+    <path d="M9 18l6-6-6-6" />
+  </svg>
+);
+
 type PostCardProps = {
   post: Post;
   currentUser: CurrentUser | null;
@@ -43,6 +55,7 @@ function PostCard({
   // Booking & Inquiry states
   const [showInquire, setShowInquire] = useState(initialShowBooking ?? false);
   const [bookingModalTab, setBookingModalTab] = useState<"book" | "inquire">("book");
+  const [calendarMonth, setCalendarMonth] = useState<Date>(new Date());
   const [copied, setCopied] = useState(false);
   const [heartBurst, setHeartBurst] = useState(false);
 
@@ -473,57 +486,168 @@ function PostCard({
                   </div>
                 ) : (
                   <>
-                    {/* Horizontal Date Pills */}
-                    <div className="glam-date-pills-row">
-                      {availableDates.map((dateKey) => {
-                        const isSelectedDate = dateKey === selectedDateKey;
-                        const count = slotsByDate[dateKey]?.length || 0;
-                        return (
-                          <button
-                            key={dateKey}
-                            type="button"
-                            className={`glam-date-pill ${isSelectedDate ? "active" : ""}`}
-                            onClick={() => {
-                              setSelectedDateKey(dateKey);
-                              const firstSlot = slotsByDate[dateKey]?.[0];
-                              if (firstSlot) setSelectedSlotId(String(firstSlot.id));
-                            }}
-                          >
-                            <strong>{dateKey}</strong>
-                            <small>{count} slot{count > 1 ? "s" : ""}</small>
-                          </button>
-                        );
-                      })}
+                    {/* Full Month Calendar View */}
+                    <div className="glam-full-calendar">
+                      {/* Calendar Header with Month Navigation */}
+                      <div className="glam-calendar-nav-header">
+                        <button
+                          type="button"
+                          className="calendar-nav-btn"
+                          onClick={() => {
+                            const newMonth = new Date(calendarMonth);
+                            newMonth.setMonth(newMonth.getMonth() - 1);
+                            setCalendarMonth(newMonth);
+                          }}
+                          aria-label="Previous month"
+                        >
+                          <IconChevronLeft size={18} />
+                        </button>
+
+                        <h3 className="calendar-month-title">
+                          {calendarMonth.toLocaleDateString("en-ZA", {
+                            month: "long",
+                            year: "numeric",
+                          })}
+                        </h3>
+
+                        <button
+                          type="button"
+                          className="calendar-nav-btn"
+                          onClick={() => {
+                            const newMonth = new Date(calendarMonth);
+                            newMonth.setMonth(newMonth.getMonth() + 1);
+                            setCalendarMonth(newMonth);
+                          }}
+                          aria-label="Next month"
+                        >
+                          <IconChevronRight size={18} />
+                        </button>
+                      </div>
+
+                      {/* Calendar Grid */}
+                      <div className="glam-calendar-grid">
+                        <div className="glam-calendar-weekdays">
+                          {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((day) => (
+                            <div key={day} className="glam-weekday-label">
+                              {day}
+                            </div>
+                          ))}
+                        </div>
+
+                        <div className="glam-calendar-dates">
+                          {(() => {
+                            const year = calendarMonth.getFullYear();
+                            const month = calendarMonth.getMonth();
+                            const firstDay = new Date(year, month, 1);
+                            const startDayOfWeek = firstDay.getDay();
+                            const lastDay = new Date(year, month + 1, 0);
+                            const daysInMonth = lastDay.getDate();
+                            const totalCells = Math.ceil((startDayOfWeek + daysInMonth) / 7) * 7;
+
+                            const calendarDays = [];
+                            const today = new Date();
+                            today.setHours(0, 0, 0, 0);
+
+                            for (let i = 0; i < totalCells; i++) {
+                              const dayNum = i - startDayOfWeek + 1;
+
+                              if (dayNum < 1 || dayNum > daysInMonth) {
+                                calendarDays.push(
+                                  <div key={`empty-${i}`} className="glam-calendar-day empty" />
+                                );
+                              } else {
+                                const currentDate = new Date(year, month, dayNum);
+                                currentDate.setHours(0, 0, 0, 0);
+
+                                const dateKey = currentDate.toLocaleDateString("en-ZA", {
+                                  weekday: "short",
+                                  day: "numeric",
+                                  month: "short",
+                                });
+
+                                const hasSlots = (slotsByDate[dateKey]?.length ?? 0) > 0;
+                                const isSelected = dateKey === selectedDateKey;
+                                const isToday = currentDate.getTime() === today.getTime();
+                                const isPast = currentDate < today;
+                                const slotCount = slotsByDate[dateKey]?.length || 0;
+
+                                calendarDays.push(
+                                  <button
+                                    key={dateKey}
+                                    type="button"
+                                    disabled={!hasSlots || isPast}
+                                    className={`glam-calendar-day ${
+                                      hasSlots && !isPast ? "available" : "unavailable"
+                                    } ${isSelected ? "selected" : ""} ${
+                                      isToday ? "today" : ""
+                                    } ${isPast ? "past" : ""}`}
+                                    onClick={() => {
+                                      if (hasSlots && !isPast) {
+                                        setSelectedDateKey(dateKey);
+                                        const firstSlot = slotsByDate[dateKey]?.[0];
+                                        if (firstSlot) setSelectedSlotId(String(firstSlot.id));
+                                      }
+                                    }}
+                                  >
+                                    <span className="day-number">{dayNum}</span>
+                                    {hasSlots && !isPast && (
+                                      <span className="slot-indicator">
+                                        {slotCount} slot{slotCount > 1 ? "s" : ""}
+                                      </span>
+                                    )}
+                                  </button>
+                                );
+                              }
+                            }
+
+                            return calendarDays;
+                          })()}
+                        </div>
+                      </div>
                     </div>
 
-                    {/* Time Slots for Selected Date */}
-                    <div className="glam-time-slots-grid">
-                      {currentDaySlots.map((slot) => {
-                        const isSelectedSlot = String(slot.id) === selectedSlotId;
-                        const start = new Date(slot.startsAt);
-                        const end = new Date(slot.endsAt);
-                        const timeLabel = `${start.toLocaleTimeString("en-ZA", {
-                          hour: "2-digit",
-                          minute: "2-digit",
-                        })} – ${end.toLocaleTimeString("en-ZA", {
-                          hour: "2-digit",
-                          minute: "2-digit",
-                        })}`;
+                    {/* Time Slots Section (Appears once a date is selected) */}
+                    {selectedDateKey && currentDaySlots.length > 0 && (
+                      <div className="glam-time-selection-section">
+                        <div className="glam-flow-header-row">
+                          <label className="glam-flow-label">
+                            <span className="flow-step-num">3</span>
+                            <span>Choose Time</span>
+                          </label>
+                          <span className="glam-flow-hint">
+                            {currentDaySlots.length} slot{currentDaySlots.length > 1 ? "s" : ""} on {selectedDateKey}
+                          </span>
+                        </div>
 
-                        return (
-                          <button
-                            key={slot.id}
-                            type="button"
-                            className={`glam-time-chip ${isSelectedSlot ? "selected" : ""}`}
-                            onClick={() => setSelectedSlotId(String(slot.id))}
-                          >
-                            <IconClock size={12} />
-                            <span>{timeLabel}</span>
-                            {isSelectedSlot && <IconCheck size={12} />}
-                          </button>
-                        );
-                      })}
-                    </div>
+                        <div className="glam-time-slots-grid" style={{ marginTop: "12px" }}>
+                          {currentDaySlots.map((slot) => {
+                            const isSelectedSlot = String(slot.id) === selectedSlotId;
+                            const start = new Date(slot.startsAt);
+                            const end = new Date(slot.endsAt);
+                            const timeLabel = `${start.toLocaleTimeString("en-ZA", {
+                              hour: "2-digit",
+                              minute: "2-digit",
+                            })} – ${end.toLocaleTimeString("en-ZA", {
+                              hour: "2-digit",
+                              minute: "2-digit",
+                            })}`;
+
+                            return (
+                              <button
+                                key={slot.id}
+                                type="button"
+                                className={`glam-time-chip ${isSelectedSlot ? "selected" : ""}`}
+                                onClick={() => setSelectedSlotId(String(slot.id))}
+                              >
+                                <IconClock size={12} />
+                                <span>{timeLabel}</span>
+                                {isSelectedSlot && <IconCheck size={12} />}
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    )}
                   </>
                 )}
               </div>
