@@ -7378,9 +7378,10 @@ body {
 
 .glam-calendar-weekdays {
   display: grid;
-  grid-template-columns: repeat(7, 1fr);
-  gap: 4px;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 6px;
   margin-bottom: 8px;
+  width: 100%;
 }
 
 .glam-weekday-label {
@@ -7391,17 +7392,23 @@ body {
   color: var(--ink-secondary);
   letter-spacing: 0.5px;
   padding: 8px 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .glam-calendar-dates {
   display: grid;
-  grid-template-columns: repeat(7, 1fr);
+  grid-template-columns: repeat(7, minmax(0, 1fr));
   gap: 6px;
+  width: 100%;
 }
 
 .glam-calendar-day {
   aspect-ratio: 1;
-  min-height: 52px;
+  min-height: 48px;
+  width: 100%;
+  box-sizing: border-box;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -7413,13 +7420,15 @@ body {
   cursor: pointer;
   transition: all 0.2s ease;
   position: relative;
-  padding: 6px 4px;
+  padding: 4px 2px;
+  overflow: hidden;
 }
 
 .glam-calendar-day.empty {
   pointer-events: none;
   opacity: 0;
   background: transparent;
+  border-color: transparent;
 }
 
 .glam-calendar-day.unavailable,
@@ -10699,9 +10708,10 @@ body {
 
 .glam-calendar-weekdays {
   display: grid !important;
-  grid-template-columns: repeat(7, 1fr) !important;
-  gap: 4px !important;
+  grid-template-columns: repeat(7, minmax(0, 1fr)) !important;
+  gap: 6px !important;
   margin-bottom: 8px !important;
+  width: 100% !important;
 }
 
 .glam-weekday-label {
@@ -10713,36 +10723,44 @@ body {
   text-transform: uppercase !important;
   color: var(--ink-muted) !important;
   padding: 6px 0 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
 }
 
 .glam-calendar-dates {
   display: grid !important;
-  grid-template-columns: repeat(7, 1fr) !important;
+  grid-template-columns: repeat(7, minmax(0, 1fr)) !important;
   gap: 6px !important;
+  width: 100% !important;
 }
 
 /* Individual Calendar Day Cells */
 .glam-calendar-day {
   aspect-ratio: 1 !important;
-  min-height: 52px !important;
+  min-height: 48px !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
   border-radius: var(--radius-md, 12px) !important;
   display: flex !important;
   flex-direction: column !important;
   align-items: center !important;
   justify-content: center !important;
   gap: 2px !important;
-  padding: 4px !important;
+  padding: 4px 2px !important;
   border: 1px solid transparent !important;
   background: var(--bg-secondary) !important;
   cursor: pointer !important;
   transition: all var(--transition-base) !important;
   position: relative !important;
+  overflow: hidden !important;
 }
 
 .glam-calendar-day.empty {
   pointer-events: none !important;
   opacity: 0 !important;
   background: transparent !important;
+  border-color: transparent !important;
 }
 
 .glam-calendar-day.unavailable,
