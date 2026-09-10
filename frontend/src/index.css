@@ -18,11 +18,11 @@
   --bg-muted:            #252538;
   --bg-overlay:          rgba(10, 10, 15, 0.85);
 
-  /* Ink (text) — warm white scale */
-  --ink-primary:   #F2EEE8;
-  --ink-secondary: #B8B3AB;
-  --ink-muted:     #7A7670;
-  --ink-light:     #4E4A46;
+  /* Ink (text) — warm white scale, boosted for readability */
+  --ink-primary:   #F5F1EB;
+  --ink-secondary: #CCC8C0;
+  --ink-muted:     #9A9590;
+  --ink-light:     #6A6662;
 
   /* Borders */
   --border-subtle: rgba(242, 238, 232, 0.07);
@@ -40,11 +40,11 @@
   --accent-green:       #4CAF86;
   --accent-green-bg:    rgba(76, 175, 134, 0.12);
 
-  /* Gradient definitions */
-  --gradient-rose-gold: linear-gradient(135deg, #E8956D 0%, #D4AF7A 100%);
-  --gradient-rose:      linear-gradient(135deg, #C7818A 0%, #E8956D 100%);
-  --gradient-dark:      linear-gradient(180deg, #13131C 0%, #0A0A0F 100%);
-  --gradient-glass:     linear-gradient(135deg, rgba(30,30,46,0.9) 0%, rgba(24,24,42,0.85) 100%);
+  /* Solid accent colours replacing gradients */
+  --gradient-rose-gold: #E8956D;
+  --gradient-rose:      #C7818A;
+  --gradient-dark:      #0A0A0F;
+  --gradient-glass:     rgba(30,30,46,0.9);
 
   /* ── Typography ──────────────────────────────────────────────────────────── */
   --font-display: "Cormorant Garamond", Georgia, serif;
@@ -90,10 +90,10 @@
   --bg-muted:            #E4E0D6;
   --bg-overlay:          rgba(36, 30, 22, 0.72);
 
-  --ink-primary:   #1A1714;
-  --ink-secondary: #4D4843;
-  --ink-muted:     #8A8480;
-  --ink-light:     #BAB6B2;
+  --ink-primary:   #0F0D0B;
+  --ink-secondary: #3A3630;
+  --ink-muted:     #6A6460;
+  --ink-light:     #9A9692;
 
   --border-subtle: rgba(26, 23, 20, 0.08);
   --border-medium: rgba(26, 23, 20, 0.15);
@@ -108,10 +108,10 @@
   --accent-green:     #15803d;
   --accent-green-bg:  rgba(21, 128, 61, 0.08);
 
-  --gradient-rose-gold: linear-gradient(135deg, #C26F3E 0%, #D4A76A 100%);
-  --gradient-rose:      linear-gradient(135deg, #B44B49 0%, #C26F3E 100%);
-  --gradient-dark:      linear-gradient(180deg, #F5F2EC 0%, #EDE9E0 100%);
-  --gradient-glass:     linear-gradient(135deg, rgba(255,253,248,0.9) 0%, rgba(245,242,236,0.85) 100%);
+  --gradient-rose-gold: #C26F3E;
+  --gradient-rose:      #B44B49;
+  --gradient-dark:      #EDE9E0;
+  --gradient-glass:     rgba(255,253,248,0.9);
 
   --shadow-xs:  0 1px 3px rgba(26, 23, 20, 0.07);
   --shadow-sm:  0 2px 8px rgba(26, 23, 20, 0.09), 0 1px 2px rgba(26, 23, 20, 0.06);
@@ -293,8 +293,8 @@ textarea::placeholder {
   font-family: var(--font-heading);
   font-weight: 600;
   font-size: 14px;
-  color: #0A0A0F;
-  background: var(--gradient-rose-gold);
+  color: #ffffff;
+  background: var(--accent-primary);
   border: none;
   box-shadow: var(--shadow-glow-rose);
   transition: all var(--transition-base);
@@ -312,7 +312,7 @@ textarea::placeholder {
 }
 
 :root[data-theme="light"] .btn-primary {
-  color: #fff;
+  color: #ffffff;
 }
 
 .btn-ghost {

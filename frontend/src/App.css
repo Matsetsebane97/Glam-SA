@@ -2032,50 +2032,24 @@ body {
   padding: 13px 20px;
   border: 0;
   border-radius: 999px;
-  background: linear-gradient(
-    135deg,
-    #1a1c17 0%,
-    #c87941 40%,
-    #1e9e88 75%,
-    #1a1c17 100%
-  );
-  background-size: 300% 300%;
+  background: #c87941;
   color: #ffffff;
   box-shadow:
     0 8px 32px rgba(0, 0, 0, 0.32),
-    0 0 28px rgba(200, 121, 65, 0.35);
+    0 0 20px rgba(200, 121, 65, 0.25);
   font-size: 13px;
   font-weight: 700;
   letter-spacing: 0.02em;
-  animation:
-    asst-flow 6s ease-in-out infinite,
-    asst-glow 3s ease-in-out infinite;
   cursor: pointer;
   transition:
     transform 0.2s ease,
     box-shadow 0.2s ease;
 }
-.assistant-launcher::before {
-  position: absolute;
-  inset: -6px;
-  z-index: -1;
-  border-radius: inherit;
-  background: conic-gradient(
-    from 0deg,
-    rgba(200, 121, 65, 0.6),
-    rgba(30, 158, 136, 0.5),
-    rgba(200, 121, 65, 0.6)
-  );
-  filter: blur(14px);
-  opacity: 0.7;
-  content: "";
-  animation: asst-halo 3s ease-in-out infinite;
-}
 .assistant-launcher:hover {
   transform: translateY(-2px) scale(1.03);
   box-shadow:
     0 14px 40px rgba(0, 0, 0, 0.35),
-    0 0 40px rgba(30, 158, 136, 0.45);
+    0 0 24px rgba(200, 121, 65, 0.35);
 }
 .assistant-launcher:focus-visible {
   outline: 3px solid rgba(30, 158, 136, 0.4);
@@ -2144,7 +2118,7 @@ body {
   align-items: center;
   justify-content: space-between;
   padding: 18px 18px 16px;
-  background: linear-gradient(135deg, #1a1c17 0%, #222b1e 50%, #1a2420 100%);
+  background: #1a1c17;
   border-bottom: 1px solid rgba(255, 255, 255, 0.07);
   flex-shrink: 0;
   position: relative;
@@ -2161,7 +2135,7 @@ body {
   width: 38px;
   height: 38px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #c87941, #1e9e88);
+  background: #c87941;
   font-size: 16px;
   flex-shrink: 0;
   box-shadow: 0 0 14px rgba(200, 121, 65, 0.4);
@@ -2251,7 +2225,7 @@ body {
 .assistant-message.user {
   align-self: flex-end;
   border-radius: 16px 16px 4px 16px;
-  background: linear-gradient(135deg, #c87941, #a85e2c);
+  background: #c87941;
   color: #fff;
   border: 0;
   box-shadow: 0 4px 16px rgba(200, 121, 65, 0.3);
@@ -2337,7 +2311,7 @@ body {
   width: 38px;
   height: 38px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #c87941, #1e9e88);
+  background: #c87941;
   color: #ffffff;
   font-size: 14px;
   font-weight: 800;
@@ -2474,7 +2448,7 @@ body {
   font-size: 10px;
 }
 .assistant-booking-actions .btn-primary {
-  background: linear-gradient(135deg, #c87941, #a85e2c);
+  background: #c87941;
   border: 0;
   color: #fff;
   cursor: pointer;
@@ -2607,7 +2581,7 @@ body {
   cursor: default;
 }
 .assistant-compose .asst-send-btn {
-  background: linear-gradient(135deg, #c87941, #1e9e88);
+  background: #c87941;
   color: #fff;
   box-shadow: 0 4px 14px rgba(200, 121, 65, 0.35);
 }
@@ -3690,7 +3664,7 @@ body {
   width: 52px;
   height: 52px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #c26f3e, #238676);
+  background: var(--accent-primary, #c26f3e);
   color: #ffffff;
   box-shadow: 0 12px 28px rgba(35, 134, 118, 0.24);
 }
@@ -4858,7 +4832,7 @@ body {
   width: 28px;
   height: 3px;
   border-radius: 99px;
-  background: linear-gradient(90deg, #c87941, #e8a86a);
+  background: var(--accent-primary);
   box-shadow: 0 0 8px rgba(200, 121, 65, 0.6);
 }
 
@@ -4883,7 +4857,7 @@ body {
   width: 54px;
   height: 54px;
   border-radius: 50%;
-  background: linear-gradient(145deg, #d4874e, #c26f3e);
+  background: var(--accent-primary);
   color: #ffffff;
   display: flex;
   align-items: center;
@@ -4908,7 +4882,7 @@ body {
   width: 26px;
   height: 26px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #c87941, #7c4b3a);
+  background: var(--accent-primary);
   color: #ffffff;
   font-family: var(--font-heading);
   font-weight: 800;
@@ -5391,7 +5365,7 @@ body {
   background: transparent;
 }
 .mobile-nav-create-circle {
-  background: linear-gradient(145deg, #d4874e, #c26f3e);
+  background: var(--accent-primary, #c26f3e);
   color: #ffffff;
 }
 .mobile-brand .brand-logo {
@@ -5587,12 +5561,12 @@ body {
   border: 0;
   border-right: 1px solid #d9d6ca;
   border-radius: 0;
-  background: linear-gradient(145deg, #171914 0%, #2f3028 58%, #7c682f 100%);
+  background: #181a15;
   color: #fffdf8;
 }
 
 .upload-dropzone.dragging {
-  background: linear-gradient(145deg, #1f241b 0%, #424738 58%, #9c8038 100%);
+  background: #23281f;
   border-color: transparent;
 }
 
@@ -7095,7 +7069,7 @@ body {
   width: 42px;
   height: 42px;
   border-radius: 50%;
-  background: linear-gradient(135deg, var(--accent, #c26f3e), #7c4b3a);
+  background: var(--accent-primary, #c26f3e);
   color: #fff;
   display: flex;
   align-items: center;
@@ -8387,7 +8361,7 @@ body {
   width: 40px;
   height: 40px;
   border-radius: 12px;
-  background: var(--gradient-rose-gold);
+  background: var(--accent-primary);
   display: grid;
   place-items: center;
   flex-shrink: 0;
@@ -8503,8 +8477,8 @@ body {
   font-family: var(--font-heading);
   font-size: 13px;
   font-weight: 700;
-  color: #0A0A0F;
-  background: var(--gradient-rose-gold);
+  color: #ffffff;
+  background: var(--accent-primary);
   border: none;
   cursor: pointer;
   box-shadow: var(--shadow-glow-rose);
@@ -8563,8 +8537,8 @@ body {
   width: 44px;
   height: 44px;
   border-radius: 50%;
-  background: var(--gradient-rose-gold);
-  color: #0A0A0F;
+  background: var(--accent-primary);
+  color: #ffffff;
   font-family: var(--font-heading);
   font-weight: 800;
   font-size: 18px;
@@ -8793,8 +8767,8 @@ body {
 }
 
 .topbar-sign-in-btn:hover {
-  background: var(--gradient-rose-gold);
-  color: #0A0A0F;
+  background: var(--accent-primary);
+  color: #ffffff;
   border-color: transparent;
   box-shadow: var(--shadow-glow-rose);
 }
@@ -8807,8 +8781,8 @@ body {
   width: 38px;
   height: 38px;
   border-radius: 50%;
-  background: var(--gradient-rose-gold);
-  color: #0A0A0F;
+  background: var(--accent-primary);
+  color: #ffffff;
   font-family: var(--font-heading);
   font-weight: 800;
   font-size: 15px;
@@ -9077,14 +9051,14 @@ body {
 }
 
 .cat-tab-pill.active {
-  background: var(--gradient-rose-gold);
-  color: #0A0A0F;
+  background: var(--accent-primary);
+  color: #ffffff;
   border-color: transparent;
   box-shadow: var(--shadow-glow-rose);
 }
 
 :root[data-theme="light"] .cat-tab-pill.active {
-  color: #fff;
+  color: #ffffff;
 }
 
 .cat-tab-skeleton {
@@ -9144,8 +9118,8 @@ body {
 }
 
 .home-nearby-btn.active {
-  background: var(--gradient-rose-gold);
-  color: #0A0A0F;
+  background: var(--accent-primary);
+  color: #ffffff;
   border-color: transparent;
   box-shadow: var(--shadow-glow-rose);
 }
@@ -9243,8 +9217,8 @@ body {
   width: 38px !important;
   height: 38px !important;
   border-radius: 50% !important;
-  background: var(--gradient-rose-gold) !important;
-  color: #0A0A0F !important;
+  background: var(--accent-primary) !important;
+  color: #ffffff !important;
   font-family: var(--font-heading) !important;
   font-weight: 800 !important;
   font-size: 14px !important;
@@ -9455,8 +9429,8 @@ body {
 }
 
 .action-btn.book-look-btn:hover {
-  background: var(--gradient-rose-gold) !important;
-  color: #0A0A0F !important;
+  background: var(--accent-primary) !important;
+  color: #ffffff !important;
   border-color: transparent !important;
   box-shadow: var(--shadow-glow-rose) !important;
 }
@@ -9612,8 +9586,8 @@ body {
   width: 36px;
   height: 36px;
   border-radius: 50%;
-  background: var(--gradient-rose-gold);
-  color: #0A0A0F;
+  background: var(--accent-primary);
+  color: #ffffff;
   font-family: var(--font-heading);
   font-weight: 800;
   font-size: 14px;
@@ -9789,10 +9763,10 @@ body {
   width: 52px;
   height: 52px;
   border-radius: 50%;
-  background: var(--gradient-rose-gold);
+  background: var(--accent-primary);
   display: grid;
   place-items: center;
-  color: #0A0A0F;
+  color: #ffffff;
   box-shadow: var(--shadow-glow-rose), 0 4px 16px rgba(0,0,0,0.4);
   transition: all var(--transition-spring);
 }
@@ -9812,8 +9786,8 @@ body {
   width: 26px;
   height: 26px;
   border-radius: 50%;
-  background: var(--gradient-rose-gold);
-  color: #0A0A0F;
+  background: var(--accent-primary);
+  color: #ffffff;
   font-family: var(--font-heading);
   font-weight: 800;
   font-size: 11px;
@@ -9891,7 +9865,7 @@ body {
   height: 480px;
   top: -120px;
   right: -120px;
-  background: radial-gradient(circle, rgba(232, 149, 109, 0.12) 0%, transparent 70%);
+  background: rgba(232, 149, 109, 0.05);
 }
 
 .auth-hero-orb-2 {
@@ -9899,7 +9873,7 @@ body {
   height: 380px;
   bottom: -80px;
   left: -80px;
-  background: radial-gradient(circle, rgba(212, 175, 122, 0.1) 0%, transparent 70%);
+  background: rgba(212, 175, 122, 0.04);
 }
 
 .auth-brand-badge {
@@ -10023,7 +9997,7 @@ body {
   width: 60px;
   height: 4px;
   border-radius: 0 0 6px 6px;
-  background: var(--gradient-rose-gold);
+  background: var(--accent-primary);
   content: "";
 }
 
@@ -10066,10 +10040,10 @@ body {
 }
 
 .auth-submit-btn {
-  background: var(--gradient-rose-gold) !important;
+  background: var(--accent-primary) !important;
   border-radius: var(--radius-full) !important;
   box-shadow: var(--shadow-glow-rose) !important;
-  color: #0A0A0F !important;
+  color: #ffffff !important;
   font-weight: 700 !important;
   border: none !important;
 }
@@ -10091,9 +10065,9 @@ body {
 }
 
 .account-type-buttons button.active {
-  background: var(--gradient-rose-gold) !important;
+  background: var(--accent-primary) !important;
   border-color: transparent !important;
-  color: #0A0A0F !important;
+  color: #ffffff !important;
   box-shadow: var(--shadow-glow-rose) !important;
 }
 
@@ -10200,8 +10174,8 @@ body {
 }
 
 .message-bubble.mine {
-  background: var(--gradient-rose-gold) !important;
-  color: #0A0A0F !important;
+  background: var(--accent-primary) !important;
+  color: #ffffff !important;
 }
 
 :root[data-theme="light"] .message-bubble.mine {
@@ -10397,8 +10371,8 @@ body {
   width: 48px !important;
   height: 48px !important;
   border-radius: 50% !important;
-  background: var(--gradient-rose-gold) !important;
-  color: #0A0A0F !important;
+  background: var(--accent-primary) !important;
+  color: #ffffff !important;
   font-family: var(--font-heading) !important;
   font-weight: 800 !important;
   font-size: 18px !important;
@@ -10611,7 +10585,7 @@ body {
   width: 9px !important;
   height: 9px !important;
   border-radius: 50% !important;
-  background: var(--gradient-rose-gold) !important;
+  background: var(--accent-primary) !important;
 }
 
 .glam-service-name,
@@ -10789,10 +10763,10 @@ body {
 }
 
 .glam-calendar-day.selected {
-  background: var(--gradient-rose-gold) !important;
+  background: var(--accent-primary) !important;
   border-color: #ffffff !important;
   border-width: 2px !important;
-  box-shadow: 0 0 0 2px var(--accent-primary), 0 8px 24px rgba(232, 149, 109, 0.6) !important;
+  box-shadow: 0 0 0 3px var(--accent-primary), 0 6px 20px rgba(232, 149, 109, 0.45) !important;
   transform: translateY(-2px) scale(1.06) !important;
   z-index: 2 !important;
 }
@@ -10811,12 +10785,12 @@ body {
 }
 
 .glam-calendar-day.selected .day-number {
-  color: #0A0A0F !important;
+  color: #ffffff !important;
   font-weight: 800 !important;
 }
 
 :root[data-theme="light"] .glam-calendar-day.selected .day-number {
-  color: #fff !important;
+  color: #ffffff !important;
 }
 
 .glam-calendar-day .slot-indicator {
@@ -10873,7 +10847,7 @@ body {
 }
 
 .glam-date-pill.active {
-  background: var(--gradient-rose-gold) !important;
+  background: var(--accent-primary) !important;
   border-color: transparent !important;
   box-shadow: var(--shadow-glow-rose) !important;
 }
@@ -10886,11 +10860,11 @@ body {
 }
 
 .glam-date-pill.active strong {
-  color: #0A0A0F !important;
+  color: #ffffff !important;
 }
 
 :root[data-theme="light"] .glam-date-pill.active strong {
-  color: #fff !important;
+  color: #ffffff !important;
 }
 
 .glam-date-pill small {
@@ -10972,15 +10946,15 @@ body {
 }
 
 .glam-time-chip.selected {
-  background: var(--gradient-rose-gold) !important;
+  background: var(--accent-primary) !important;
   border-color: transparent !important;
-  color: #0A0A0F !important;
+  color: #ffffff !important;
   box-shadow: var(--shadow-glow-rose) !important;
   font-weight: 700 !important;
 }
 
 :root[data-theme="light"] .glam-time-chip.selected {
-  color: #fff !important;
+  color: #ffffff !important;
 }
 
 /* ── Step 4: Quick Tags & Notes ────────────────────────────── */
@@ -11119,8 +11093,8 @@ body {
   width: 100% !important;
   padding: 14px 20px !important;
   border-radius: var(--radius-md, 12px) !important;
-  background: var(--gradient-rose-gold) !important;
-  color: #0A0A0F !important;
+  background: var(--accent-primary) !important;
+  color: #ffffff !important;
   font-family: var(--font-heading) !important;
   font-size: 14px !important;
   font-weight: 700 !important;
