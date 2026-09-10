@@ -239,6 +239,39 @@ def admin_dashboard(request):
 
 
 @csrf_exempt
+def admin_user_detail(request, user_id):
+    if not request.user.is_authenticated or not request.user.is_staff:
+        return JsonResponse({"error": "Administrator access is required."}, status=403)
+    if request.user.id == user_id:
+        return JsonResponse({"error": "You cannot suspend or delete your own administrator account."}, status=400)
+    try:
+        user = User.objects.get(id=user_id)
+    except User.DoesNotExist:
+        return JsonResponse({"error": "User not found."}, status=404)
+
+    if request.method == "PATCH":
+        try:
+            action = json.loads(request.body or "{}").get("action")
+        except json.JSONDecodeError:
+            return JsonResponse({"error": "Request body must be valid JSON."}, status=400)
+        if action not in ("suspend", "activate"):
+            return JsonResponse({"error": "Choose suspend or activate."}, status=400)
+        user.is_active = action == "activate"
+        user.save(update_fields=["is_active"])
+        return JsonResponse({"id": user.id, "isActive": user.is_active})
+
+    if request.method == "DELETE":
+        if not request.user.is_superuser:
+            return JsonResponse({"error": "Only a superuser can permanently delete accounts."}, status=403)
+        if user.is_superuser:
+            return JsonResponse({"error": "Superuser accounts cannot be deleted here."}, status=400)
+        user.delete()
+        return JsonResponse({"message": "User account deleted."})
+
+    return JsonResponse({"error": "Method not allowed."}, status=405)
+
+
+@csrf_exempt
 def update_profile(request):
     if request.method != "PATCH":
         return JsonResponse({"error": "Method not allowed."}, status=405)

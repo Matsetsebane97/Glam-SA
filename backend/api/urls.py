@@ -15,6 +15,7 @@ urlpatterns = [
     path("auth/me/", views.current_user),
     path("auth/profile/", views.update_profile),
     path("admin/dashboard/", views.admin_dashboard),
+    path("admin/users/<int:user_id>/", views.admin_user_detail),
     path("users/<int:user_id>/", views.user_profile),
     path("reviews/", views.reviews),
     path("categories/", views.categories),

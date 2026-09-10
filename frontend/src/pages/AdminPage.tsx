@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { getAdminDashboard, type AdminDashboardData } from "../api";
+import { deleteAdminUser, getAdminDashboard, updateAdminUser, type AdminDashboardData } from "../api";
 import { IconCalendar, IconGrid, IconMessage, IconSparkles, IconUpload, IconUser } from "../components/Icons";
 import type { CurrentUser } from "../types";
 
@@ -18,6 +18,7 @@ function AdminPage({ currentUser, onNavigate }: AdminPageProps) {
   const [dashboard, setDashboard] = useState<AdminDashboardData | null>(null);
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(true);
+  const [actionUserId, setActionUserId] = useState<number | null>(null);
 
   useEffect(() => {
     if (!currentUser?.isStaff) return;
@@ -26,6 +27,28 @@ function AdminPage({ currentUser, onNavigate }: AdminPageProps) {
       .catch((loadError: unknown) => setError(loadError instanceof Error ? loadError.message : "Unable to load dashboard."))
       .finally(() => setIsLoading(false));
   }, [currentUser?.isStaff]);
+
+  const reloadDashboard = () => {
+    void getAdminDashboard().then(setDashboard).catch((loadError: unknown) => setError(loadError instanceof Error ? loadError.message : "Unable to refresh dashboard."));
+  };
+
+  const handleUserAction = async (userId: number, action: "suspend" | "activate" | "delete") => {
+    const message = action === "delete"
+      ? "Permanently delete this user and their account data? This cannot be undone."
+      : `${action === "suspend" ? "Suspend" : "Reactivate"} this user?`;
+    if (!window.confirm(message)) return;
+    setActionUserId(userId);
+    try {
+      if (action === "delete") await deleteAdminUser(userId);
+      else await updateAdminUser(userId, action);
+      setError("");
+      reloadDashboard();
+    } catch (actionError) {
+      setError(actionError instanceof Error ? actionError.message : "Unable to update this user.");
+    } finally {
+      setActionUserId(null);
+    }
+  };
 
   if (!currentUser?.isStaff) {
     return (
@@ -81,14 +104,18 @@ function AdminPage({ currentUser, onNavigate }: AdminPageProps) {
               <div className="admin-panel-heading"><h2>Recent users</h2><span>{stats?.users ?? 0} total</span></div>
               <div className="admin-table-wrap">
                 <table className="admin-table">
-                  <thead><tr><th>User</th><th>Role</th><th>Location</th><th>Joined</th></tr></thead>
+                  <thead><tr><th>User</th><th>Role</th><th>Location</th><th>Status</th><th>Actions</th></tr></thead>
                   <tbody>
                     {dashboard?.recentUsers.map((user) => (
                       <tr key={user.id}>
                         <td><strong>{user.name}</strong><small>{user.email}</small></td>
                         <td><span className={`admin-role ${user.accountType}`}>{user.accountType}</span></td>
                         <td>{user.location || "Not set"}</td>
-                        <td>{formatDate(user.joinedAt)}</td>
+                        <td><span className={`admin-status ${user.isActive ? "confirmed" : "cancelled"}`}>{user.isActive ? "Active" : "Suspended"}</span><small>{formatDate(user.joinedAt)}</small></td>
+                        <td className="admin-user-actions">
+                          <button className="btn-ghost-sm" type="button" disabled={actionUserId === user.id} onClick={() => void handleUserAction(user.id, user.isActive ? "suspend" : "activate")}>{user.isActive ? "Suspend" : "Activate"}</button>
+                          {currentUser.isSuperuser && <button className="btn-danger-sm" type="button" disabled={actionUserId === user.id} onClick={() => void handleUserAction(user.id, "delete")}>Delete</button>}
+                        </td>
                       </tr>
                     ))}
                   </tbody>

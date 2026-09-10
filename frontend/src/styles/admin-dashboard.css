@@ -72,6 +72,11 @@
 .admin-table td strong, .admin-table td small { display: block; }
 .admin-table td strong { color: var(--ink-primary); font-size: 12px; }
 .admin-table td small { margin-top: 3px; color: var(--ink-muted); font-size: 11px; }
+.admin-user-actions { min-width: 150px; }
+.admin-user-actions button { margin: 2px; }
+.btn-danger-sm { display: inline-flex; align-items: center; min-height: 28px; padding: 0 9px; border: 1px solid var(--accent-rose); border-radius: var(--radius-sm); background: transparent; color: var(--accent-rose); font-size: 11px; font-weight: 700; cursor: pointer; }
+.btn-danger-sm:hover { background: var(--accent-rose-bg); }
+.btn-danger-sm:disabled, .admin-user-actions button:disabled { opacity: .5; cursor: wait; }
 .admin-role, .admin-status { display: inline-flex; padding: 4px 8px; border-radius: var(--radius-full); font-size: 10px; font-weight: 700; text-transform: capitalize; }
 .admin-role.creator { background: var(--accent-rose-bg); color: var(--accent-rose); }
 .admin-role.client { background: var(--accent-gold-bg); color: var(--accent-secondary); }

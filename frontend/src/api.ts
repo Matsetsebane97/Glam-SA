@@ -97,6 +97,22 @@ export const getAdminDashboard = async (): Promise<AdminDashboardData> => {
   return data;
 };
 
+export const updateAdminUser = async (userId: number, action: "suspend" | "activate"): Promise<void> => {
+  const response = await fetch(`/api/admin/users/${userId}/`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ action }),
+  });
+  const data = (await response.json().catch(() => ({}))) as { error?: string };
+  if (!response.ok) throw new Error(data.error || "Unable to update this user.");
+};
+
+export const deleteAdminUser = async (userId: number): Promise<void> => {
+  const response = await fetch(`/api/admin/users/${userId}/`, { method: "DELETE" });
+  const data = (await response.json().catch(() => ({}))) as { error?: string };
+  if (!response.ok) throw new Error(data.error || "Unable to delete this user.");
+};
+
 export const logout = async (): Promise<void> => {
   const response = await fetch("/api/auth/logout/", { method: "POST" });
   if (!response.ok) throw new Error("Unable to log out.");
