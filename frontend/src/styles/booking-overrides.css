@@ -1,0 +1,867 @@
+
+/* ── Modal Backdrop & Card ─────────────────────────────────── */
+.glam-modal-backdrop {
+  background: var(--bg-overlay) !important;
+  backdrop-filter: var(--glass-blur) !important;
+  -webkit-backdrop-filter: var(--glass-blur) !important;
+  display: grid !important;
+  place-items: center !important;
+  padding: 16px !important;
+  z-index: 100 !important;
+}
+
+.glam-booking-sheet {
+  background: var(--bg-surface-elevated) !important;
+  border: 1px solid var(--border-medium) !important;
+  border-radius: var(--radius-2xl, 28px) !important;
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.6), var(--shadow-glow-rose) !important;
+  max-width: 580px !important;
+  width: 100% !important;
+  overflow: hidden !important;
+  display: flex !important;
+  flex-direction: column !important;
+  animation: slideUpSheet 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards !important;
+}
+
+/* ── Sheet Header ─────────────────────────────────────────── */
+.glam-sheet-header {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  padding: 20px 24px 16px !important;
+  background: var(--bg-secondary) !important;
+  border-bottom: 1px solid var(--border-subtle) !important;
+}
+
+.glam-sheet-artist {
+  display: flex !important;
+  align-items: center !important;
+  gap: 14px !important;
+}
+
+.glam-artist-avatar,
+.glam-artist-avatar-img {
+  width: 48px !important;
+  height: 48px !important;
+  border-radius: 50% !important;
+  background: var(--accent-primary) !important;
+  color: #ffffff !important;
+  font-family: var(--font-heading) !important;
+  font-weight: 800 !important;
+  font-size: 18px !important;
+  display: grid !important;
+  place-items: center !important;
+  box-shadow: var(--shadow-glow-rose) !important;
+  object-fit: cover !important;
+  flex-shrink: 0 !important;
+}
+
+:root[data-theme="light"] .glam-artist-avatar {
+  color: #fff !important;
+}
+
+.glam-artist-title-row {
+  display: flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+}
+
+.glam-artist-title-row h3 {
+  font-family: var(--font-heading) !important;
+  font-size: 17px !important;
+  font-weight: 700 !important;
+  color: var(--ink-primary) !important;
+  margin: 0 !important;
+}
+
+.glam-artist-title-row svg {
+  color: var(--accent-secondary) !important;
+}
+
+.glam-artist-sub {
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  font-size: 12px !important;
+  color: var(--ink-muted) !important;
+  margin: 3px 0 0 !important;
+}
+
+.glam-artist-location {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 3px !important;
+  color: var(--accent-primary) !important;
+}
+
+.glam-modal-close {
+  width: 36px !important;
+  height: 36px !important;
+  border-radius: 50% !important;
+  background: var(--bg-surface) !important;
+  border: 1px solid var(--border-subtle) !important;
+  color: var(--ink-muted) !important;
+  display: grid !important;
+  place-items: center !important;
+  cursor: pointer !important;
+  transition: all var(--transition-fast) !important;
+}
+
+.glam-modal-close:hover {
+  background: var(--bg-muted) !important;
+  color: var(--ink-primary) !important;
+  transform: scale(1.06) !important;
+}
+
+/* ── Segmented Mode Tabs ──────────────────────────────────── */
+.glam-booking-tabs {
+  display: flex !important;
+  background: var(--bg-base) !important;
+  padding: 6px !important;
+  gap: 6px !important;
+  border-bottom: 1px solid var(--border-subtle) !important;
+}
+
+.glam-booking-tab {
+  flex: 1 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 8px !important;
+  padding: 10px 14px !important;
+  border-radius: var(--radius-md, 12px) !important;
+  background: transparent !important;
+  border: 1px solid transparent !important;
+  font-family: var(--font-heading) !important;
+  font-size: 13px !important;
+  font-weight: 600 !important;
+  color: var(--ink-muted) !important;
+  cursor: pointer !important;
+  transition: all var(--transition-base) !important;
+}
+
+.glam-booking-tab:hover {
+  color: var(--ink-primary) !important;
+  background: var(--bg-surface) !important;
+}
+
+.glam-booking-tab.active {
+  background: var(--bg-surface) !important;
+  color: var(--accent-primary) !important;
+  border-color: var(--border-subtle) !important;
+  box-shadow: var(--shadow-sm) !important;
+}
+
+/* ── Sheet Body & Flow Sections ────────────────────────────── */
+.glam-sheet-body {
+  padding: 22px 24px 28px !important;
+  overflow-y: auto !important;
+  max-height: calc(88vh - 130px) !important;
+  background: var(--bg-surface-elevated) !important;
+}
+
+.glam-flow-section {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 12px !important;
+  margin-bottom: 20px !important;
+}
+
+.glam-flow-header-row,
+.glam-flow-label {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  font-family: var(--font-heading) !important;
+  font-size: 14px !important;
+  font-weight: 700 !important;
+  color: var(--ink-primary) !important;
+}
+
+.flow-step-num {
+  display: inline-grid !important;
+  place-items: center !important;
+  width: 22px !important;
+  height: 22px !important;
+  border-radius: 50% !important;
+  background: var(--accent-gold-bg) !important;
+  color: var(--accent-secondary) !important;
+  font-size: 12px !important;
+  font-weight: 800 !important;
+  margin-right: 8px !important;
+}
+
+.glam-flow-hint {
+  font-size: 12px !important;
+  font-weight: 500 !important;
+  color: var(--accent-primary) !important;
+}
+
+/* ── Step 1: Services Grid & Cards ─────────────────────────── */
+.glam-services-chips-grid {
+  display: grid !important;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)) !important;
+  gap: 10px !important;
+}
+
+.glam-service-card-item,
+.glam-service-chip {
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: space-between !important;
+  padding: 14px 16px !important;
+  border-radius: var(--radius-lg, 16px) !important;
+  background: var(--bg-surface) !important;
+  border: 1px solid var(--border-subtle) !important;
+  cursor: pointer !important;
+  transition: all var(--transition-base) !important;
+  gap: 10px !important;
+  text-align: left !important;
+}
+
+.glam-service-card-item:hover,
+.glam-service-chip:hover {
+  background: var(--bg-muted) !important;
+  border-color: var(--border-medium) !important;
+  transform: translateY(-2px) !important;
+}
+
+.glam-service-card-item.selected,
+.glam-service-chip.selected {
+  background: rgba(232, 149, 109, 0.08) !important;
+  border-color: var(--accent-primary) !important;
+  box-shadow: 0 0 0 1px var(--accent-primary), var(--shadow-glow-rose) !important;
+}
+
+.glam-service-card-top {
+  display: flex !important;
+  align-items: center !important;
+  gap: 10px !important;
+}
+
+.glam-service-radio {
+  width: 18px !important;
+  height: 18px !important;
+  border-radius: 50% !important;
+  border: 1.5px solid var(--border-medium) !important;
+  display: grid !important;
+  place-items: center !important;
+  flex-shrink: 0 !important;
+  transition: border-color var(--transition-fast) !important;
+}
+
+.glam-service-card-item.selected .glam-service-radio {
+  border-color: var(--accent-primary) !important;
+}
+
+.glam-radio-dot {
+  width: 9px !important;
+  height: 9px !important;
+  border-radius: 50% !important;
+  background: var(--accent-primary) !important;
+}
+
+.glam-service-name,
+.chip-service-info strong {
+  font-family: var(--font-heading) !important;
+  font-size: 14px !important;
+  font-weight: 700 !important;
+  color: var(--ink-primary) !important;
+}
+
+.glam-service-card-bottom {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  width: 100% !important;
+}
+
+.glam-service-duration,
+.chip-service-info small {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 4px !important;
+  font-size: 12px !important;
+  color: var(--ink-muted) !important;
+}
+
+.glam-service-price,
+.chip-service-price {
+  font-family: var(--font-heading) !important;
+  font-size: 15px !important;
+  font-weight: 800 !important;
+  color: var(--accent-secondary) !important;
+}
+
+.glam-default-service-card {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  padding: 16px 18px !important;
+  border-radius: var(--radius-lg, 16px) !important;
+  background: var(--bg-surface) !important;
+  border: 1px solid var(--border-subtle) !important;
+}
+
+/* ── Step 2: Full Calendar Overhaul (Editorial Dark Glass) ──── */
+.glam-full-calendar {
+  background: var(--bg-surface) !important;
+  border: 1px solid var(--border-subtle) !important;
+  border-radius: var(--radius-xl, 20px) !important;
+  padding: 20px 18px !important;
+  box-shadow: var(--shadow-sm) !important;
+}
+
+.glam-calendar-nav-header {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  margin-bottom: 18px !important;
+  padding: 0 6px !important;
+}
+
+.calendar-month-title {
+  font-family: var(--font-heading) !important;
+  font-size: 16px !important;
+  font-weight: 800 !important;
+  letter-spacing: -0.01em !important;
+  color: var(--ink-primary) !important;
+  margin: 0 !important;
+}
+
+.calendar-nav-btn {
+  width: 36px !important;
+  height: 36px !important;
+  border-radius: var(--radius-md, 12px) !important;
+  background: var(--bg-muted) !important;
+  border: 1px solid var(--border-subtle) !important;
+  color: var(--ink-primary) !important;
+  display: grid !important;
+  place-items: center !important;
+  cursor: pointer !important;
+  transition: all var(--transition-fast) !important;
+}
+
+.calendar-nav-btn:hover {
+  background: var(--bg-surface-elevated) !important;
+  border-color: var(--accent-primary) !important;
+  color: var(--accent-primary) !important;
+  transform: scale(1.05) !important;
+}
+
+.glam-calendar-grid {
+  background: transparent !important;
+}
+
+.glam-calendar-weekdays {
+  display: grid !important;
+  grid-template-columns: repeat(7, minmax(0, 1fr)) !important;
+  gap: 6px !important;
+  margin-bottom: 8px !important;
+  width: 100% !important;
+}
+
+.glam-weekday-label {
+  text-align: center !important;
+  font-family: var(--font-heading) !important;
+  font-size: 11px !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.08em !important;
+  text-transform: uppercase !important;
+  color: var(--ink-muted) !important;
+  padding: 6px 0 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+.glam-calendar-dates {
+  display: grid !important;
+  grid-template-columns: repeat(7, minmax(0, 1fr)) !important;
+  gap: 6px !important;
+  width: 100% !important;
+}
+
+/* Individual Calendar Day Cells */
+.glam-calendar-day {
+  aspect-ratio: 1 !important;
+  min-height: 48px !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+  border-radius: var(--radius-md, 12px) !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 2px !important;
+  padding: 4px 2px !important;
+  border: 1px solid transparent !important;
+  background: var(--bg-secondary) !important;
+  cursor: pointer !important;
+  transition: all var(--transition-base) !important;
+  position: relative !important;
+  overflow: hidden !important;
+}
+
+.glam-calendar-day.empty {
+  pointer-events: none !important;
+  opacity: 0 !important;
+  background: transparent !important;
+  border-color: transparent !important;
+}
+
+.glam-calendar-day.unavailable,
+.glam-calendar-day.past {
+  opacity: 0.28 !important;
+  cursor: not-allowed !important;
+  background: transparent !important;
+  border-color: transparent !important;
+}
+
+.glam-calendar-day.unavailable .day-number,
+.glam-calendar-day.past .day-number {
+  color: var(--ink-light) !important;
+}
+
+.glam-calendar-day.available {
+  background: var(--bg-surface) !important;
+  border-color: var(--border-medium) !important;
+}
+
+.glam-calendar-day.available:hover {
+  background: var(--bg-muted) !important;
+  border-color: var(--accent-primary) !important;
+  transform: translateY(-2px) !important;
+  box-shadow: var(--shadow-glow-rose) !important;
+}
+
+.glam-calendar-day.selected {
+  background: var(--accent-primary) !important;
+  border-color: #ffffff !important;
+  border-width: 2px !important;
+  box-shadow: 0 0 0 3px var(--accent-primary), 0 6px 20px rgba(232, 149, 109, 0.45) !important;
+  transform: translateY(-2px) scale(1.06) !important;
+  z-index: 2 !important;
+}
+
+.glam-calendar-day.today {
+  border-color: var(--accent-secondary) !important;
+  border-width: 1.5px !important;
+}
+
+.glam-calendar-day .day-number {
+  font-family: var(--font-heading) !important;
+  font-size: 15px !important;
+  font-weight: 700 !important;
+  color: var(--ink-primary) !important;
+  line-height: 1 !important;
+}
+
+.glam-calendar-day.selected .day-number {
+  color: #ffffff !important;
+  font-weight: 800 !important;
+}
+
+:root[data-theme="light"] .glam-calendar-day.selected .day-number {
+  color: #ffffff !important;
+}
+
+.glam-calendar-day .slot-indicator {
+  font-size: 9px !important;
+  font-weight: 700 !important;
+  color: var(--accent-secondary) !important;
+  padding: 2px 5px !important;
+  background: var(--accent-gold-bg) !important;
+  border-radius: var(--radius-full) !important;
+  line-height: 1 !important;
+  white-space: nowrap !important;
+}
+
+.glam-calendar-day.selected .slot-indicator {
+  background: rgba(0, 0, 0, 0.15) !important;
+  color: #0A0A0F !important;
+}
+
+:root[data-theme="light"] .glam-calendar-day.selected .slot-indicator {
+  color: #fff !important;
+  background: rgba(255, 255, 255, 0.25) !important;
+}
+
+/* Horizontal Date Pills (PostCard modal fallback) */
+.glam-date-pills-row {
+  display: flex !important;
+  gap: 8px !important;
+  overflow-x: auto !important;
+  padding-bottom: 6px !important;
+  scrollbar-width: none !important;
+}
+
+.glam-date-pills-row::-webkit-scrollbar {
+  display: none !important;
+}
+
+.glam-date-pill {
+  flex: 0 0 auto !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  gap: 2px !important;
+  padding: 10px 16px !important;
+  border-radius: var(--radius-lg, 16px) !important;
+  background: var(--bg-surface) !important;
+  border: 1px solid var(--border-subtle) !important;
+  cursor: pointer !important;
+  transition: all var(--transition-base) !important;
+}
+
+.glam-date-pill:hover {
+  background: var(--bg-muted) !important;
+  border-color: var(--border-medium) !important;
+}
+
+.glam-date-pill.active {
+  background: var(--accent-primary) !important;
+  border-color: transparent !important;
+  box-shadow: var(--shadow-glow-rose) !important;
+}
+
+.glam-date-pill strong {
+  font-family: var(--font-heading) !important;
+  font-size: 13px !important;
+  font-weight: 700 !important;
+  color: var(--ink-primary) !important;
+}
+
+.glam-date-pill.active strong {
+  color: #ffffff !important;
+}
+
+:root[data-theme="light"] .glam-date-pill.active strong {
+  color: #ffffff !important;
+}
+
+.glam-date-pill small {
+  font-size: 11px !important;
+  color: var(--ink-muted) !important;
+}
+
+.glam-date-pill.active small {
+  color: rgba(10, 10, 15, 0.75) !important;
+}
+
+:root[data-theme="light"] .glam-date-pill.active small {
+  color: rgba(255, 255, 255, 0.85) !important;
+}
+
+/* ── Step 3: Time Slot Selection (Morning / Afternoon / Evening) */
+.glam-time-selection-section {
+  margin-top: 18px !important;
+  padding: 18px 20px !important;
+  background: var(--bg-surface) !important;
+  border-radius: var(--radius-xl, 20px) !important;
+  border: 1px solid var(--border-medium) !important;
+  box-shadow: var(--shadow-sm) !important;
+}
+
+.glam-time-periods-container {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 16px !important;
+  margin-top: 14px !important;
+}
+
+.glam-time-period-group {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 8px !important;
+}
+
+.period-label {
+  font-family: var(--font-heading) !important;
+  font-size: 11px !important;
+  font-weight: 700 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.08em !important;
+  color: var(--accent-secondary) !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+}
+
+.glam-time-chips-wrap,
+.glam-time-slots-grid {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  gap: 8px !important;
+}
+
+.glam-time-chip {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+  padding: 9px 14px !important;
+  border-radius: var(--radius-full) !important;
+  border: 1px solid var(--border-subtle) !important;
+  background: var(--bg-secondary) !important;
+  color: var(--ink-primary) !important;
+  font-family: var(--font-heading) !important;
+  font-size: 13px !important;
+  font-weight: 600 !important;
+  cursor: pointer !important;
+  transition: all var(--transition-base) !important;
+}
+
+.glam-time-chip:hover {
+  background: var(--bg-muted) !important;
+  border-color: var(--accent-primary) !important;
+  color: var(--accent-primary) !important;
+  transform: translateY(-1px) !important;
+}
+
+.glam-time-chip.selected {
+  background: var(--accent-primary) !important;
+  border-color: transparent !important;
+  color: #ffffff !important;
+  box-shadow: var(--shadow-glow-rose) !important;
+  font-weight: 700 !important;
+}
+
+:root[data-theme="light"] .glam-time-chip.selected {
+  color: #ffffff !important;
+}
+
+/* ── Step 4: Quick Tags & Notes ────────────────────────────── */
+.glam-quick-tags-row {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  gap: 6px !important;
+  margin-bottom: 10px !important;
+}
+
+.glam-quick-tag-chip {
+  padding: 6px 12px !important;
+  border-radius: var(--radius-full) !important;
+  background: var(--bg-surface) !important;
+  border: 1px solid var(--border-subtle) !important;
+  font-family: var(--font-heading) !important;
+  font-size: 11px !important;
+  font-weight: 600 !important;
+  color: var(--ink-secondary) !important;
+  cursor: pointer !important;
+  transition: all var(--transition-fast) !important;
+}
+
+.glam-quick-tag-chip:hover {
+  border-color: var(--accent-primary) !important;
+  color: var(--ink-primary) !important;
+}
+
+.glam-quick-tag-chip.applied {
+  background: var(--accent-gold-bg) !important;
+  border-color: var(--accent-secondary) !important;
+  color: var(--accent-secondary) !important;
+  font-weight: 700 !important;
+}
+
+.glam-booking-notes {
+  width: 100% !important;
+  border-radius: var(--radius-md, 12px) !important;
+  background: var(--bg-secondary) !important;
+  border: 1px solid var(--border-medium) !important;
+  color: var(--ink-primary) !important;
+  padding: 12px 14px !important;
+  font-size: 13px !important;
+  font-family: var(--font-body) !important;
+  resize: vertical !important;
+  outline: none !important;
+  transition: border-color var(--transition-fast) !important;
+}
+
+.glam-booking-notes:focus {
+  border-color: var(--accent-primary) !important;
+  box-shadow: 0 0 0 2px rgba(232, 149, 109, 0.2) !important;
+}
+
+/* ── No Slots State ────────────────────────────────────────── */
+.glam-no-slots-box {
+  padding: 20px 22px !important;
+  border-radius: var(--radius-xl, 20px) !important;
+  background: var(--accent-gold-bg) !important;
+  border: 1px dashed rgba(212, 175, 122, 0.3) !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 12px !important;
+}
+
+.no-slots-icon-wrap {
+  width: 44px !important;
+  height: 44px !important;
+  border-radius: 50% !important;
+  background: var(--bg-surface) !important;
+  display: grid !important;
+  place-items: center !important;
+  color: var(--accent-secondary) !important;
+}
+
+.glam-no-slots-box strong {
+  font-family: var(--font-heading) !important;
+  font-size: 15px !important;
+  color: var(--accent-secondary) !important;
+}
+
+.glam-no-slots-box p {
+  font-size: 13px !important;
+  color: var(--ink-secondary) !important;
+  line-height: 1.5 !important;
+  margin: 0 !important;
+}
+
+/* ── Footer & Price Summary ────────────────────────────────── */
+.glam-booking-sheet-footer {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 14px !important;
+  padding: 18px 24px !important;
+  background: var(--bg-secondary) !important;
+  border-top: 1px solid var(--border-subtle) !important;
+}
+
+.glam-footer-price-summary {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 2px !important;
+}
+
+.summary-total-label {
+  font-family: var(--font-heading) !important;
+  font-size: 11px !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.08em !important;
+  color: var(--ink-muted) !important;
+}
+
+.summary-total-price {
+  font-family: var(--font-heading) !important;
+  font-size: 22px !important;
+  font-weight: 800 !important;
+  color: var(--accent-primary) !important;
+}
+
+.summary-duration {
+  font-size: 13px !important;
+  color: var(--ink-secondary) !important;
+  margin-left: 6px !important;
+}
+
+.summary-payment-terms {
+  font-size: 11px !important;
+  color: var(--ink-muted) !important;
+}
+
+.btn-book-submit {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 8px !important;
+  width: 100% !important;
+  padding: 14px 20px !important;
+  border-radius: var(--radius-md, 12px) !important;
+  background: var(--accent-primary) !important;
+  color: #ffffff !important;
+  font-family: var(--font-heading) !important;
+  font-size: 14px !important;
+  font-weight: 700 !important;
+  border: none !important;
+  cursor: pointer !important;
+  box-shadow: var(--shadow-glow-rose) !important;
+  transition: all var(--transition-base) !important;
+}
+
+:root[data-theme="light"] .btn-book-submit {
+  color: #fff !important;
+}
+
+.btn-book-submit:hover:not(:disabled) {
+  transform: translateY(-2px) !important;
+  filter: brightness(1.08) !important;
+  box-shadow: 0 8px 24px rgba(232, 149, 109, 0.4) !important;
+}
+
+.btn-book-submit:disabled {
+  opacity: 0.4 !important;
+  cursor: not-allowed !important;
+  box-shadow: none !important;
+}
+
+/* ── Success Confirmation View ─────────────────────────────── */
+.glam-booking-success-view {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  text-align: center !important;
+  padding: 24px 12px !important;
+  gap: 16px !important;
+}
+
+.glam-success-icon-badge {
+  width: 68px !important;
+  height: 68px !important;
+  border-radius: 50% !important;
+  background: var(--accent-green-bg) !important;
+  border: 2px solid var(--accent-green) !important;
+  color: var(--accent-green) !important;
+  display: grid !important;
+  place-items: center !important;
+}
+
+.glam-booking-success-view h2 {
+  font-family: var(--font-display) !important;
+  font-size: 28px !important;
+  color: var(--ink-primary) !important;
+  margin: 0 !important;
+}
+
+.glam-success-desc {
+  font-size: 14px !important;
+  color: var(--ink-secondary) !important;
+  line-height: 1.5 !important;
+  max-width: 420px !important;
+  margin: 0 !important;
+}
+
+.glam-success-summary-card {
+  width: 100% !important;
+  border-radius: var(--radius-lg, 16px) !important;
+  background: var(--bg-surface) !important;
+  border: 1px solid var(--border-subtle) !important;
+  padding: 16px 20px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 10px !important;
+  text-align: left !important;
+}
+
+.glam-summary-row {
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  font-size: 13px !important;
+  color: var(--ink-primary) !important;
+}
+
+.glam-summary-row .summary-label {
+  color: var(--ink-muted) !important;
+}
+
+.glam-summary-row .summary-price {
+  color: var(--accent-primary) !important;
+  font-weight: 800 !important;
+}
+
+.glam-success-actions {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 8px !important;
+  width: 100% !important;
+  margin-top: 8px !important;
+}

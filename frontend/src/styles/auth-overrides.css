@@ -1,0 +1,633 @@
+/* ── 9. Mobile Nav ──────────────────────────────────────────── */
+.mobile-nav {
+  display: none;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 40;
+  align-items: center;
+  justify-content: space-around;
+  padding: 0 8px env(safe-area-inset-bottom);
+  min-height: 64px;
+  background: var(--glass-bg) !important;
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border-top: 1px solid var(--glass-border);
+  box-shadow: 0 -8px 32px rgba(0, 0, 0, 0.3);
+}
+
+.mobile-nav-tab {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  padding: 8px 4px;
+  background: transparent;
+  border: none;
+  color: var(--ink-light);
+  font-family: var(--font-heading);
+  font-size: 10px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  min-height: 56px;
+}
+
+.mobile-nav-tab span {
+  color: inherit;
+}
+
+.mobile-nav-tab.active {
+  color: var(--accent-primary);
+}
+
+.mobile-nav-tab svg {
+  transition: transform var(--transition-spring);
+}
+
+.mobile-nav-tab.active svg {
+  transform: scale(1.15);
+}
+
+/* Centre FAB */
+.mobile-nav-fab {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  position: relative;
+}
+
+.mobile-nav-fab-circle {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: var(--accent-primary);
+  display: grid;
+  place-items: center;
+  color: #ffffff;
+  box-shadow: var(--shadow-glow-rose), 0 4px 16px rgba(0, 0, 0, 0.4);
+  transition: all var(--transition-spring);
+}
+
+:root[data-theme="light"] .mobile-nav-fab-circle {
+  color: #fff;
+}
+
+.mobile-nav-fab:hover .mobile-nav-fab-circle,
+.mobile-nav-fab:active .mobile-nav-fab-circle {
+  transform: scale(1.1) translateY(-3px);
+  box-shadow: 0 0 32px rgba(232, 149, 109, 0.5), 0 8px 24px rgba(0, 0, 0, 0.4);
+}
+
+/* Mobile avatar */
+.mobile-nav-avatar {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: var(--accent-primary);
+  color: #ffffff;
+  font-family: var(--font-heading);
+  font-weight: 800;
+  font-size: 11px;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+}
+
+:root[data-theme="light"] .mobile-nav-avatar {
+  color: #fff;
+}
+
+.mobile-nav-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* ── 10. Auth / Login Page ──────────────────────────────────── */
+.auth-page {
+  position: relative;
+  isolation: isolate;
+  min-height: 100vh;
+  background: var(--bg-base) !important;
+  overflow: hidden;
+  padding: 24px 0 0;
+}
+
+.auth-back-link {
+  position: absolute;
+  top: 20px;
+  left: 24px;
+  z-index: 10;
+  font-family: var(--font-heading);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ink-muted);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  transition: color var(--transition-fast);
+}
+
+.auth-back-link:hover {
+  color: var(--accent-primary);
+}
+
+.auth-split {
+  display: grid;
+  grid-template-columns: 1fr 460px;
+  min-height: 100vh;
+  gap: 0;
+}
+
+/* Left — editorial hero */
+.auth-hero {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  padding: clamp(60px, 8vh, 100px) clamp(40px, 6vw, 90px) 60px;
+  background: var(--bg-secondary);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Decorative orbs */
+.auth-hero-orb {
+  position: absolute;
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.auth-hero-orb-1 {
+  width: 480px;
+  height: 480px;
+  top: -120px;
+  right: -120px;
+  background: rgba(232, 149, 109, 0.05);
+}
+
+.auth-hero-orb-2 {
+  width: 380px;
+  height: 380px;
+  bottom: -80px;
+  left: -80px;
+  background: rgba(212, 175, 122, 0.04);
+}
+
+.auth-brand-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 16px 8px 8px;
+  border-radius: var(--radius-full);
+  background: var(--bg-surface);
+  border: 1px solid var(--border-medium);
+  width: fit-content;
+  font-family: var(--font-heading);
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--ink-primary);
+}
+
+.auth-hero-logo {
+  width: 34px;
+  height: 34px;
+  border-radius: 9px;
+}
+
+.auth-hero-headline {
+  font-size: clamp(40px, 5vw, 64px);
+  font-weight: 800;
+  line-height: 1.04;
+  letter-spacing: -0.045em;
+  color: var(--ink-primary);
+  max-width: 540px;
+  position: relative;
+  z-index: 1;
+}
+
+.auth-hero-desc {
+  max-width: 460px;
+  color: var(--ink-secondary);
+  font-size: 15px;
+  line-height: 1.65;
+  position: relative;
+  z-index: 1;
+}
+
+.auth-feature-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  position: relative;
+  z-index: 1;
+}
+
+.auth-feature-card {
+  display: flex;
+  gap: 14px;
+  padding: 16px;
+  border-radius: var(--radius-md);
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  transition: all var(--transition-base);
+}
+
+.auth-feature-card:hover {
+  border-color: var(--accent-primary);
+  box-shadow: var(--shadow-sm);
+}
+
+.auth-feature-icon {
+  width: 38px;
+  height: 38px;
+  border-radius: var(--radius-sm);
+  background: var(--accent-gold-bg);
+  color: var(--accent-primary);
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+}
+
+.auth-feature-card strong {
+  display: block;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--ink-primary);
+  margin-bottom: 2px;
+}
+
+.auth-feature-card p {
+  font-size: 12px;
+  color: var(--ink-muted);
+  line-height: 1.5;
+}
+
+/* Right — auth card */
+.auth-card-wrap {
+  background: var(--bg-primary);
+  border-left: 1px solid var(--border-subtle);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 32px;
+}
+
+/* Auth card itself (from AuthSection) */
+.auth-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+  padding: clamp(24px, 4vw, 40px) !important;
+  border-radius: var(--radius-xl) !important;
+  background: var(--bg-surface) !important;
+  border: 1px solid var(--border-medium) !important;
+  box-shadow: var(--shadow-lg) !important;
+  width: 100%;
+  max-width: 380px;
+}
+
+.auth-card::before {
+  position: absolute;
+  top: 0;
+  left: 36px;
+  width: 60px;
+  height: 4px;
+  border-radius: 0 0 6px 6px;
+  background: var(--accent-primary);
+  content: "";
+}
+
+.auth-tabs {
+  background: var(--bg-muted) !important;
+  border-radius: var(--radius-md) !important;
+  padding: 4px !important;
+}
+
+.auth-tab-btn {
+  border-radius: var(--radius-sm) !important;
+  font-family: var(--font-heading) !important;
+  font-size: 13px !important;
+  font-weight: 600 !important;
+  color: var(--ink-muted) !important;
+  transition: all var(--transition-base) !important;
+}
+
+.auth-tab-btn.active {
+  background: var(--bg-surface-elevated) !important;
+  color: var(--ink-primary) !important;
+  box-shadow: var(--shadow-sm) !important;
+}
+
+.studio-input {
+  background: var(--bg-muted) !important;
+  border: 1px solid var(--border-subtle) !important;
+  border-radius: var(--radius-md) !important;
+  color: var(--ink-primary) !important;
+}
+
+.studio-input:focus {
+  border-color: var(--accent-primary) !important;
+  background: var(--bg-surface-elevated) !important;
+  box-shadow: 0 0 0 3px rgba(232, 149, 109, 0.15) !important;
+}
+
+.studio-label {
+  color: var(--ink-secondary) !important;
+}
+
+.auth-submit-btn {
+  background: var(--accent-primary) !important;
+  border-radius: var(--radius-full) !important;
+  box-shadow: var(--shadow-glow-rose) !important;
+  color: #ffffff !important;
+  font-weight: 700 !important;
+  border: none !important;
+}
+
+:root[data-theme="light"] .auth-submit-btn {
+  color: #fff !important;
+}
+
+.auth-submit-btn:hover:not(:disabled) {
+  filter: brightness(1.1) !important;
+  transform: translateY(-1px) !important;
+}
+
+.account-type-buttons button {
+  background: var(--bg-muted) !important;
+  border: 1px solid var(--border-subtle) !important;
+  color: var(--ink-secondary) !important;
+  border-radius: var(--radius-md) !important;
+}
+
+.account-type-buttons button.active {
+  background: var(--accent-primary) !important;
+  border-color: transparent !important;
+  color: #ffffff !important;
+  box-shadow: var(--shadow-glow-rose) !important;
+}
+
+:root[data-theme="light"] .account-type-buttons button.active {
+  color: #fff !important;
+}
+
+.auth-location-box {
+  background: var(--bg-muted) !important;
+  border-radius: var(--radius-md) !important;
+  border: 1px solid var(--border-subtle) !important;
+}
+
+.form-message-error {
+  background: var(--accent-rose-bg) !important;
+  border-radius: var(--radius-md) !important;
+  color: var(--accent-rose) !important;
+}
+
+/* ── 11. Broader Component Overrides ────────────────────────── */
+
+/* Profile page */
+.profile-hero {
+  background: var(--bg-surface) !important;
+  border: 1px solid var(--border-subtle) !important;
+  border-radius: var(--radius-xl) !important;
+  box-shadow: var(--shadow-sm) !important;
+}
+
+.profile-work-card {
+  background: var(--bg-surface) !important;
+  border: 1px solid var(--border-subtle) !important;
+  border-radius: var(--radius-lg) !important;
+  box-shadow: var(--shadow-sm) !important;
+}
+
+.profile-work-card:hover {
+  box-shadow: var(--shadow-md) !important;
+  border-color: var(--border-medium) !important;
+  transform: translateY(-2px) !important;
+}
+
+.profile-work-actions,
+.profile-edit-actions {
+  background: var(--bg-muted) !important;
+  border-top-color: var(--border-subtle) !important;
+}
+
+/* Settings */
+.settings-form {
+  background: var(--bg-surface) !important;
+  border: 1px solid var(--border-subtle) !important;
+  border-radius: var(--radius-xl) !important;
+}
+
+/* Discover page */
+.discover-hero {
+  background: var(--bg-surface) !important;
+  border: 1px solid var(--border-subtle) !important;
+  border-radius: var(--radius-xl) !important;
+  box-shadow: var(--shadow-sm) !important;
+}
+
+.discover-map-wrapper {
+  background: var(--bg-surface) !important;
+  border: 1px solid var(--border-subtle) !important;
+  border-radius: var(--radius-xl) !important;
+  box-shadow: var(--shadow-sm) !important;
+}
+
+/* Messages */
+.messenger-layout {
+  background: var(--bg-surface) !important;
+  border: 1px solid var(--border-subtle) !important;
+  border-radius: var(--radius-xl) !important;
+  box-shadow: var(--shadow-sm) !important;
+}
+
+.conversation-list {
+  background: var(--bg-secondary) !important;
+  border-right-color: var(--border-subtle) !important;
+}
+
+.conversation-item {
+  border-bottom-color: var(--border-subtle) !important;
+}
+
+.conversation-item.active {
+  background: var(--bg-surface-elevated) !important;
+  box-shadow: inset 3px 0 var(--accent-primary) !important;
+}
+
+.conversation-panel {
+  background: var(--bg-surface) !important;
+}
+
+.conversation-header {
+  border-bottom-color: var(--border-subtle) !important;
+}
+
+.message-bubble {
+  background: var(--bg-muted) !important;
+  color: var(--ink-secondary) !important;
+}
+
+.message-bubble.mine {
+  background: var(--accent-primary) !important;
+  color: #ffffff !important;
+}
+
+:root[data-theme="light"] .message-bubble.mine {
+  color: #fff !important;
+}
+
+.message-compose {
+  border-top-color: var(--border-subtle) !important;
+}
+
+/* Booking modal + other modals */
+.success-modal-card,
+.inquiry-modal-card,
+.directions-modal,
+.glam-booking-modal-card {
+  background: var(--bg-surface-elevated) !important;
+  border: 1px solid var(--border-medium) !important;
+  border-radius: var(--radius-xl) !important;
+  box-shadow: var(--shadow-lg) !important;
+}
+
+.directions-modal-backdrop,
+.glam-booking-backdrop {
+  background: var(--bg-overlay) !important;
+  backdrop-filter: blur(8px) !important;
+}
+
+/* Upload page */
+.upload-studio-card {
+  background: var(--bg-surface) !important;
+  border: 1px solid var(--border-subtle) !important;
+  border-radius: var(--radius-xl) !important;
+  box-shadow: var(--shadow-sm) !important;
+}
+
+/* Info pages */
+.info-hero {
+  background: var(--bg-surface) !important;
+  border: 1px solid var(--border-subtle) !important;
+  border-radius: var(--radius-xl) !important;
+}
+
+.info-section {
+  background: var(--bg-surface) !important;
+  border: 1px solid var(--border-subtle) !important;
+  border-radius: var(--radius-lg) !important;
+}
+
+/* Empty states */
+.location-prompt-card,
+.login-prompt-card {
+  background: var(--bg-surface) !important;
+  border: 1px solid var(--border-subtle) !important;
+  border-radius: var(--radius-xl) !important;
+  box-shadow: var(--shadow-sm) !important;
+}
+
+/* ── 12. Responsive Breakpoints ─────────────────────────────── */
+@media (max-width: 1200px) {
+  .app-shell {
+    grid-template-columns: 220px minmax(0, 1fr) 260px;
+  }
+}
+
+@media (max-width: 1024px) {
+  .app-shell {
+    grid-template-columns: 220px minmax(0, 1fr);
+  }
+
+  .right-rail {
+    display: none !important;
+  }
+}
+
+@media (max-width: 768px) {
+  .app-shell {
+    grid-template-columns: 1fr;
+    padding-bottom: 70px;
+  }
+
+  .sidebar {
+    display: none !important;
+  }
+
+  .feed-main {
+    border: none !important;
+  }
+
+  .mobile-nav {
+    display: flex !important;
+  }
+
+  .topbar-brand {
+    display: flex !important;
+  }
+
+  .topbar-search-wrap {
+    display: none;
+  }
+
+  .mobile-only {
+    display: grid !important;
+  }
+
+  .post-masonry-feed,
+  .home-skeleton-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .page-content {
+    padding: 20px 16px 32px;
+    gap: 20px;
+  }
+
+  /* Auth page mobile */
+  .auth-split {
+    grid-template-columns: 1fr;
+  }
+
+  .auth-hero {
+    padding: 64px 24px 36px;
+  }
+
+  .auth-hero-headline {
+    font-size: 38px;
+  }
+
+  .auth-feature-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+
+  .auth-feature-card {
+    flex-direction: column;
+    gap: 8px;
+    padding: 12px;
+  }
+
+  .auth-card-wrap {
+    border-left: none;
+    border-top: 1px solid var(--border-subtle);
+    padding: 32px 20px 48px;
+  }
+}
+
+/* ============================================================
+   GLAM SA — LUXURY EDITORIAL BOOKING CALENDAR REDESIGN
+   ============================================================ */

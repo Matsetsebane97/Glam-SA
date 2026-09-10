@@ -1,0 +1,264 @@
+/* ==========================================================================
+   GLAM SA — Auth, Login Page, User Role Badges, Auth Card
+   ========================================================================== */
+
+/* ── 1. Auth Page Container ─────────────────────────────────── */
+.auth-page-container {
+  display: grid;
+  grid-template-columns: 1.15fr 1fr;
+  min-height: 100vh;
+  background: var(--bg-base);
+  position: relative;
+  overflow: hidden;
+}
+
+/* ── 2. Left — Editorial Hero Column ────────────────────────── */
+.auth-hero-col {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 48px;
+  background: var(--bg-secondary);
+  border-right: 1px solid var(--border-subtle);
+  overflow: hidden;
+}
+
+.auth-hero-orb-1 {
+  position: absolute;
+  width: 480px;
+  height: 480px;
+  top: -120px;
+  right: -120px;
+  border-radius: 50%;
+  background: rgba(232, 149, 109, 0.05);
+  pointer-events: none;
+}
+
+.auth-hero-orb-2 {
+  position: absolute;
+  width: 380px;
+  height: 380px;
+  bottom: -80px;
+  left: -80px;
+  border-radius: 50%;
+  background: rgba(212, 175, 122, 0.04);
+  pointer-events: none;
+}
+
+.auth-brand-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 16px 8px 8px;
+  border-radius: var(--radius-full);
+  background: var(--bg-surface);
+  border: 1px solid var(--border-medium);
+  width: fit-content;
+  font-family: var(--font-heading);
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--ink-primary);
+}
+
+.auth-hero-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  max-width: 460px;
+  position: relative;
+  z-index: 2;
+  margin: auto 0;
+}
+
+.auth-hero-title {
+  font-family: var(--font-display);
+  font-size: clamp(36px, 4.5vw, 54px);
+  font-weight: 700;
+  line-height: 1.08;
+  color: var(--ink-primary);
+}
+
+.auth-hero-title em {
+  font-style: italic;
+  color: var(--accent-primary);
+}
+
+.auth-hero-sub {
+  font-size: 16px;
+  line-height: 1.6;
+  color: var(--ink-secondary);
+}
+
+.auth-features-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.auth-feature-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--ink-secondary);
+}
+
+.auth-feature-icon {
+  color: var(--accent-primary);
+}
+
+/* ── 3. Right — Auth Form Column ────────────────────────────── */
+.auth-card-col {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 32px;
+}
+
+.auth-card {
+  width: 100%;
+  max-width: 440px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 36px 32px;
+  border-radius: var(--radius-xl, 24px);
+  background: var(--bg-surface);
+  border: 1px solid var(--border-medium);
+  box-shadow: var(--shadow-lg);
+}
+
+.auth-tabs {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 4px;
+  padding: 4px;
+  border-radius: var(--radius-md);
+  background: var(--bg-secondary);
+}
+
+.auth-tab-btn {
+  padding: 10px;
+  border-radius: var(--radius-sm);
+  border: none;
+  background: transparent;
+  font-family: var(--font-heading);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ink-muted);
+  cursor: pointer;
+  transition: all var(--transition-base);
+}
+
+.auth-tab-btn.active {
+  background: var(--bg-surface-elevated);
+  color: var(--ink-primary);
+  font-weight: 700;
+  box-shadow: var(--shadow-xs);
+}
+
+.auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.auth-field-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.auth-label {
+  font-family: var(--font-heading);
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--ink-muted);
+}
+
+.auth-input {
+  width: 100%;
+  padding: 12px 14px;
+  border-radius: var(--radius-md);
+  background: var(--bg-secondary);
+  border: 1.5px solid var(--border-subtle);
+  color: var(--ink-primary);
+  font-family: var(--font-body);
+  font-size: 14px;
+  outline: none;
+  transition: all var(--transition-fast);
+}
+
+.auth-input:focus {
+  border-color: var(--accent-primary);
+  background: var(--bg-surface-elevated);
+  box-shadow: 0 0 0 3px rgba(232, 149, 109, 0.15);
+}
+
+.auth-submit-btn {
+  width: 100%;
+  padding: 14px;
+  border-radius: var(--radius-md);
+  background: var(--accent-primary);
+  color: #ffffff;
+  font-family: var(--font-heading);
+  font-size: 14px;
+  font-weight: 700;
+  border: none;
+  cursor: pointer;
+  box-shadow: var(--shadow-glow-rose);
+  transition: all var(--transition-base);
+  margin-top: 6px;
+}
+
+.auth-submit-btn:hover:not(:disabled) {
+  transform: translateY(-1px);
+  filter: brightness(1.08);
+}
+
+.auth-footer-prompt {
+  text-align: center;
+  font-size: 13px;
+  color: var(--ink-muted);
+}
+
+.auth-footer-link {
+  color: var(--accent-primary);
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.auth-footer-link:hover {
+  text-decoration: underline;
+}
+
+/* User Role Badges */
+.user-role-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 8px;
+  border-radius: var(--radius-full);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.user-role-badge.artist {
+  background: var(--accent-gold-bg);
+  color: var(--accent-secondary);
+  border: 1px solid rgba(212, 175, 122, 0.3);
+}
+
+.user-role-badge.client {
+  background: rgba(76, 175, 134, 0.12);
+  color: #4CAF86;
+  border: 1px solid rgba(76, 175, 134, 0.3);
+}
