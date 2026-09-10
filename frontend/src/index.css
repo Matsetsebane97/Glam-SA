@@ -90,26 +90,26 @@
   --bg-muted:            #E4E0D6;
   --bg-overlay:          rgba(36, 30, 22, 0.72);
 
-  --ink-primary:   #0F0D0B;
-  --ink-secondary: #3A3630;
-  --ink-muted:     #6A6460;
-  --ink-light:     #9A9692;
+  --ink-primary:   #17120E;
+  --ink-secondary: #302923;
+  --ink-muted:     #5A514A;
+  --ink-light:     #6C625A;
 
-  --border-subtle: rgba(26, 23, 20, 0.08);
-  --border-medium: rgba(26, 23, 20, 0.15);
-  --border-strong: rgba(26, 23, 20, 0.32);
+  --border-subtle: rgba(26, 23, 20, 0.14);
+  --border-medium: rgba(26, 23, 20, 0.22);
+  --border-strong: rgba(26, 23, 20, 0.38);
 
-  --accent-primary:   #C26F3E;
-  --accent-secondary: #9A6B30;
-  --accent-rose:      #B44B49;
-  --accent-gold:      #C26F3E;
-  --accent-gold-bg:   rgba(194, 111, 62, 0.1);
-  --accent-rose-bg:   rgba(180, 75, 73, 0.08);
-  --accent-green:     #15803d;
+  --accent-primary:   #A94F25;
+  --accent-secondary: #7A5016;
+  --accent-rose:      #9F3438;
+  --accent-gold:      #A94F25;
+  --accent-gold-bg:   rgba(169, 79, 37, 0.13);
+  --accent-rose-bg:   rgba(159, 52, 56, 0.1);
+  --accent-green:     #116B34;
   --accent-green-bg:  rgba(21, 128, 61, 0.08);
 
-  --gradient-rose-gold: #C26F3E;
-  --gradient-rose:      #B44B49;
+  --gradient-rose-gold: #A94F25;
+  --gradient-rose:      #9F3438;
   --gradient-dark:      #EDE9E0;
   --gradient-glass:     rgba(255,253,248,0.9);
 
@@ -117,8 +117,8 @@
   --shadow-sm:  0 2px 8px rgba(26, 23, 20, 0.09), 0 1px 2px rgba(26, 23, 20, 0.06);
   --shadow-md:  0 6px 24px rgba(26, 23, 20, 0.12), 0 2px 6px rgba(26, 23, 20, 0.07);
   --shadow-lg:  0 18px 50px rgba(26, 23, 20, 0.16), 0 6px 16px rgba(26, 23, 20, 0.1);
-  --shadow-glow-rose: 0 0 20px rgba(194, 111, 62, 0.2), 0 6px 24px rgba(194, 111, 62, 0.12);
-  --shadow-glow-gold: 0 0 20px rgba(194, 111, 62, 0.15), 0 6px 24px rgba(194, 111, 62, 0.1);
+  --shadow-glow-rose: 0 0 20px rgba(169, 79, 37, 0.2), 0 6px 24px rgba(169, 79, 37, 0.12);
+  --shadow-glow-gold: 0 0 20px rgba(169, 79, 37, 0.15), 0 6px 24px rgba(169, 79, 37, 0.1);
 
   --glass-bg:     rgba(255, 253, 248, 0.82);
   --glass-border: rgba(26, 23, 20, 0.1);
@@ -138,7 +138,7 @@ html {
   color-scheme: dark;
 }
 
-:root[data-theme="light"] html {
+:root[data-theme="light"] {
   color-scheme: light;
 }
 
