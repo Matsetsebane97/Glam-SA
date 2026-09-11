@@ -268,6 +268,27 @@
     height: 54px !important;
   }
 
+  .assistant-widget {
+    right: 14px !important;
+    bottom: calc(82px + env(safe-area-inset-bottom)) !important;
+    z-index: 170 !important;
+  }
+
+  .assistant-launcher {
+    min-height: 48px;
+    padding: 12px 17px !important;
+    border-radius: 999px !important;
+  }
+
+  .assistant-panel {
+    width: min(400px, calc(100vw - 28px)) !important;
+    max-height: calc(100dvh - 112px - env(safe-area-inset-top)) !important;
+  }
+
+  .assistant-compose input {
+    font-size: 16px !important;
+  }
+
   .discover-hero,
   .location-prompt-card,
   .discover-map-wrapper,
@@ -308,9 +329,81 @@
   .artist-portfolio-card {
     width: 100%;
   }
+
+  .messages-page,
+  .settings-page,
+  .client-dashboard,
+  .client-dashboard-empty {
+    padding-right: 14px !important;
+    padding-left: 14px !important;
+  }
+
+  .messenger-layout {
+    min-height: calc(100dvh - 180px);
+  }
+
+  .conversation-item {
+    min-width: min(240px, 82vw);
+  }
+
+  .message-list {
+    max-height: calc(100dvh - 330px);
+  }
 }
 
 @media (max-width: 640px) {
+  .assistant-widget:has(.assistant-panel) {
+    right: 0 !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    z-index: 240 !important;
+  }
+
+  .assistant-panel {
+    width: 100% !important;
+    height: calc(100dvh - env(safe-area-inset-top)) !important;
+    max-height: none !important;
+    border-radius: 18px 18px 0 0 !important;
+  }
+
+  .assistant-header {
+    padding: 14px 14px 12px !important;
+  }
+
+  .assistant-header-identity {
+    min-width: 0;
+  }
+
+  .assistant-header-identity > div:last-child {
+    min-width: 0;
+  }
+
+  .assistant-header span {
+    overflow: hidden;
+    max-width: 210px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .assistant-message {
+    max-width: 94% !important;
+  }
+
+  .assistant-suggestions {
+    flex-wrap: nowrap !important;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+
+  .assistant-suggestions::-webkit-scrollbar {
+    display: none;
+  }
+
+  .assistant-suggestions button {
+    flex: 0 0 auto;
+  }
+
   .glam-modal-backdrop {
     align-items: end !important;
     place-items: end center !important;
@@ -435,6 +528,16 @@
 
   .topbar-sign-in-btn {
     padding-inline: 10px;
+  }
+
+  .assistant-launcher span {
+    display: none;
+  }
+
+  .assistant-launcher {
+    width: 48px;
+    padding-inline: 0 !important;
+    justify-content: center;
   }
 
   .mobile-nav-tab span {
