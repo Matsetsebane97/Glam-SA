@@ -7,18 +7,22 @@ import {
   deleteAccount,
   deleteAvailability,
   getAvailability,
+  getServices,
+  deleteService,
+  saveService,
   updateProfile,
 } from "../api";
 import {
   IconCalendar,
   IconClock,
+  IconBell,
   IconPin,
   IconSparkles,
   IconTrash,
   IconUser,
   IconZap,
 } from "../components/Icons";
-import type { AvailabilitySlot, CurrentUser } from "../types";
+import type { AvailabilitySlot, CurrentUser, ServiceOffering } from "../types";
 import { citiesByProvince, southAfricanProvinces } from "../constants";
 
 type SettingsPageProps = {
@@ -47,6 +51,7 @@ function SettingsPage({ currentUser, onNavigate, onSaved }: SettingsPageProps) {
   const [whatsappNotifications, setWhatsappNotifications] = useState(
     currentUser?.whatsappNotifications ?? true,
   );
+  const [pushNotifications, setPushNotifications] = useState(() => localStorage.getItem("glamPushNotifications") === "on");
   const [message, setMessage] = useState("");
   const [isSaving, setIsSaving] = useState(false);
 
@@ -69,6 +74,12 @@ function SettingsPage({ currentUser, onNavigate, onSaved }: SettingsPageProps) {
   const [generatorDuration, setGeneratorDuration] = useState(60);
   const [isGeneratingSlots, setIsGeneratingSlots] = useState(false);
   const [slotMessage, setSlotMessage] = useState("");
+  const [services, setServices] = useState<ServiceOffering[]>([]);
+  const [serviceName, setServiceName] = useState("");
+  const [servicePrice, setServicePrice] = useState("");
+  const [serviceDuration, setServiceDuration] = useState(60);
+  const [serviceMessage, setServiceMessage] = useState("");
+  const [isSavingService, setIsSavingService] = useState(false);
 
   useEffect(() => {
     if (!currentUser || !isCreator) return;
@@ -77,6 +88,11 @@ function SettingsPage({ currentUser, onNavigate, onSaved }: SettingsPageProps) {
       .then(setSlots)
       .catch(() => {})
       .finally(() => setIsLoadingSlots(false));
+  }, [currentUser, isCreator]);
+
+  useEffect(() => {
+    if (!currentUser || !isCreator) return;
+    void getServices().then(setServices).catch(() => setServiceMessage("Unable to load your service packages."));
   }, [currentUser, isCreator]);
 
   if (!currentUser) {
@@ -270,6 +286,47 @@ function SettingsPage({ currentUser, onNavigate, onSaved }: SettingsPageProps) {
     setSlotMessage(`Exported ${events.length} calendar event(s).`);
   };
 
+  const togglePushNotifications = async () => {
+    if (!("Notification" in window)) {
+      setMessage("Push notifications are not supported by this browser.");
+      return;
+    }
+    if (!pushNotifications && Notification.permission === "default") {
+      await Notification.requestPermission();
+    }
+    const enabled = !pushNotifications && Notification.permission === "granted";
+    setPushNotifications(enabled);
+    if (enabled) localStorage.setItem("glamPushNotifications", "on");
+    else localStorage.removeItem("glamPushNotifications");
+  };
+
+  const handleSaveService = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    setServiceMessage("");
+    setIsSavingService(true);
+    try {
+      const saved = await saveService({ name: serviceName.trim(), price: servicePrice, durationMinutes: serviceDuration });
+      setServices((current) => [...current.filter((service) => service.id !== saved.id), saved].sort((a, b) => a.name.localeCompare(b.name)));
+      setServiceName("");
+      setServicePrice("");
+      setServiceDuration(60);
+      setServiceMessage("Package added. Clients can compare it when booking.");
+    } catch (error) {
+      setServiceMessage(error instanceof Error ? error.message : "Unable to save this package.");
+    } finally {
+      setIsSavingService(false);
+    }
+  };
+
+  const handleDeleteService = async (serviceId: number) => {
+    try {
+      await deleteService(serviceId);
+      setServices((current) => current.filter((service) => service.id !== serviceId));
+    } catch (error) {
+      setServiceMessage(error instanceof Error ? error.message : "Unable to remove this package.");
+    }
+  };
+
   return (
     <section className="page-content settings-page">
       <div className="settings-header">
@@ -381,7 +438,7 @@ function SettingsPage({ currentUser, onNavigate, onSaved }: SettingsPageProps) {
             className="settings-section-heading"
             data-settings-section="preferences"
           >
-            <h3>Notification Preferences</h3>
+            <h3>Appointment reminders & notifications</h3>
           </div>
 
           <label
@@ -393,7 +450,7 @@ function SettingsPage({ currentUser, onNavigate, onSaved }: SettingsPageProps) {
               onChange={(e) => setEmailNotifications(e.target.checked)}
             />
             <span className="settings-checkbox-label">
-              Receive email notifications
+              Receive appointment reminders by email
             </span>
           </label>
           <label
@@ -405,8 +462,12 @@ function SettingsPage({ currentUser, onNavigate, onSaved }: SettingsPageProps) {
               onChange={(e) => setWhatsappNotifications(e.target.checked)}
             />
             <span className="settings-checkbox-label">
-              Receive WhatsApp notifications
+              Receive appointment reminders by WhatsApp
             </span>
+          </label>
+          <label className="studio-label settings-checkbox-row">
+            <input type="checkbox" checked={pushNotifications} onChange={() => void togglePushNotifications()} />
+            <span className="settings-checkbox-label"><IconBell size={14} /> Receive device push reminders</span>
           </label>
         </div>
 
@@ -435,6 +496,40 @@ function SettingsPage({ currentUser, onNavigate, onSaved }: SettingsPageProps) {
           </button>
         </div>
       </form>
+
+      {/* Creator packages are the price-comparison options clients see in booking. */}
+      {isCreator && (
+        <section className="settings-scheduling" id="services">
+          <div className="settings-section-heading">
+            <div>
+              <div className="eyebrow">Services & pricing</div>
+              <h2>Service packages</h2>
+            </div>
+            <p>Add clear packages so clients can compare price and duration before requesting a slot.</p>
+          </div>
+          <div className="service-package-layout">
+            <form className="settings-subform" onSubmit={handleSaveService}>
+              <h3>Add a package</h3>
+              <label className="studio-label"><span>Package name</span><input className="studio-input" value={serviceName} onChange={(event) => setServiceName(event.target.value)} placeholder="Bridal glam package" required maxLength={120} /></label>
+              <div className="settings-grid service-package-form-grid">
+                <label className="studio-label"><span>Price (R)</span><input className="studio-input" type="number" min="0" step="0.01" value={servicePrice} onChange={(event) => setServicePrice(event.target.value)} placeholder="850" required /></label>
+                <label className="studio-label"><span>Duration</span><select className="studio-input" value={serviceDuration} onChange={(event) => setServiceDuration(Number(event.target.value))}><option value={30}>30 minutes</option><option value={60}>1 hour</option><option value={90}>1.5 hours</option><option value={120}>2 hours</option><option value={180}>3 hours</option><option value={240}>4 hours</option></select></label>
+              </div>
+              <button className="btn-primary" type="submit" disabled={isSavingService}>{isSavingService ? "Adding..." : "Add package"}</button>
+              {serviceMessage && <p className="field-help" role="status">{serviceMessage}</p>}
+            </form>
+            <div className="service-package-list">
+              {services.length === 0 ? <p className="settings-note">No packages yet. Add your first service so clients can compare options.</p> : services.map((service) => (
+                <article className="service-package-row" key={service.id}>
+                  <div><strong>{service.name}</strong><span>{service.durationMinutes} minutes</span></div>
+                  <strong>R {service.price}</strong>
+                  <button className="icon-btn" type="button" onClick={() => void handleDeleteService(service.id)} aria-label={`Remove ${service.name}`} title="Remove package"><IconTrash size={15} /></button>
+                </article>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* ─── CREATOR WORKING HOURS & AVAILABILITY ──────────────────────────────── */}
       {isCreator && (

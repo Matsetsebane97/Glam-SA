@@ -323,7 +323,7 @@ function AssistantPanel({ posts, currentUser, onNavigate, onSearch }: AssistantP
                 <strong>Ask Glam</strong>
                 <span style={{ display: "flex", alignItems: "center", gap: "5px" }}>
                   <span className="assistant-online-dot" />
-                  Beauty discovery help
+                  Recommendations and booking help
                 </span>
               </div>
             </div>
@@ -506,7 +506,7 @@ function AssistantPanel({ posts, currentUser, onNavigate, onSearch }: AssistantP
             <input
               value={draft}
               onChange={(e) => setDraft(e.target.value)}
-              placeholder="Try: makeup near Sandton under R800"
+              placeholder="Ask for a recommendation or booking help…"
               aria-label="Ask Glam"
             />
             <button className="icon-btn assistant-voice-btn" type="button" onClick={startVoiceSearch} aria-label="Start voice search">

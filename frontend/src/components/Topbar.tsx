@@ -86,8 +86,8 @@ function Topbar({ currentUser, query, onQueryChange, onNavigate }: TopbarProps) 
             onChange={(e) => onQueryChange(e.target.value)}
             onFocus={() => setSearchFocused(true)}
             onBlur={() => setSearchFocused(false)}
-            placeholder="Search hair, braids, makeup, nails, barber…"
-            aria-label="Search looks and artists"
+            placeholder="Search creators, services, or locations…"
+            aria-label="Search creators, services, or locations"
             className="topbar-search-input"
           />
           {query && (

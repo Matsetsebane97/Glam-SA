@@ -254,6 +254,51 @@
   font-size: 16px;
 }
 
+.service-package-layout {
+  display: grid;
+  grid-template-columns: minmax(260px, 0.8fr) minmax(0, 1.2fr);
+  gap: 18px;
+}
+
+.service-package-form-grid {
+  gap: 12px;
+}
+
+.service-package-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 0;
+}
+
+.service-package-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  gap: 14px;
+  align-items: center;
+  padding: 16px;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  background: var(--bg-secondary);
+}
+
+.service-package-row > div {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.service-package-row span {
+  color: var(--ink-muted);
+  font-size: 12px;
+}
+
+.service-package-row > strong {
+  color: var(--accent-primary);
+  white-space: nowrap;
+}
+
 .settings-danger-subform {
   border-color: color-mix(in srgb, var(--accent-rose) 40%, var(--border-subtle));
 }
@@ -286,7 +331,8 @@
 
   .account-role-selector-card,
   .settings-grid,
-  .settings-booking-grid {
+  .settings-booking-grid,
+  .service-package-layout {
     grid-template-columns: 1fr;
   }
 

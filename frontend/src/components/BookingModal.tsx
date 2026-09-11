@@ -595,11 +595,11 @@ export default function BookingModal({
                 <div className="glam-flow-header-row">
                   <label className="glam-flow-label">
                     <span className="flow-step-num">1</span>
-                    <span>Select Service</span>
+                    <span>{services.length > 1 ? "Compare service packages" : "Select Service"}</span>
                   </label>
                   {services.length > 1 && (
                     <span className="glam-flow-hint">
-                      {services.length} options available
+                      Compare price and duration
                     </span>
                   )}
                 </div>

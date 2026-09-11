@@ -32,7 +32,7 @@ const creatorSteps: Step[] = [
     eyebrow: "The Home Feed",
     title: "Discover stunning looks every day",
     description:
-      "Your home feed surfaces fresh portfolio work from creators across South Africa. Filter by category — Bridal, Nails, Barbering, Makeup, and more — or search by style, price, and city using the smart search bar at the top.",
+      "Your home feed surfaces fresh portfolio work from creators across South Africa. Use Search for direct results by creator, service, location, or price. Use Ask Glam when you want recommendations or booking help.",
     ctaLabel: "Explore the feed",
     ctaPath: "/",
     illustration: "feed",
@@ -62,7 +62,7 @@ const creatorSteps: Step[] = [
     eyebrow: "Glam Assistant",
     title: "Your AI beauty concierge",
     description:
-      "Tap the sparkle button (✦) at the bottom-right of any page to open the Glam Assistant. Ask it to find hair stylists under R300, book an appointment, or recommend nail artists in your city — it handles it all in chat.",
+      "Tap Ask Glam at the bottom-right when you want conversational help. It can recommend creators, compare options, open profiles, and help you begin a booking.",
     illustration: "assistant",
   },
   {
@@ -91,7 +91,7 @@ const clientSteps: Step[] = [
     eyebrow: "The Home Feed",
     title: "Browse stunning looks",
     description:
-      "Scroll through the home feed to see the latest portfolio work from verified artists. Filter by Bridal, Nails, Makeup, and more — or use the search bar to find a specific style, location, or price range.",
+      "Scroll through the home feed to see the latest portfolio work from verified artists. Use Search for a specific style, location, or price range, and Ask Glam for recommendations.",
     ctaLabel: "Browse the feed",
     ctaPath: "/",
     illustration: "feed",
@@ -111,7 +111,7 @@ const clientSteps: Step[] = [
     eyebrow: "Glam Assistant",
     title: "Ask your AI beauty concierge",
     description:
-      "Tap the sparkle button (✦) at any time to chat with the Glam Assistant. Ask it things like \"Find a braider near Polokwane under R400\" and it will surface matching artists and even help you book a slot.",
+      "Tap Ask Glam at any time to chat with the Glam Assistant. Ask it things like \"Find a braider near Polokwane under R400\" and it will surface matching artists and help you start a booking.",
     illustration: "assistant",
   },
   {
