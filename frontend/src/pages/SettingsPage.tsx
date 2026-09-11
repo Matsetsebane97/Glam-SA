@@ -294,6 +294,9 @@ function SettingsPage({ currentUser, onNavigate, onSaved }: SettingsPageProps) {
     if (!pushNotifications && Notification.permission === "default") {
       await Notification.requestPermission();
     }
+    if (!pushNotifications && Notification.permission === "granted" && "serviceWorker" in navigator) {
+      await navigator.serviceWorker.ready;
+    }
     const enabled = !pushNotifications && Notification.permission === "granted";
     setPushNotifications(enabled);
     if (enabled) localStorage.setItem("glamPushNotifications", "on");

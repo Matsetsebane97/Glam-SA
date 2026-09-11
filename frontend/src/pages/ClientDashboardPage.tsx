@@ -1,5 +1,5 @@
 // Client workspace for appointments, saved inspiration, reviews, and calendar export.
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { createReview, getBookings } from "../api";
 import { IconBookmark, IconCalendar, IconClock, IconStar } from "../components/Icons";
 import type { Booking, CurrentUser, Post } from "../types";
@@ -53,6 +53,22 @@ function downloadCalendarEvent(booking: Booking) {
   URL.revokeObjectURL(url);
 }
 
+async function notifyBookingConfirmed(booking: Booking) {
+  if (!("Notification" in window) || Notification.permission !== "granted") return;
+  const body = `${booking.serviceName} with ${booking.otherUserName} on ${new Date(booking.startsAt).toLocaleString()}.`;
+  if ("serviceWorker" in navigator) {
+    const registration = await navigator.serviceWorker.ready;
+    await registration.showNotification("Booking confirmed", {
+      body,
+      icon: "/logo-mark.svg",
+      badge: "/logo-mark.svg",
+      data: { url: "/notifications" },
+    });
+    return;
+  }
+  new Notification("Booking confirmed", { body });
+}
+
 function ClientDashboardPage({ currentUser, posts, onNavigate }: ClientDashboardPageProps) {
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [reminders, setReminders] = useState<number[]>([]);
@@ -62,13 +78,40 @@ function ClientDashboardPage({ currentUser, posts, onNavigate }: ClientDashboard
   const [notice, setNotice] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmittingReview, setIsSubmittingReview] = useState(false);
+  const knownStatuses = useRef<Record<number, Booking["status"]>>({});
+  const hasLoadedBookings = useRef(false);
 
   useEffect(() => {
     if (!currentUser) return;
-    void getBookings()
-      .then(setBookings)
-      .catch(() => setNotice("We could not load your appointments."))
-      .finally(() => setIsLoading(false));
+    let isActive = true;
+    const refreshBookings = async () => {
+      try {
+        const nextBookings = await getBookings();
+        if (!isActive) return;
+        if (hasLoadedBookings.current) {
+          nextBookings.forEach((booking) => {
+            if (booking.status === "confirmed" && knownStatuses.current[booking.id] === "requested") {
+              void notifyBookingConfirmed(booking);
+              setNotice(`Your ${booking.serviceName} appointment has been confirmed.`);
+            }
+          });
+        }
+        knownStatuses.current = Object.fromEntries(nextBookings.map((booking) => [booking.id, booking.status]));
+        hasLoadedBookings.current = true;
+        setBookings(nextBookings);
+      } catch {
+        if (isActive) setNotice("We could not load your appointments.");
+      } finally {
+        if (isActive) setIsLoading(false);
+      }
+    };
+
+    void refreshBookings();
+    const pollTimer = window.setInterval(() => void refreshBookings(), 30_000);
+    return () => {
+      isActive = false;
+      window.clearInterval(pollTimer);
+    };
   }, [currentUser]);
 
   useEffect(() => {
