@@ -14,7 +14,7 @@ export const citiesByProvince: Record<string, string[]> = {
   Gauteng: ["Johannesburg", "Pretoria", "Soweto", "Midrand", "Vanderbijlpark"],
   "KwaZulu-Natal": ["Durban", "Pietermaritzburg", "Richards Bay"],
   Limpopo: ["Polokwane", "Thohoyandou", "Tzaneen"],
- "Mpumalanga": ["Mbombela", "Emalahleni", "Secunda"],
+ Mpumalanga: ["Mbombela", "Emalahleni", "Secunda"],
   "Northern Cape": ["Kimberley", "Upington"],
   "North West": ["Mahikeng", "Rustenburg", "Klerksdorp"],
   "Western Cape": ["Cape Town", "Stellenbosch", "George", "Paarl"],
