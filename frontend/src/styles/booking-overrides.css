@@ -865,3 +865,31 @@
   width: 100% !important;
   margin-top: 8px !important;
 }
+
+/* Keep the desktop booking sheet inside the viewport while the content area scrolls. */
+@media (min-width: 641px) {
+  .glam-modal-backdrop {
+    align-items: center !important;
+    overflow-y: auto !important;
+    padding: 24px !important;
+  }
+
+  .glam-booking-sheet {
+    width: min(680px, calc(100vw - 48px)) !important;
+    max-height: calc(100vh - 48px) !important;
+    min-height: 0 !important;
+  }
+
+  .glam-sheet-header,
+  .glam-booking-tabs {
+    flex: 0 0 auto !important;
+  }
+
+  .glam-sheet-body {
+    flex: 1 1 auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    overflow-y: auto !important;
+    overscroll-behavior: contain !important;
+  }
+}
