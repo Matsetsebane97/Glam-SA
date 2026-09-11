@@ -34,7 +34,6 @@ export const fallbackCategories = [
   "Wigs & Weaves",
   "Natural Hair",
   "Spa & Wellness",
-  "Massage",
   "Waxing & Hair Removal",
   "Piercing",
   "Teeth Whitening",
