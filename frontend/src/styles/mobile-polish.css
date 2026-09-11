@@ -1,0 +1,443 @@
+/* Final mobile layer for the current React component class names. */
+
+@media (max-width: 768px) {
+  html,
+  body,
+  #root {
+    width: 100%;
+    min-width: 0;
+    overflow-x: hidden;
+  }
+
+  .app-shell {
+    display: block !important;
+    width: 100%;
+    min-width: 0;
+    padding-bottom: calc(78px + env(safe-area-inset-bottom)) !important;
+  }
+
+  .feed-main {
+    width: 100%;
+    min-width: 0;
+    min-height: 100dvh;
+    padding-bottom: calc(92px + env(safe-area-inset-bottom)) !important;
+  }
+
+  .topbar {
+    min-height: calc(58px + env(safe-area-inset-top));
+    padding: calc(8px + env(safe-area-inset-top)) 12px 8px !important;
+    gap: 8px !important;
+    z-index: 120 !important;
+  }
+
+  .topbar-brand {
+    min-width: 0;
+    max-width: 42vw;
+  }
+
+  .topbar-logo {
+    width: 32px;
+    height: 32px;
+    flex: 0 0 32px;
+    object-fit: contain;
+  }
+
+  .topbar-actions {
+    gap: 5px !important;
+    margin-left: auto;
+  }
+
+  .topbar-icon-btn,
+  .topbar-avatar-btn {
+    width: 40px !important;
+    height: 40px !important;
+    border-radius: 12px !important;
+  }
+
+  .topbar-sign-in-btn {
+    min-height: 40px;
+    padding: 8px 12px;
+    font-size: 12px;
+  }
+
+  .topbar-notif-dropdown {
+    position: fixed !important;
+    top: calc(58px + env(safe-area-inset-top)) !important;
+    right: 10px !important;
+    left: 10px !important;
+    width: auto !important;
+    max-height: min(430px, calc(100dvh - 88px)) !important;
+    overflow-y: auto;
+    border-radius: 16px !important;
+  }
+
+  .topbar-mobile-search {
+    position: fixed !important;
+    inset: 0 !important;
+    z-index: 220 !important;
+    align-content: start;
+    align-items: start !important;
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 12px !important;
+    padding: calc(12px + env(safe-area-inset-top)) 14px 20px !important;
+    background: var(--bg-primary) !important;
+  }
+
+  .topbar-mobile-search-box {
+    min-width: 0;
+    min-height: 48px;
+    border-radius: 14px !important;
+  }
+
+  .topbar-mobile-search-box .topbar-search-input {
+    width: 100%;
+    min-width: 0;
+    font-size: 16px !important;
+  }
+
+  .topbar-mobile-hint {
+    grid-column: 1 / -1;
+  }
+
+  .page-content {
+    width: 100%;
+    max-width: none;
+    padding: 16px 14px 28px !important;
+    gap: 18px !important;
+  }
+
+  .home-page {
+    padding-inline: 0 !important;
+  }
+
+  .home-cat-section,
+  .home-feed-header,
+  .home-feed-grid > .empty-state,
+  .home-feed-grid > .home-skeleton-grid {
+    margin-inline: 14px;
+  }
+
+  .cat-tabs-scroll {
+    top: calc(58px + env(safe-area-inset-top)) !important;
+    margin: 0 -14px;
+    padding: 10px 14px 8px !important;
+    background: var(--bg-primary);
+    border-bottom: 1px solid var(--border-subtle);
+  }
+
+  .cat-tabs-row {
+    gap: 7px !important;
+    padding-bottom: 2px !important;
+  }
+
+  .cat-tab-pill {
+    min-height: 38px;
+    padding: 8px 14px !important;
+    font-size: 12px !important;
+  }
+
+  .home-feed-header {
+    align-items: flex-start !important;
+    gap: 12px !important;
+  }
+
+  .home-feed-title h2 {
+    font-size: 22px !important;
+    line-height: 1.15;
+  }
+
+  .home-feed-subtitle {
+    max-width: 34ch;
+    font-size: 12px !important;
+    line-height: 1.45;
+  }
+
+  .home-feed-controls {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .home-nearby-btn {
+    min-height: 38px;
+  }
+
+  .post-masonry-feed {
+    grid-template-columns: 1fr !important;
+    gap: 14px !important;
+  }
+
+  .post-card {
+    width: 100% !important;
+    border-right: 0 !important;
+    border-left: 0 !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+  }
+
+  .post-card:hover,
+  .post-card:hover .post-media-img {
+    transform: none !important;
+    box-shadow: none !important;
+  }
+
+  .post-card-head {
+    min-height: 58px;
+    padding: 10px 14px !important;
+  }
+
+  .post-author-details {
+    min-width: 0;
+  }
+
+  .post-meta-sub {
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  .post-location-tag,
+  .post-distance-badge {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .post-price-pill {
+    max-width: 96px;
+    justify-content: center;
+    padding-inline: 8px !important;
+  }
+
+  .post-price-duration {
+    display: none;
+  }
+
+  .post-media-wrap {
+    aspect-ratio: 4 / 5 !important;
+    max-height: min(78vh, 620px);
+  }
+
+  .post-card-actions {
+    min-height: 50px;
+    padding: 7px 12px !important;
+  }
+
+  .action-btn {
+    min-width: 40px;
+    min-height: 40px;
+    justify-content: center;
+    padding: 7px 9px !important;
+  }
+
+  .action-label {
+    display: none;
+  }
+
+  .post-caption-box {
+    padding: 8px 14px 2px !important;
+  }
+
+  .mobile-nav {
+    z-index: 160 !important;
+    min-height: calc(70px + env(safe-area-inset-bottom)) !important;
+    padding: 6px max(8px, env(safe-area-inset-left)) env(safe-area-inset-bottom) max(8px, env(safe-area-inset-right)) !important;
+    background: rgba(10, 10, 15, 0.94) !important;
+    border-top-color: rgba(255, 255, 255, 0.12) !important;
+  }
+
+  .mobile-nav-tab {
+    min-width: 0;
+    min-height: 58px;
+    color: rgba(255, 255, 255, 0.62) !important;
+  }
+
+  .mobile-nav-tab.active {
+    color: #ffffff !important;
+  }
+
+  .mobile-nav-tab span {
+    max-width: 54px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .mobile-nav-fab-circle {
+    width: 54px !important;
+    height: 54px !important;
+  }
+
+  .discover-hero,
+  .location-prompt-card,
+  .discover-map-wrapper,
+  .artist-portfolio-card,
+  .profile-hero,
+  .settings-form,
+  .messenger-layout {
+    border-radius: 14px !important;
+  }
+
+  .discover-hero {
+    padding: 22px 18px !important;
+  }
+
+  .discover-hero h1 {
+    font-size: 30px;
+    line-height: 1.06;
+  }
+
+  .discover-hero p {
+    font-size: 14px;
+    line-height: 1.5;
+  }
+
+  .discover-map-wrapper {
+    height: min(52dvh, 390px) !important;
+    min-height: 280px !important;
+    padding: 6px !important;
+  }
+
+  .artist-card-grid {
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    overflow: visible !important;
+    padding: 0 !important;
+  }
+
+  .artist-portfolio-card {
+    width: 100%;
+  }
+}
+
+@media (max-width: 640px) {
+  .glam-modal-backdrop {
+    align-items: end !important;
+    place-items: end center !important;
+    padding: 0 !important;
+    overflow: hidden !important;
+  }
+
+  .glam-booking-sheet {
+    width: 100% !important;
+    max-width: none !important;
+    max-height: calc(100dvh - env(safe-area-inset-top)) !important;
+    border-right: 0 !important;
+    border-bottom: 0 !important;
+    border-left: 0 !important;
+    border-radius: 22px 22px 0 0 !important;
+  }
+
+  .glam-sheet-header {
+    padding: 16px 16px 12px !important;
+  }
+
+  .glam-sheet-artist {
+    min-width: 0;
+  }
+
+  .glam-artist-sub {
+    display: block !important;
+    overflow: hidden;
+    max-width: 220px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .glam-booking-tabs {
+    padding: 6px 10px !important;
+  }
+
+  .glam-booking-tab {
+    min-height: 42px;
+    padding: 8px 7px !important;
+    gap: 5px !important;
+    font-size: 11px !important;
+    line-height: 1.15;
+  }
+
+  .glam-sheet-body {
+    max-height: calc(100dvh - 196px - env(safe-area-inset-bottom)) !important;
+    padding: 16px 14px 18px !important;
+  }
+
+  .glam-flow-label,
+  .glam-flow-header-row {
+    align-items: flex-start !important;
+    gap: 6px !important;
+  }
+
+  .glam-flow-hint {
+    text-align: right;
+  }
+
+  .glam-services-chips-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .glam-full-calendar {
+    padding: 14px 10px !important;
+    border-radius: 16px !important;
+  }
+
+  .glam-calendar-weekdays,
+  .glam-calendar-dates {
+    gap: 3px !important;
+  }
+
+  .glam-weekday-label {
+    font-size: 9px !important;
+    letter-spacing: 0 !important;
+  }
+
+  .glam-calendar-day {
+    min-height: 42px !important;
+    border-radius: 10px !important;
+  }
+
+  .glam-calendar-day .slot-indicator {
+    max-width: 100%;
+    padding-inline: 3px !important;
+    font-size: 8px !important;
+  }
+
+  .glam-time-selection-section {
+    padding: 14px !important;
+    border-radius: 16px !important;
+  }
+
+  .glam-time-chip {
+    flex: 1 1 132px;
+    justify-content: center;
+    min-height: 40px;
+    padding: 8px 10px !important;
+  }
+
+  .glam-booking-sheet-footer {
+    padding: 14px 14px calc(14px + env(safe-area-inset-bottom)) !important;
+  }
+}
+
+@media (max-width: 380px) {
+  .topbar-brand-name {
+    display: none;
+  }
+
+  .topbar-actions {
+    gap: 4px !important;
+  }
+
+  .topbar-icon-btn,
+  .topbar-avatar-btn {
+    width: 40px !important;
+    height: 40px !important;
+  }
+
+  .topbar-sign-in-btn {
+    padding-inline: 10px;
+  }
+
+  .mobile-nav-tab span {
+    font-size: 9px;
+  }
+}

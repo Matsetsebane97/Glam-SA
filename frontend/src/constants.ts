@@ -9,12 +9,12 @@ export const southAfricanProvinces = [
 ];
 
 export const citiesByProvince: Record<string, string[]> = {
-  "Eastern Cape": ["East London", "Gqeberha", "Mthatha"],
-  "Free State": ["Bloemfontein", "Welkom"],
-  Gauteng: ["Johannesburg", "Pretoria", "Soweto", "Midrand", "Vanderbijlpark"],
-  "KwaZulu-Natal": ["Durban", "Pietermaritzburg", "Richards Bay"],
-  Limpopo: ["Polokwane", "Thohoyandou", "Tzaneen"],
- Mpumalanga: ["Mbombela", "Emalahleni", "Secunda"],
+   "Eastern Cape": ["East London", "Gqeberha", "Mthatha"],
+   "Free State": ["Bloemfontein", "Welkom"],
+   Gauteng: ["Johannesburg", "Pretoria", "Soweto", "Midrand", "Vanderbijlpark"],
+   "KwaZulu-Natal": ["Durban", "Pietermaritzburg", "Richards Bay"],
+   Limpopo: ["Polokwane", "Thohoyandou", "Tzaneen"],
+   Mpumalanga: ["Mbombela", "Emalahleni", "Secunda"],
   "Northern Cape": ["Kimberley", "Upington"],
   "North West": ["Mahikeng", "Rustenburg", "Klerksdorp"],
   "Western Cape": ["Cape Town", "Stellenbosch", "George", "Paarl"],
