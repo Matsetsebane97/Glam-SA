@@ -1,5 +1,5 @@
 // Conversation list, message threads, and appointments/bookings management.
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { getBookings, getConversations, getMessages, sendMessage, updateBookingStatus } from "../api";
 import {
   IconCalendar,
@@ -32,6 +32,8 @@ function MessagesPage({ currentUser, onNavigate }: MessagesPageProps) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [draft, setDraft] = useState("");
   const [isSending, setIsSending] = useState(false);
+  const [isLoadingMessages, setIsLoadingMessages] = useState(false);
+  const messageListRef = useRef<HTMLDivElement>(null);
 
   // Bookings state
   const [bookings, setBookings] = useState<Booking[]>([]);
@@ -44,34 +46,72 @@ function MessagesPage({ currentUser, onNavigate }: MessagesPageProps) {
 
   const isCreator = currentUser?.accountType === "creator";
 
-  // Load initial conversations and bookings
+  // Refresh the inbox periodically so new messages and booking updates arrive
+  // without forcing the user to reload the page.
   useEffect(() => {
     if (!currentUser) {
       setIsLoading(false);
       return;
     }
 
-    setIsLoading(true);
-    Promise.all([
-      getConversations().catch(() => []),
-      getBookings().catch(() => []),
-    ])
-      .then(([convs, bks]) => {
+    let isActive = true;
+    const refreshInbox = async () => {
+      try {
+        const [convs, bks] = await Promise.all([getConversations(), getBookings()]);
+        if (!isActive) return;
         setConversations(convs);
-        setSelectedUser(convs[0] || null);
+        setSelectedUser((current) => current || convs[0] || null);
         setBookings(bks);
-      })
-      .catch(() => setError("We could not load your inbox."))
-      .finally(() => setIsLoading(false));
+        setError("");
+      } catch {
+        if (isActive) setError("We could not refresh your inbox.");
+      } finally {
+        if (isActive) setIsLoading(false);
+      }
+    };
+
+    setIsLoading(true);
+    void refreshInbox();
+    const refreshTimer = window.setInterval(() => void refreshInbox(), 20_000);
+    const handleFocus = () => void refreshInbox();
+    window.addEventListener("focus", handleFocus);
+    return () => {
+      isActive = false;
+      window.clearInterval(refreshTimer);
+      window.removeEventListener("focus", handleFocus);
+    };
   }, [currentUser]);
 
-  // Load messages when selected user changes
+  // Poll the open thread and mark incoming messages read through the API.
   useEffect(() => {
     if (!selectedUser) return;
-    void getMessages(selectedUser.userId)
-      .then(setMessages)
-      .catch(() => setError("We could not load this conversation."));
+    let isActive = true;
+    const loadThread = async () => {
+      setIsLoadingMessages(true);
+      try {
+        const nextMessages = await getMessages(selectedUser.userId);
+        if (!isActive) return;
+        setMessages(nextMessages);
+        setConversations((items) => items.map((item) => item.userId === selectedUser.userId ? { ...item, unreadCount: 0 } : item));
+      } catch {
+        if (isActive) setError("We could not load this conversation.");
+      } finally {
+        if (isActive) setIsLoadingMessages(false);
+      }
+    };
+
+    setMessages([]);
+    void loadThread();
+    const threadTimer = window.setInterval(() => void loadThread(), 10_000);
+    return () => {
+      isActive = false;
+      window.clearInterval(threadTimer);
+    };
   }, [selectedUser]);
+
+  useEffect(() => {
+    messageListRef.current?.scrollTo({ top: messageListRef.current.scrollHeight, behavior: "smooth" });
+  }, [messages, selectedUser]);
 
   const send = async () => {
     if (!selectedUser || !draft.trim()) return;
@@ -81,13 +121,13 @@ function MessagesPage({ currentUser, onNavigate }: MessagesPageProps) {
     try {
       const message = await sendMessage({ recipientId: selectedUser.userId, body: draft.trim() });
       setMessages((currentMessages) => [...currentMessages, message]);
-      setConversations((items) =>
-        items.map((item) =>
-          item.userId === selectedUser.userId
-            ? { ...item, lastMessage: message.body, createdAt: message.createdAt }
-            : item,
-        ),
-      );
+      setConversations((items) => {
+        const updated = items.map((item) => item.userId === selectedUser.userId
+          ? { ...item, lastMessage: message.body, createdAt: message.createdAt, unreadCount: 0 }
+          : item);
+        const current = updated.find((item) => item.userId === selectedUser.userId);
+        return current ? [current, ...updated.filter((item) => item.userId !== selectedUser.userId)] : updated;
+      });
       setDraft("");
     } catch (sendError) {
       setError(sendError instanceof Error ? sendError.message : "Unable to send message.");
@@ -140,6 +180,11 @@ function MessagesPage({ currentUser, onNavigate }: MessagesPageProps) {
       setConversations((prev) => [newConv, ...prev]);
       setSelectedUser(newConv);
     }
+  };
+
+  const selectConversation = (conversation: Conversation) => {
+    setSelectedUser(conversation);
+    setConversations((items) => items.map((item) => item.userId === conversation.userId ? { ...item, unreadCount: 0 } : item));
   };
 
   if (!currentUser) {
@@ -248,13 +293,14 @@ function MessagesPage({ currentUser, onNavigate }: MessagesPageProps) {
                     key={conversation.userId}
                     type="button"
                     className={`conversation-item ${selectedUser?.userId === conversation.userId ? "active" : ""}`}
-                    onClick={() => setSelectedUser(conversation)}
+                    onClick={() => selectConversation(conversation)}
                   >
                     <div className="conversation-avatar">{conversation.name.charAt(0)}</div>
-                    <div>
+                    <div className="conversation-item-copy">
                       <strong>
                         {conversation.name}
                         <IconVerified size={12} />
+                        {(conversation.unreadCount ?? 0) > 0 && <span className="conversation-unread-badge">{conversation.unreadCount}</span>}
                       </strong>
                       <small>{conversation.postService}</small>
                       <p>{conversation.lastMessage}</p>
@@ -273,7 +319,9 @@ function MessagesPage({ currentUser, onNavigate }: MessagesPageProps) {
                     </div>
                   </header>
 
-                  <div className="message-list">
+                  <div className="message-list" ref={messageListRef} aria-live="polite">
+                    {isLoadingMessages && messages.length === 0 && <p className="message-list-status">Loading conversation...</p>}
+                    {!isLoadingMessages && messages.length === 0 && <p className="message-list-status">No messages yet. Start the conversation below.</p>}
                     {messages.map((message) => (
                       <div
                         key={message.id}
@@ -303,12 +351,22 @@ function MessagesPage({ currentUser, onNavigate }: MessagesPageProps) {
                       rows={2}
                       value={draft}
                       onChange={(event) => setDraft(event.target.value)}
+                      onKeyDown={(event) => {
+                        if (event.key === "Enter" && !event.shiftKey) {
+                          event.preventDefault();
+                          void send();
+                        }
+                      }}
+                      maxLength={2000}
                       placeholder="Write a message..."
                       aria-label="Message"
                     />
-                    <button className="btn-primary" type="submit" disabled={isSending || !draft.trim()}>
-                      <IconSend size={16} /> {isSending ? "Sending..." : "Send"}
-                    </button>
+                    <div className="message-compose-actions">
+                      <small>{draft.length}/2000 · Enter to send</small>
+                      <button className="btn-primary" type="submit" disabled={isSending || !draft.trim()}>
+                        <IconSend size={16} /> {isSending ? "Sending..." : "Send"}
+                      </button>
+                    </div>
                   </form>
                 </section>
               )}

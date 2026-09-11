@@ -1,0 +1,64 @@
+/* Messaging-specific polish kept separate from the general page and booking styles. */
+.conversation-item-copy {
+  flex: 1;
+  min-width: 0;
+}
+
+.conversation-item-copy strong {
+  width: 100%;
+}
+
+.conversation-unread-badge {
+  display: inline-grid;
+  place-items: center;
+  min-width: 18px;
+  height: 18px;
+  margin-left: auto;
+  padding: 0 5px;
+  border-radius: var(--radius-full);
+  background: var(--accent-primary);
+  color: #fff;
+  font-size: 10px;
+  line-height: 1;
+}
+
+.message-list-status {
+  margin: auto;
+  color: var(--ink-muted);
+  font-size: 13px;
+  text-align: center;
+}
+
+.message-compose {
+  flex-wrap: wrap;
+}
+
+.message-compose textarea {
+  min-height: 44px;
+  max-height: 140px;
+  resize: vertical;
+}
+
+.message-compose-actions {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 10px;
+}
+
+.message-compose-actions small {
+  color: var(--ink-muted);
+  font-size: 11px;
+  white-space: nowrap;
+}
+
+@media (max-width: 700px) {
+  .message-compose-actions {
+    justify-content: space-between;
+    width: 100%;
+  }
+
+  .message-compose-actions .btn-primary {
+    flex: 1;
+  }
+}
