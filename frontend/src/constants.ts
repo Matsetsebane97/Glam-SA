@@ -10,11 +10,11 @@ export const southAfricanProvinces = [
 
 export const citiesByProvince: Record<string, string[]> = {
    "Eastern Cape": ["East London", "Gqeberha", "Mthatha"],
-   "Free State": ["Bloemfontein", "Welkom"],
+   "Free State": ["Bloemfontein", "Welkom", "Sasolburg"],
    Gauteng: ["Johannesburg", "Pretoria", "Soweto", "Midrand", "Vanderbijlpark"],
    "KwaZulu-Natal": ["Durban", "Pietermaritzburg", "Richards Bay"],
-   Limpopo: ["Polokwane", "Thohoyandou", "Tzaneen"],
-   Mpumalanga: ["Mbombela", "Emalahleni", "Secunda"],
+   Limpopo: ["Polokwane", "Thohoyandou", "Tzaneen","Thabazimbi"],
+   Mpumalanga: ["Mbombela", "Emalahleni", "Secunda", "Middleburg"],
   "Northern Cape": ["Kimberley", "Upington"],
   "North West": ["Mahikeng", "Rustenburg", "Klerksdorp"],
   "Western Cape": ["Cape Town", "Stellenbosch", "George", "Paarl"],
@@ -23,7 +23,7 @@ export const citiesByProvince: Record<string, string[]> = {
 export const navItems: NavItem[] = ["Home", "Discover", "Messages", "Saved", "Upload"];
 
 export const fallbackCategories = [
-  "Bridal",
+  "Hair",
   "Nails",
   "Barbering",
   "Makeup",
