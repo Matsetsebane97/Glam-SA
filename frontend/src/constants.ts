@@ -24,6 +24,7 @@ export const navItems: NavItem[] = ["Home", "Discover", "Messages", "Saved", "Up
 
 export const fallbackCategories = [
   "Hair",
+  "Bridal",
   "Nails",
   "Barbering",
   "Makeup",

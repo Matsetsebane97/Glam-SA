@@ -26,6 +26,7 @@ from .storage import is_configured, upload_media
 CATEGORIES = [
     "For you",
     "Bridal",
+    "Hair",
     "Nails",
     "Barbering",
     "Makeup",

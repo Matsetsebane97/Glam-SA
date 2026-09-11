@@ -58,9 +58,11 @@ export const categoryAliases: Record<string, string> = {
   bridal: "Bridal",
   wedding: "Bridal",
   weddings: "Bridal",
-  braid: "Bridal",
-  braids: "Bridal",
-  hair: "Bridal",
+  bride: "Bridal",
+  bridesmaid: "Bridal",
+  braid: "Hair",
+  braids: "Hair",
+  hair: "Hair",
   nail: "Nails",
   nails: "Nails",
   manicure: "Nails",
@@ -180,7 +182,7 @@ function getFuzzyCategory(normalizedQuestion: string, synonyms?: Record<string, 
 
 export function parseQuestion(question: string, synonyms?: Record<string, string[]>): ParsedQuestion {
   const normalizedQuestion = question.trim().toLowerCase();
-  const categoryToken = normalizedQuestion.match(/\b(bridal|weddings?|braids?|hair|nails?|manicure|pedicure|barber(?:ing|s)?|makeup|facials?|skincare|tattoos?|lashes?|brows?|locs?|dreadlocks?|wigs?|weaves?|natural hair|spa|wellness|massage|waxing|piercing|teeth whitening|aesthetics|injectables|men's grooming|beauty courses)\b/);
+  const categoryToken = normalizedQuestion.match(/\b(natural hair|bridal|bride|bridesmaid|weddings?|braids?|hair|nails?|manicure|pedicure|barber(?:ing|s)?|makeup|facials?|skincare|tattoos?|lashes?|brows?|locs?|dreadlocks?|wigs?|weaves?|spa|wellness|massage|waxing|piercing|teeth whitening|aesthetics|injectables|men's grooming|beauty courses)\b/);
   const priceMatch = normalizedQuestion.match(/(?:under|below|less than)\s*r?\s*(\d+(?:\.\d+)?)/);
   const locationMatch = normalizedQuestion.match(/\bnear\s+(?!me\b)([a-z][a-z\s-]*?)(?=\s+(?:under|below|less than)\b|$)/);
   const weekdayMatch = normalizedQuestion.match(/\b(sunday|monday|tuesday|wednesday|thursday|friday|saturday)\b/);

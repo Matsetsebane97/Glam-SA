@@ -5,7 +5,10 @@ from collections import Counter
 
 TRAINING_EXAMPLES = {
     "Bridal": (
-        "braids knotless braids box braids cornrows hair extensions weave wig install wash cut blowout silk press relaxer dreadlocks locs twists"
+        "bridal bride bridesmaid wedding matric dance formal updo bridal glam wedding hair veil"
+    ),
+    "Hair": (
+        "hair braids knotless braids box braids cornrows wash cut blowout silk press relaxer styling colour color"
     ),
     "Nails": (
         "gel nails acrylic manicure pedicure nail art tips polish french tips builder gel extensions"

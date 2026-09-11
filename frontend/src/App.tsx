@@ -27,9 +27,11 @@ const categoryAliases: Record<string, string> = {
   bridal: "Bridal",
   wedding: "Bridal",
   weddings: "Bridal",
-  braid: "Bridal",
-  braids: "Bridal",
-  hair: "Bridal",
+  bride: "Bridal",
+  bridesmaid: "Bridal",
+  braid: "Hair",
+  braids: "Hair",
+  hair: "Hair",
   nails: "Nails",
   nail: "Nails",
   manicure: "Nails",
@@ -73,7 +75,7 @@ const searchStopWords = new Set(["a", "an", "and", "for", "in", "near", "the", "
 
 function parseSmartQuery(query: string) {
   const normalizedQuery = query.trim().toLowerCase();
-  const categoryToken = normalizedQuery.match(/\b(bridal|weddings?|braids?|hair|nails?|manicure|pedicure|barber(?:ing|s)?|makeup|skincare|facials?|tattoos?|lashes?|brows?|locs?|dreadlocks?|wigs?|weaves?|natural hair|spa|wellness|massage|waxing|piercing|teeth whitening|aesthetics|injectables|men's grooming|beauty courses)\b/);
+  const categoryToken = normalizedQuery.match(/\b(natural hair|bridal|bride|bridesmaid|weddings?|braids?|hair|nails?|manicure|pedicure|barber(?:ing|s)?|makeup|skincare|facials?|tattoos?|lashes?|brows?|locs?|dreadlocks?|wigs?|weaves?|spa|wellness|massage|waxing|piercing|teeth whitening|aesthetics|injectables|men's grooming|beauty courses)\b/);
   const priceMatch = normalizedQuery.match(/(?:under|below|less than)\s*r?\s*(\d+(?:\.\d+)?)/);
   const nearMatch = normalizedQuery.match(/\bnear\s+([a-z][a-z\s-]*?)(?=\s+(?:under|below|less than)\b|$)/);
   const category = categoryToken ? categoryAliases[categoryToken[1]] : undefined;
