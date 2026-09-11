@@ -129,6 +129,27 @@ export type NearbyArtist = {
   distanceKm: number;
   postCount: number;
   openSlotCount?: number;
+  rating?: number | null;
+  reviewCount?: number;
+  priceRange?: string;
+  categories?: string[];
+};
+
+export type ArtistSummary = {
+  id: string;
+  ownerId?: number;
+  name: string;
+  handle: string;
+  location: string;
+  distanceKm?: number;
+  priceRange: string;
+  categories: string[];
+  postCount: number;
+  rating?: number | null;
+  reviewCount?: number;
+  availableLabel: string;
+  imageUrl?: string;
+  whatsappNumber?: string;
 };
 
 export type NavItem = "Home" | "Discover" | "Messages" | "Saved" | "Upload";
