@@ -236,18 +236,21 @@ function AuthSection({ onSuccess }: AuthSectionProps) {
               </select>
             </label>
             <label className="studio-label">
-              <span>City</span>
-              <select
+              <span>City / Town</span>
+              {/* Suggestions guide users without restricting them to a short city list. */}
+              <input
                 className="studio-input"
                 value={city}
                 onChange={(event) => setCity(event.target.value)}
                 autoComplete="address-level2"
+                list="signup-city-options"
+                placeholder={province ? "Start typing your city or town" : "Select a province first"}
                 disabled={!province}
                 required
-              >
-                <option value="">{province ? "Select city" : "Select a province first"}</option>
-                {(citiesByProvince[province] || []).map((item) => <option key={item} value={item}>{item}</option>)}
-              </select>
+              />
+              <datalist id="signup-city-options">
+                {(citiesByProvince[province] || []).map((item) => <option key={item} value={item} />)}
+              </datalist>
             </label>
             <label className="studio-label">
               <span>Suburb</span>

@@ -359,10 +359,19 @@ function SettingsPage({ currentUser, onNavigate, onSaved }: SettingsPageProps) {
                 <option value="">Select province</option>
                 {southAfricanProvinces.map((item) => <option key={item} value={item}>{item}</option>)}
               </select>
-              <select className="studio-input" value={city} onChange={(event) => setCity(event.target.value)} autoComplete="address-level2" disabled={!province}>
-                <option value="">{province ? "Select city" : "Select province first"}</option>
-                {(citiesByProvince[province] || []).map((item) => <option key={item} value={item}>{item}</option>)}
-              </select>
+              {/* Suggestions guide users without preventing less common towns. */}
+              <input
+                className="studio-input"
+                value={city}
+                onChange={(event) => setCity(event.target.value)}
+                autoComplete="address-level2"
+                list="settings-city-options"
+                placeholder={province ? "City or town" : "Select province first"}
+                disabled={!province}
+              />
+              <datalist id="settings-city-options">
+                {(citiesByProvince[province] || []).map((item) => <option key={item} value={item} />)}
+              </datalist>
               <input className="studio-input" value={suburb} onChange={(event) => setSuburb(event.target.value)} maxLength={100} autoComplete="address-line2" placeholder="Suburb" />
             </div>
             <small className="field-help">Displayed as Province, City, Suburb. Coordinates are used separately for distance calculations.</small>
