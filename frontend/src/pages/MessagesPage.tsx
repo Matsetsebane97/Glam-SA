@@ -23,6 +23,10 @@ type MessagesPageProps = {
 type TabType = "messages" | "bookings";
 type BookingFilter = "all" | "requested" | "confirmed" | "completed" | "cancelled";
 
+const INBOX_REFRESH_MS = 20_000;
+const THREAD_REFRESH_MS = 10_000;
+const MAX_MESSAGE_LENGTH = 2_000;
+
 function MessagesPage({ currentUser, onNavigate }: MessagesPageProps) {
   const [activeTab, setActiveTab] = useState<TabType>("messages");
 
@@ -50,7 +54,6 @@ function MessagesPage({ currentUser, onNavigate }: MessagesPageProps) {
   // without forcing the user to reload the page.
   useEffect(() => {
     if (!currentUser) {
-      setIsLoading(false);
       return;
     }
 
@@ -60,7 +63,12 @@ function MessagesPage({ currentUser, onNavigate }: MessagesPageProps) {
         const [convs, bks] = await Promise.all([getConversations(), getBookings()]);
         if (!isActive) return;
         setConversations(convs);
-        setSelectedUser((current) => current || convs[0] || null);
+        setSelectedUser((current) => {
+          const refreshed = current ? convs.find((conversation) => conversation.userId === current.userId) : convs[0];
+          if (!refreshed) return null;
+          if (current && refreshed.lastMessage === current.lastMessage && refreshed.createdAt === current.createdAt && refreshed.unreadCount === current.unreadCount) return current;
+          return refreshed;
+        });
         setBookings(bks);
         setError("");
       } catch {
@@ -72,7 +80,7 @@ function MessagesPage({ currentUser, onNavigate }: MessagesPageProps) {
 
     setIsLoading(true);
     void refreshInbox();
-    const refreshTimer = window.setInterval(() => void refreshInbox(), 20_000);
+    const refreshTimer = window.setInterval(() => void refreshInbox(), INBOX_REFRESH_MS);
     const handleFocus = () => void refreshInbox();
     window.addEventListener("focus", handleFocus);
     return () => {
@@ -100,9 +108,8 @@ function MessagesPage({ currentUser, onNavigate }: MessagesPageProps) {
       }
     };
 
-    setMessages([]);
     void loadThread();
-    const threadTimer = window.setInterval(() => void loadThread(), 10_000);
+    const threadTimer = window.setInterval(() => void loadThread(), THREAD_REFRESH_MS);
     return () => {
       isActive = false;
       window.clearInterval(threadTimer);
@@ -165,6 +172,7 @@ function MessagesPage({ currentUser, onNavigate }: MessagesPageProps) {
 
   const switchToChatWithUser = (userId: number, name: string, handle?: string) => {
     setActiveTab("messages");
+    setMessages([]);
     const existing = conversations.find((c) => c.userId === userId);
     if (existing) {
       setSelectedUser(existing);
@@ -183,6 +191,7 @@ function MessagesPage({ currentUser, onNavigate }: MessagesPageProps) {
   };
 
   const selectConversation = (conversation: Conversation) => {
+    setMessages([]);
     setSelectedUser(conversation);
     setConversations((items) => items.map((item) => item.userId === conversation.userId ? { ...item, unreadCount: 0 } : item));
   };
@@ -357,12 +366,12 @@ function MessagesPage({ currentUser, onNavigate }: MessagesPageProps) {
                           void send();
                         }
                       }}
-                      maxLength={2000}
+                      maxLength={MAX_MESSAGE_LENGTH}
                       placeholder="Write a message..."
                       aria-label="Message"
                     />
                     <div className="message-compose-actions">
-                      <small>{draft.length}/2000 · Enter to send</small>
+                      <small>{draft.length}/{MAX_MESSAGE_LENGTH} · Enter to send</small>
                       <button className="btn-primary" type="submit" disabled={isSending || !draft.trim()}>
                         <IconSend size={16} /> {isSending ? "Sending..." : "Send"}
                       </button>
