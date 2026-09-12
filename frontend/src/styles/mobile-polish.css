@@ -1,5 +1,80 @@
-/* Final mobile layer for the current React component class names. */
+/* ─────────────────────────────────────────────────────────────────────────────
+   GLAM SA — MOBILE POLISH
+   Final override layer. Applied on top of all other sheets.
+   Breakpoints: 768px (phones), 640px (small phones / bottom-sheet), 380px (tiny)
+───────────────────────────────────────────────────────────────────────────── */
 
+/* ── 0. New global mobile components (not breakpoint-gated) ──────────────── */
+
+/* Drag handle that sits above the booking sheet header */
+.glam-sheet-drag-handle {
+  display: none; /* shown only on small screens — see 640px block */
+  touch-action: none; /* we own all pointer events on this element */
+  cursor: grab;
+  user-select: none;
+  -webkit-user-select: none;
+  padding: 10px 0 4px;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+}
+
+.glam-sheet-drag-pill {
+  width: 36px;
+  height: 4px;
+  border-radius: 99px;
+  background: var(--border-medium, rgba(255, 255, 255, 0.22));
+}
+
+/* Unread badge on the Messages nav tab */
+.mobile-nav-icon-wrap {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.mobile-nav-badge {
+  position: absolute;
+  top: -5px;
+  right: -7px;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 4px;
+  border-radius: 99px;
+  background: var(--accent-primary, #e8956d);
+  color: #ffffff;
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 16px;
+  text-align: center;
+  pointer-events: none;
+  box-shadow: 0 0 0 2px rgba(10, 10, 15, 0.85);
+  /* Subtle entrance animation */
+  animation: badgePop 0.2s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+@keyframes badgePop {
+  from {
+    transform: scale(0.4);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* Join FAB variant for unauthenticated users */
+.mobile-nav-fab-join {
+  background: linear-gradient(
+    135deg,
+    var(--accent-secondary, #c8943f) 0%,
+    var(--accent-primary, #e8956d) 100%
+  ) !important;
+}
+
+/* ── 1. 768 px — phones ───────────────────────────────────────────────────── */
 @media (max-width: 768px) {
   html,
   body,
@@ -23,6 +98,7 @@
     padding-bottom: calc(92px + env(safe-area-inset-bottom)) !important;
   }
 
+  /* ── Topbar ── */
   .topbar {
     min-height: calc(58px + env(safe-area-inset-top));
     padding: calc(8px + env(safe-area-inset-top)) 12px 8px !important;
@@ -49,15 +125,16 @@
 
   .topbar-icon-btn,
   .topbar-avatar-btn {
-    width: 40px !important;
-    height: 40px !important;
+    /* 44 × 44 px minimum touch target (WCAG 2.5.5) */
+    width: 44px !important;
+    height: 44px !important;
     border-radius: 12px !important;
   }
 
   .topbar-sign-in-btn {
-    min-height: 40px;
-    padding: 8px 12px;
-    font-size: 12px;
+    min-height: 44px;
+    padding: 8px 14px;
+    font-size: 13px;
   }
 
   .topbar-notif-dropdown {
@@ -93,6 +170,7 @@
   .topbar-mobile-search-box .topbar-search-input {
     width: 100%;
     min-width: 0;
+    /* 16px prevents iOS auto-zoom on focus */
     font-size: 16px !important;
   }
 
@@ -100,6 +178,7 @@
     grid-column: 1 / -1;
   }
 
+  /* ── Page content ── */
   .page-content {
     width: 100%;
     max-width: none;
@@ -118,6 +197,7 @@
     margin-inline: 14px;
   }
 
+  /* ── Category tabs ── */
   .cat-tabs-scroll {
     top: calc(58px + env(safe-area-inset-top)) !important;
     margin: 0 -14px;
@@ -132,11 +212,13 @@
   }
 
   .cat-tab-pill {
-    min-height: 38px;
-    padding: 8px 14px !important;
-    font-size: 12px !important;
+    /* 44 px tall for comfortable thumb tapping */
+    min-height: 44px;
+    padding: 9px 16px !important;
+    font-size: 13px !important;
   }
 
+  /* ── Feed header ── */
   .home-feed-header {
     align-items: flex-start !important;
     gap: 12px !important;
@@ -159,9 +241,10 @@
   }
 
   .home-nearby-btn {
-    min-height: 38px;
+    min-height: 44px;
   }
 
+  /* ── Post feed ── */
   .post-masonry-feed {
     grid-template-columns: 1fr !important;
     gap: 14px !important;
@@ -182,7 +265,7 @@
   }
 
   .post-card-head {
-    min-height: 58px;
+    min-height: 60px;
     padding: 10px 14px !important;
   }
 
@@ -216,18 +299,33 @@
   .post-media-wrap {
     aspect-ratio: 4 / 5 !important;
     max-height: min(78vh, 620px);
+    /* Allow vertical scroll through; double-tap still works via JS */
+    touch-action: pan-y;
   }
 
+  /* ── Post action bar — 44 px tap targets ── */
   .post-card-actions {
-    min-height: 50px;
-    padding: 7px 12px !important;
+    min-height: 52px;
+    padding: 6px 12px !important;
   }
 
   .action-btn {
-    min-width: 40px;
-    min-height: 40px;
+    /* 44 × 44 px touch target */
+    min-width: 44px;
+    min-height: 44px;
     justify-content: center;
-    padding: 7px 9px !important;
+    padding: 8px 10px !important;
+    border-radius: 10px;
+    /* Fast active feedback for touch */
+    -webkit-tap-highlight-color: transparent;
+    transition:
+      background 0.1s ease,
+      transform 0.1s ease;
+  }
+
+  .action-btn:active {
+    transform: scale(0.91);
+    background: var(--bg-muted);
   }
 
   .action-label {
@@ -238,25 +336,39 @@
     padding: 8px 14px 2px !important;
   }
 
+  /* ── Mobile bottom nav ── */
   .mobile-nav {
     z-index: 160 !important;
     min-height: calc(70px + env(safe-area-inset-bottom)) !important;
-    padding: 6px max(8px, env(safe-area-inset-left)) env(safe-area-inset-bottom) max(8px, env(safe-area-inset-right)) !important;
+    padding: 6px max(8px, env(safe-area-inset-left)) env(safe-area-inset-bottom)
+      max(8px, env(safe-area-inset-right)) !important;
     background: rgba(10, 10, 15, 0.94) !important;
     border-top-color: rgba(255, 255, 255, 0.12) !important;
+    /* Blur to avoid competing visually with content underneath */
+    backdrop-filter: blur(18px) saturate(1.4) !important;
+    -webkit-backdrop-filter: blur(18px) saturate(1.4) !important;
   }
 
   .mobile-nav-tab {
     min-width: 0;
+    /* 44 px tall ensures comfortable tap even near safe area */
     min-height: 58px;
     color: rgba(255, 255, 255, 0.62) !important;
+    -webkit-tap-highlight-color: transparent;
+    transition:
+      color 0.15s ease,
+      transform 0.12s ease;
+  }
+
+  .mobile-nav-tab:active {
+    transform: scale(0.88);
   }
 
   .mobile-nav-tab.active {
     color: #ffffff !important;
   }
 
-  .mobile-nav-tab span {
+  .mobile-nav-tab > span:last-child {
     max-width: 54px;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -268,6 +380,7 @@
     height: 54px !important;
   }
 
+  /* ── Assistant widget ── */
   .assistant-widget {
     right: 14px !important;
     bottom: calc(82px + env(safe-area-inset-bottom)) !important;
@@ -289,6 +402,7 @@
     font-size: 16px !important;
   }
 
+  /* ── Page chrome ── */
   .discover-hero,
   .location-prompt-card,
   .discover-map-wrapper,
@@ -351,7 +465,9 @@
   }
 }
 
+/* ── 2. 640 px — small phones / bottom-sheet behaviour ───────────────────── */
 @media (max-width: 640px) {
+  /* ── Assistant panel becomes full-screen ── */
   .assistant-widget:has(.assistant-panel) {
     right: 0 !important;
     bottom: 0 !important;
@@ -404,6 +520,7 @@
     flex: 0 0 auto;
   }
 
+  /* ── Booking bottom sheet ── */
   .glam-modal-backdrop {
     align-items: end !important;
     place-items: end center !important;
@@ -414,15 +531,24 @@
   .glam-booking-sheet {
     width: 100% !important;
     max-width: none !important;
-    max-height: calc(100dvh - env(safe-area-inset-top)) !important;
+    /* Cap height so the handle is always visible above the fold */
+    max-height: calc(96dvh - env(safe-area-inset-top)) !important;
     border-right: 0 !important;
     border-bottom: 0 !important;
     border-left: 0 !important;
     border-radius: 22px 22px 0 0 !important;
+    /* Swipe-dismiss transition is applied inline via JS; this fallback handles
+       the initial slide-up animation and snap-back */
+    will-change: transform;
+  }
+
+  /* Show drag handle on small screens */
+  .glam-sheet-drag-handle {
+    display: flex;
   }
 
   .glam-sheet-header {
-    padding: 16px 16px 12px !important;
+    padding: 8px 16px 12px !important;
   }
 
   .glam-sheet-artist {
@@ -442,16 +568,24 @@
   }
 
   .glam-booking-tab {
-    min-height: 42px;
+    min-height: 44px;
     padding: 8px 7px !important;
     gap: 5px !important;
     font-size: 11px !important;
     line-height: 1.15;
+    -webkit-tap-highlight-color: transparent;
   }
 
+  /* Body scrolls; extra bottom clearance for the sticky footer */
   .glam-sheet-body {
-    max-height: calc(100dvh - 196px - env(safe-area-inset-bottom)) !important;
-    padding: 16px 14px 18px !important;
+    /* Account for drag handle (24px), header (~72px), tabs (~56px), footer (~76px) */
+    max-height: calc(
+      96dvh - 228px - env(safe-area-inset-top) - env(safe-area-inset-bottom)
+    ) !important;
+    padding: 16px 14px 4px !important;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
   }
 
   .glam-flow-label,
@@ -484,8 +618,9 @@
   }
 
   .glam-calendar-day {
-    min-height: 42px !important;
+    min-height: 44px !important;
     border-radius: 10px !important;
+    -webkit-tap-highlight-color: transparent;
   }
 
   .glam-calendar-day .slot-indicator {
@@ -502,15 +637,47 @@
   .glam-time-chip {
     flex: 1 1 132px;
     justify-content: center;
-    min-height: 40px;
+    min-height: 44px;
     padding: 8px 10px !important;
+    -webkit-tap-highlight-color: transparent;
   }
 
+  /* ── Sticky booking footer — always above the keyboard ── */
   .glam-booking-sheet-footer {
-    padding: 14px 14px calc(14px + env(safe-area-inset-bottom)) !important;
+    position: sticky !important;
+    bottom: 0 !important;
+    /* Frosted glass so content scrolling underneath looks clean */
+    background: var(--bg-surface-elevated, var(--bg-surface)) !important;
+    border-top: 1px solid var(--border-subtle) !important;
+    padding: 12px 14px calc(12px + env(safe-area-inset-bottom)) !important;
+    /* Prevents the footer from being layered beneath sheet content */
+    z-index: 2;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    /* Subtle separator shadow */
+    box-shadow: 0 -6px 18px rgba(0, 0, 0, 0.18);
+  }
+
+  /* Make the primary CTA full-width and generously tall on mobile */
+  .glam-booking-sheet-footer .btn-book-submit,
+  .glam-booking-sheet-footer .btn-primary {
+    width: 100%;
+    min-height: 50px;
+    font-size: 15px !important;
+    border-radius: 14px !important;
+  }
+
+  /* Price summary sits just above the CTA on narrow screens */
+  .glam-footer-price-summary {
+    margin-bottom: 10px;
+    display: flex;
+    align-items: baseline;
+    gap: 6px;
+    flex-wrap: wrap;
   }
 }
 
+/* ── 3. 380 px — very small phones ───────────────────────────────────────── */
 @media (max-width: 380px) {
   .topbar-brand-name {
     display: none;
@@ -540,7 +707,18 @@
     justify-content: center;
   }
 
-  .mobile-nav-tab span {
+  .mobile-nav-tab > span:last-child {
     font-size: 9px;
+  }
+
+  /* Tighten booking sheet on very small screens */
+  .glam-booking-tab {
+    font-size: 10px !important;
+    gap: 3px !important;
+    padding: 7px 5px !important;
+  }
+
+  .glam-sheet-body {
+    padding: 12px 10px 4px !important;
   }
 }

@@ -19,7 +19,7 @@ function icsEscape(value: string) {
 
 function downloadCalendarEvent(booking: Booking) {
   // ICS keeps reminders in the user's own calendar app instead of requiring
-  // a background notification service from Bridgy.
+  // a background notification service from Glam.
   const toCalendarDate = (value: string) => new Date(value).toISOString().replace(/[-:]/g, "").replace(/\.\d{3}Z$/, "Z");
   const content = [
     "BEGIN:VCALENDAR",

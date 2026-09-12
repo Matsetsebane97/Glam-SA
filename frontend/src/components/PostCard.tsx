@@ -1,6 +1,6 @@
 // A portfolio card owns lightweight interaction state, while bookings and likes
 // are persisted through the API and saved looks are persisted per browser user.
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   IconBookmark,
   IconCalendar,
@@ -87,6 +87,63 @@ function PostCard({
   const [authNotice, setAuthNotice] = useState("");
   const [showBookingAuthPopup, setShowBookingAuthPopup] = useState(false);
 
+  // ── Swipe-to-dismiss for the booking bottom sheet ────────────────────────────
+  // On mobile we track a vertical drag starting from the drag handle. When the
+  // user drags down far enough (>= DISMISS_THRESHOLD) or releases with enough
+  // velocity we close the sheet. The sheet translates in real-time so the user
+  // gets physical feedback.
+  const DISMISS_THRESHOLD = 120; // px
+  const VELOCITY_THRESHOLD = 0.5; // px/ms — fast flick dismisses early
+  const sheetRef = useRef<HTMLDivElement>(null);
+  const dragStartY = useRef(0);
+  const dragStartTime = useRef(0);
+  const [dragOffset, setDragOffset] = useState(0);
+  const [isDragging, setIsDragging] = useState(false);
+
+  const onDragStart = (clientY: number) => {
+    dragStartY.current = clientY;
+    dragStartTime.current = Date.now();
+    setIsDragging(true);
+    setDragOffset(0);
+  };
+
+  const onDragMove = (clientY: number) => {
+    if (!isDragging) return;
+    const delta = clientY - dragStartY.current;
+    // Only allow downward drag
+    setDragOffset(Math.max(0, delta));
+  };
+
+  const onDragEnd = (clientY: number) => {
+    if (!isDragging) return;
+    setIsDragging(false);
+    const delta = clientY - dragStartY.current;
+    const elapsed = Date.now() - dragStartTime.current;
+    const velocity = elapsed > 0 ? Math.abs(delta) / elapsed : 0;
+    if (delta >= DISMISS_THRESHOLD || (delta > 40 && velocity >= VELOCITY_THRESHOLD)) {
+      setDragOffset(0);
+      closeBooking();
+    } else {
+      setDragOffset(0);
+    }
+  };
+
+  // Touch handlers for the drag handle
+  const handleHandleTouchStart = (e: React.TouchEvent) => {
+    onDragStart(e.touches[0].clientY);
+  };
+  const handleHandleTouchMove = (e: React.TouchEvent) => {
+    onDragMove(e.touches[0].clientY);
+  };
+  const handleHandleTouchEnd = (e: React.TouchEvent) => {
+    onDragEnd(e.changedTouches[0].clientY);
+  };
+
+  // Lightweight haptic wrapper — uses Vibration API where available
+  const haptic = (pattern: number | number[] = 8) => {
+    try { navigator.vibrate?.(pattern); } catch { /* not available */ }
+  };
+
   const styleImageUrl = post.mediaType.startsWith("image/")
     ? post.mediaUrl || post.imageUrl
     : post.imageUrl;
@@ -158,6 +215,9 @@ function PostCard({
     if (nextIsLiked) {
       setHeartBurst(true);
       setTimeout(() => setHeartBurst(false), 600);
+      haptic([6, 30, 10]); // double-tap pulse feel
+    } else {
+      haptic(4);
     }
     setIsUpdatingLike(true);
     try {
@@ -175,6 +235,7 @@ function PostCard({
       setAuthNotice("Sign in to save posts.");
       return;
     }
+    haptic(8);
     setIsSaved(toggleSavedPost(currentUser.id!, post));
     setAuthNotice("");
   };
@@ -185,6 +246,7 @@ function PostCard({
       setShowBookingAuthPopup(true);
       return;
     }
+    haptic(10);
     setAuthNotice("");
     setShowInquire(true);
   };
@@ -229,6 +291,7 @@ function PostCard({
         notes: inquiryText,
       });
       setBookingSuccess(booking);
+      haptic([10, 60, 20]); // success pulse
       setSlots((current) => current.filter((slot) => slot.id !== Number(selectedSlotId)));
     } catch (error) {
       setBookingStatus(error instanceof Error ? error.message : "Unable to request booking.");
@@ -258,6 +321,8 @@ function PostCard({
   const closeBooking = () => {
     setShowInquire(false);
     setShowBookingAuthPopup(false);
+    setDragOffset(0);
+    setIsDragging(false);
     onCloseBooking?.();
   };
 
@@ -309,7 +374,26 @@ function PostCard({
 
   const bookingSheet = showInquire && (
     <div className="glam-modal-backdrop" onClick={closeBooking}>
-      <div className="glam-booking-sheet" onClick={(e) => e.stopPropagation()}>
+      <div
+        ref={sheetRef}
+        className="glam-booking-sheet"
+        onClick={(e) => e.stopPropagation()}
+        style={{
+          transform: dragOffset > 0 ? `translateY(${dragOffset}px)` : undefined,
+          transition: isDragging ? "none" : "transform 0.28s cubic-bezier(0.16, 1, 0.3, 1)",
+        }}
+      >
+        {/* Drag Handle — touch target for swipe-to-dismiss */}
+        <div
+          className="glam-sheet-drag-handle"
+          onTouchStart={handleHandleTouchStart}
+          onTouchMove={handleHandleTouchMove}
+          onTouchEnd={handleHandleTouchEnd}
+          aria-hidden="true"
+        >
+          <div className="glam-sheet-drag-pill" />
+        </div>
+
         {/* Sheet Header */}
         <div className="glam-sheet-header">
           <div className="glam-sheet-artist">
@@ -833,7 +917,7 @@ function PostCard({
       </header>
 
       {/* ── Media Viewport ───────────────────────────────────────── */}
-      <div className="post-media-wrap" onDoubleClick={toggleLike}>
+      <div className="post-media-wrap" onDoubleClick={toggleLike} style={{ touchAction: "pan-y" }}>
         {post.mediaUrl && post.mediaType.startsWith("video/") ? (
           <video
             src={post.mediaUrl}
