@@ -533,8 +533,8 @@
 
   /* ── Booking bottom sheet ── */
   .glam-modal-backdrop {
-    align-items: end !important;
-    place-items: end center !important;
+    align-items: stretch !important;
+    place-items: stretch center !important;
     padding: 0 !important;
     overflow: hidden !important;
   }
@@ -542,15 +542,18 @@
   .glam-booking-sheet {
     width: 100% !important;
     max-width: none !important;
-    /* Cap height so the handle is always visible above the fold */
-    max-height: calc(96dvh - env(safe-area-inset-top)) !important;
+    /* Full screen on mobile — stretches to fill available viewport */
+    height: 100dvh !important;
+    max-height: 100dvh !important;
     border-right: 0 !important;
     border-bottom: 0 !important;
     border-left: 0 !important;
-    border-radius: 22px 22px 0 0 !important;
+    border-radius: 0 !important;
     /* Swipe-dismiss transition is applied inline via JS; this fallback handles
        the initial slide-up animation and snap-back */
     will-change: transform;
+    display: flex;
+    flex-direction: column;
   }
 
   /* Show drag handle on small screens */
@@ -559,7 +562,9 @@
   }
 
   .glam-sheet-header {
-    padding: 8px 16px 12px !important;
+    flex-shrink: 0;
+    padding: 12px 16px 8px !important;
+    padding-top: calc(12px + env(safe-area-inset-top)) !important;
   }
 
   .glam-sheet-artist {
@@ -575,6 +580,7 @@
   }
 
   .glam-booking-tabs {
+    flex-shrink: 0;
     padding: 6px 10px !important;
   }
 
@@ -587,12 +593,10 @@
     -webkit-tap-highlight-color: transparent;
   }
 
-  /* Body scrolls; extra bottom clearance for the sticky footer */
+  /* Body scrolls and fills remaining space */
   .glam-sheet-body {
-    /* Account for drag handle (24px), header (~72px), tabs (~56px), footer (~76px) */
-    max-height: calc(
-      96dvh - 228px - env(safe-area-inset-top) - env(safe-area-inset-bottom)
-    ) !important;
+    flex: 1 1 auto !important;
+    min-height: 0 !important;
     padding: 16px 14px 4px !important;
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
@@ -655,14 +659,11 @@
 
   /* ── Sticky booking footer — always above the keyboard ── */
   .glam-booking-sheet-footer {
-    position: sticky !important;
-    bottom: 0 !important;
+    flex-shrink: 0;
     /* Frosted glass so content scrolling underneath looks clean */
     background: var(--bg-surface-elevated, var(--bg-surface)) !important;
     border-top: 1px solid var(--border-subtle) !important;
     padding: 12px 14px calc(12px + env(safe-area-inset-bottom)) !important;
-    /* Prevents the footer from being layered beneath sheet content */
-    z-index: 2;
     backdrop-filter: blur(8px);
     -webkit-backdrop-filter: blur(8px);
     /* Subtle separator shadow */
