@@ -150,13 +150,9 @@ export function MobileNav({
         onClick={() => onNavigate(currentUser ? "/profile" : "/login")}
         aria-label={currentUser ? "My profile" : "Join"}
       >
-        {currentUser ? (
+        {currentUser?.profilePhotoUrl ? (
           <div className="mobile-nav-avatar">
-            {currentUser.profilePhotoUrl ? (
-              <img src={currentUser.profilePhotoUrl} alt={currentUser.name} />
-            ) : (
-              currentUser.name.charAt(0).toUpperCase()
-            )}
+            <img src={currentUser.profilePhotoUrl} alt={currentUser.name} />
           </div>
         ) : (
           <IconUser size={21} />
