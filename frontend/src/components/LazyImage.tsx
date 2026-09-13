@@ -46,7 +46,6 @@ export function LazyImage({
   sizes,
   srcSet,
   placeholder,
-  rootMargin = "50px",
 }: LazyImageProps) {
   const imgRef = useRef<HTMLImageElement>(null);
   const [isLoaded, setIsLoaded] = useState(false);
@@ -63,34 +62,14 @@ export function LazyImage({
       return;
     }
 
-    // Create Intersection Observer to lazy-load image
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            const target = entry.target as HTMLImageElement;
-
-            // Set actual src and srcset
-            if (srcSet) {
-              target.srcset = srcSet;
-            }
-            if (sizes) {
-              target.sizes = sizes;
-            }
-            target.src = src;
-
-            // Stop observing
-            observer.unobserve(target);
-          }
-        });
-      },
-      {
-        rootMargin,
-        threshold: 0.01,
-      }
-    );
-
-    observer.observe(img);
+    // Set src immediately instead of waiting for intersection
+    if (srcSet) {
+      img.srcset = srcSet;
+    }
+    if (sizes) {
+      img.sizes = sizes;
+    }
+    img.src = src;
 
     // Handle load and error events
     const handleLoad = () => {
@@ -107,11 +86,10 @@ export function LazyImage({
     img.addEventListener("error", handleError);
 
     return () => {
-      observer.disconnect();
       img.removeEventListener("load", handleLoad);
       img.removeEventListener("error", handleError);
     };
-  }, [src, srcSet, sizes, rootMargin, onLoad, onError]);
+  }, [src, srcSet, sizes, onLoad, onError]);
 
   return (
     <img
@@ -124,7 +102,7 @@ export function LazyImage({
       data-loaded={isLoaded}
       data-error={hasError}
       style={{
-        opacity: isLoaded ? 1 : 0.7,
+        opacity: 1, // Always visible
         transition: "opacity 0.3s ease-in-out",
       }}
     />

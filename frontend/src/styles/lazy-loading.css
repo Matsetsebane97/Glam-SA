@@ -31,19 +31,12 @@
   height: auto;
   aspect-ratio: 4 / 5;
   object-fit: cover;
+  opacity: 1 !important; /* Always visible */
   transition: opacity 0.3s ease-in-out;
 }
 
-.post-media-img[data-loaded="false"] {
-  opacity: 0.8;
-}
-
-.post-media-img[data-loaded="true"] {
-  opacity: 1;
-}
-
 .post-media-img[data-error="true"] {
-  opacity: 0.5;
+  opacity: 1 !important;
   background: var(--bg-muted);
 }
 
