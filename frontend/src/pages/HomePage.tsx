@@ -2,6 +2,7 @@
 import CategoryTabs from "../components/CategoryTabs";
 import PostCard from "../components/PostCard";
 import PullToRefresh from "../components/PullToRefresh";
+import { DesktopFilterPanel } from "../components/DesktopFilterPanel";
 import { IconPin } from "../components/Icons";
 import { usePullToRefresh } from "../hooks/usePullToRefresh";
 import type { CurrentUser, Post } from "../types";
@@ -21,6 +22,12 @@ type HomePageProps = {
   onSelectCategory: (category: string) => void;
   onToggleNearby: () => void;
   onRefresh: () => Promise<void>;
+  priceRange: { min: number; max: number };
+  onPriceRangeChange: (min: number, max: number) => void;
+  selectedLocation: string;
+  onLocationChange: (location: string) => void;
+  filterPanelOpen: boolean;
+  onFilterPanelToggle: (open: boolean) => void;
 };
 
 function HomePage({
@@ -38,10 +45,27 @@ function HomePage({
   currentUser,
   searchSummary,
   onRefresh,
+  priceRange,
+  onPriceRangeChange,
+  selectedLocation,
+  onLocationChange,
+  filterPanelOpen,
+  onFilterPanelToggle,
 }: HomePageProps) {
   const { pullDistance, isRefreshing, scrollContainerRef, handlers } = usePullToRefresh({
     onRefresh,
   });
+
+  // Apply price filter to posts
+  const filteredByPrice = posts.filter((post) => {
+    const price = Number(post.price) || 0;
+    return price >= priceRange.min && price <= priceRange.max;
+  });
+
+  // Apply location filter
+  const filteredByLocation = selectedLocation
+    ? filteredByPrice.filter((post) => post.location.toLowerCase().includes(selectedLocation.toLowerCase()))
+    : filteredByPrice;
 
   return (
     <PullToRefresh
@@ -53,6 +77,19 @@ function HomePage({
       onTouchEnd={handlers.onTouchEnd}
     >
       <div className="page-content home-page">
+        {/* Desktop filter panel */}
+        <DesktopFilterPanel
+          posts={posts}
+          categories={categories}
+          onCategoryChange={onSelectCategory}
+          selectedCategory={activeCategory}
+          priceRange={priceRange}
+          onPriceRangeChange={onPriceRangeChange}
+          onLocationChange={onLocationChange}
+          selectedLocation={selectedLocation}
+          isOpen={filterPanelOpen}
+          onToggle={onFilterPanelToggle}
+        />
 
       {/* Category pill strip */}
       <section className="home-cat-section">
@@ -95,7 +132,7 @@ function HomePage({
             </button>
           )}
           <span className="home-post-count">
-            {posts.length} {posts.length === 1 ? "look" : "looks"}
+            {filteredByLocation.length} {filteredByLocation.length === 1 ? "look" : "looks"}
           </span>
         </div>
       </section>
@@ -123,7 +160,7 @@ function HomePage({
           </div>
         )}
 
-        {!isLoading && !error && posts.length === 0 && (
+        {!isLoading && !error && filteredByLocation.length === 0 && (
           <div className="empty-state">
             <h3>No posts found</h3>
             <p>{emptyCopy}</p>
@@ -133,9 +170,9 @@ function HomePage({
           </div>
         )}
 
-        {!isLoading && !error && posts.length > 0 && (
+        {!isLoading && !error && filteredByLocation.length > 0 && (
           <div className="post-masonry-feed">
-            {posts.map((post) => (
+            {filteredByLocation.map((post) => (
               <PostCard key={post.id} post={post} currentUser={currentUser} onNavigate={onNavigate} />
             ))}
           </div>

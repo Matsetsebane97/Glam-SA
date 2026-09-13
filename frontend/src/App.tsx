@@ -4,11 +4,13 @@ import { ToastProvider } from "./context/ToastContext";
 import { getCategories, getCurrentUser, getPosts, logout } from "./api";
 import { parseSmartQuery, formatSearchSummary } from "./utils/searchQuery";
 import { renderPage } from "./pages/PageRouter";
+import { useKeyboardShortcuts } from "./hooks/useKeyboardShortcuts";
 import "./App.css";
 import OnboardingWalkthrough, { STORAGE_KEY as ONBOARDING_KEY } from "./components/OnboardingWalkthrough";
 import MobileNav from "./components/MobileNav";
 import { Toaster } from "./components/Toast";
 import { useToast } from "./context/ToastContext";
+import { KeyboardShortcutsModal } from "./components/KeyboardShortcutsModal";
 import RightRail from "./components/RightRail";
 import Sidebar from "./components/Sidebar";
 import Topbar from "./components/Topbar";
@@ -31,6 +33,9 @@ function App() {
   const [pathname, setPathname] = useState(window.location.pathname);
   const [currentUser, setCurrentUser] = useState<CurrentUser | null>(null);
   const [showOnboarding, setShowOnboarding] = useState(false);
+  const [priceRange, setPriceRange] = useState({ min: 0, max: 5000 });
+  const [selectedLocation, setSelectedLocation] = useState("");
+  const [filterPanelOpen, setFilterPanelOpen] = useState(false);
 
   // Client-side navigation without page reload
   const navigate = (path: string) => {
@@ -138,6 +143,8 @@ function App() {
     navigate("/");
   };
 
+  const [showKeyboardShortcuts, setShowKeyboardShortcuts] = useState(false);
+
   return (
     <ThemeProvider>
       <ToastProvider>
@@ -162,6 +169,14 @@ function App() {
           navigate={navigate}
           handleLogout={handleLogout}
           refreshPosts={refreshPosts}
+          showKeyboardShortcuts={showKeyboardShortcuts}
+          setShowKeyboardShortcuts={setShowKeyboardShortcuts}
+          priceRange={priceRange}
+          setPriceRange={setPriceRange}
+          selectedLocation={selectedLocation}
+          setSelectedLocation={setSelectedLocation}
+          filterPanelOpen={filterPanelOpen}
+          setFilterPanelOpen={setFilterPanelOpen}
         />
       </ToastProvider>
     </ThemeProvider>
@@ -189,6 +204,14 @@ type AppContentProps = {
   navigate: (path: string) => void;
   handleLogout: () => Promise<void>;
   refreshPosts: () => Promise<void>;
+  showKeyboardShortcuts: boolean;
+  setShowKeyboardShortcuts: (show: boolean) => void;
+  priceRange: { min: number; max: number };
+  setPriceRange: (range: { min: number; max: number }) => void;
+  selectedLocation: string;
+  setSelectedLocation: (location: string) => void;
+  filterPanelOpen: boolean;
+  setFilterPanelOpen: (open: boolean) => void;
 };
 
 /**
@@ -197,6 +220,19 @@ type AppContentProps = {
  */
 function AppContent(props: AppContentProps) {
   const { toasts, removeToast } = useToast();
+
+  // Keyboard shortcuts
+  useKeyboardShortcuts({
+    focusSearch: () => {
+      const searchInput = document.querySelector(
+        'input[placeholder*="Search"]'
+      ) as HTMLInputElement;
+      searchInput?.focus();
+    },
+    showHelp: () => {
+      props.setShowKeyboardShortcuts(true);
+    },
+  });
 
   const pageContent = renderPage({
     pathname: props.pathname,
@@ -216,6 +252,12 @@ function AppContent(props: AppContentProps) {
     onSelectCategory: props.setActiveCategory,
     onToggleNearby: () => props.setNearbyOnly(!props.nearbyOnly),
     onQueryChange: props.setQuery,
+    priceRange: props.priceRange,
+    onPriceRangeChange: (min, max) => props.setPriceRange({ min, max }),
+    selectedLocation: props.selectedLocation,
+    onLocationChange: props.setSelectedLocation,
+    filterPanelOpen: props.filterPanelOpen,
+    onFilterPanelToggle: props.setFilterPanelOpen,
   });
 
   return (
@@ -227,13 +269,16 @@ function AppContent(props: AppContentProps) {
           onDismiss={() => props.setShowOnboarding(false)}
         />
       )}
+      <a href="#feed-main" className="skip-to-content">
+        Skip to main content
+      </a>
       <Sidebar
         activeNav={navForPath(props.pathname)}
         currentUser={props.currentUser}
         onNavigate={props.navigate}
         onLogout={() => void props.handleLogout()}
       />
-      <main className="feed-main">
+      <main className="feed-main" id="feed-main">
         <Topbar
           currentUser={props.currentUser}
           query={props.query}
@@ -246,6 +291,10 @@ function AppContent(props: AppContentProps) {
       <RightRail currentUser={props.currentUser} onNavigate={props.navigate} />
       <MobileNav pathname={props.pathname} currentUser={props.currentUser} onNavigate={props.navigate} />
       <Toaster toasts={toasts} onClose={removeToast} />
+      <KeyboardShortcutsModal
+        isOpen={props.showKeyboardShortcuts}
+        onClose={() => props.setShowKeyboardShortcuts(false)}
+      />
     </div>
   );
 }

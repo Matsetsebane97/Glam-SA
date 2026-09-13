@@ -12,6 +12,7 @@ import {
   sendMessage,
 } from "../api";
 import { useToast } from "../context/ToastContext";
+import { BookingModalDesktopPreview } from "./BookingModalDesktop";
 import { BookingModalSkeleton } from "./Skeleton";
 import { ConfirmDialog } from "./ConfirmDialog";
 import { StickyFooter, StickyFooterButton, StickyFooterInfo } from "./StickyFooter";
@@ -1125,7 +1126,18 @@ export default function BookingModal({
             </div>
           )}
         </div>
+
+        {/* Desktop preview pane */}
+        <BookingModalDesktopPreview
+          creatorName={creatorName}
+          creatorHandle={creatorHandle}
+          creatorLocation={creatorLocation}
+          creatorAvatar={creatorAvatar}
+          creatorRating={4.8}
+          creatorReviews={0}
+        />
       </div>
     </div>
+    </>
   );
 }

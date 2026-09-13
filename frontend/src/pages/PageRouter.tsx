@@ -31,6 +31,12 @@ type PageRouterProps = {
   onSelectCategory: (category: string) => void;
   onToggleNearby: () => void;
   onQueryChange: (query: string) => void;
+  priceRange: { min: number; max: number };
+  onPriceRangeChange: (min: number, max: number) => void;
+  selectedLocation: string;
+  onLocationChange: (location: string) => void;
+  filterPanelOpen: boolean;
+  onFilterPanelToggle: (open: boolean) => void;
 };
 
 /**
@@ -54,6 +60,12 @@ export function renderPage({
   onSelectCategory,
   onToggleNearby,
   onQueryChange,
+  priceRange,
+  onPriceRangeChange,
+  selectedLocation,
+  onLocationChange,
+  filterPanelOpen,
+  onFilterPanelToggle,
 }: PageRouterProps): React.ReactNode {
   // /upload
   if (pathname === "/upload") {
@@ -165,6 +177,12 @@ export function renderPage({
       onSelectCategory={onSelectCategory}
       onToggleNearby={onToggleNearby}
       onRefresh={onRefresh}
+      priceRange={priceRange}
+      onPriceRangeChange={onPriceRangeChange}
+      selectedLocation={selectedLocation}
+      onLocationChange={onLocationChange}
+      filterPanelOpen={filterPanelOpen}
+      onFilterPanelToggle={onFilterPanelToggle}
     />
   );
 }

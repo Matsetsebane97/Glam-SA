@@ -1,0 +1,179 @@
+/* ──────────────────────────────────────────────────────────────────────────
+   Desktop Focus & Keyboard Navigation
+   Visible focus outlines and enhanced keyboard interaction for desktop UX
+   ────────────────────────────────────────────────────────────────────────── */
+
+/* ── Global Focus Styles ── */
+*:focus-visible {
+  outline: 2px solid var(--accent-primary);
+  outline-offset: 2px;
+}
+
+/* Override outline for elements where outline-offset doesn't work well */
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible {
+  outline: 2px solid var(--accent-primary);
+  outline-offset: 2px;
+}
+
+/* Close buttons, small icon buttons get smaller outline offset */
+.btn-close:focus-visible,
+.icon-btn:focus-visible,
+[class*="close"]:focus-visible {
+  outline-offset: 1px;
+}
+
+/* Focus visible for specific interactive elements */
+.topbar-icon-btn:focus-visible {
+  outline: 2px solid var(--accent-primary);
+  outline-offset: 4px;
+  border-radius: var(--radius-full);
+}
+
+.post-card:focus-visible {
+  outline: 2px solid var(--accent-primary);
+  outline-offset: 2px;
+  border-radius: var(--radius-md);
+}
+
+.sidebar-nav-item:focus-visible {
+  outline: 2px solid var(--accent-primary);
+  outline-offset: 0px;
+  border-radius: var(--radius-sm);
+}
+
+.right-rail-artist-card:focus-visible {
+  outline: 2px solid var(--accent-primary);
+  outline-offset: 2px;
+  border-radius: var(--radius-md);
+}
+
+/* Modal and backdrop */
+.modal-backdrop:focus-visible,
+.glam-modal-backdrop:focus-visible {
+  outline: none; /* Don't outline backdrop */
+}
+
+.glam-booking-sheet:focus-visible,
+.modal-dialog:focus-visible {
+  outline: 2px solid var(--accent-primary);
+  outline-offset: -2px;
+  border-radius: var(--radius-lg);
+}
+
+/* ── Tab Focus Indicator ── */
+.focus-ring:focus-visible {
+  box-shadow: 0 0 0 3px var(--accent-primary);
+  border-radius: var(--radius-md);
+}
+
+/* ── Keyboard-only Focus Styles ── */
+/* Only show focus outline when navigating via keyboard (not mouse) */
+*:focus:not(:focus-visible) {
+  outline: none;
+}
+
+/* ── Skip to Content Link ── */
+.skip-to-content {
+  position: absolute;
+  top: -40px;
+  left: 0;
+  background: var(--accent-primary);
+  color: white;
+  padding: 8px 12px;
+  text-decoration: none;
+  z-index: 10000;
+  border-radius: var(--radius-md);
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.skip-to-content:focus,
+.skip-to-content:focus-visible {
+  top: 16px;
+  left: 16px;
+  outline: none;
+}
+
+/* ── Keyboard Shortcut Indicator ── */
+.keyboard-hint {
+  display: none; /* Hidden by default */
+  font-size: 11px;
+  color: var(--ink-muted);
+  font-weight: 600;
+  margin-left: 8px;
+  padding: 2px 6px;
+  background: var(--bg-muted);
+  border-radius: 4px;
+  white-space: nowrap;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Show hints on tooltip hover or button hover */
+button:hover .keyboard-hint,
+[role="menuitem"]:hover .keyboard-hint {
+  display: inline-block;
+}
+
+/* ── Desktop-only: Show outline-offset for better visibility ── */
+@media (min-width: 821px) {
+  *:focus-visible {
+    outline-offset: 3px;
+  }
+
+  .topbar-icon-btn:focus-visible {
+    outline-offset: 6px;
+  }
+
+  .post-card:focus-visible {
+    outline-offset: 3px;
+  }
+
+  .right-rail-artist-card:focus-visible {
+    outline-offset: 3px;
+  }
+}
+
+/* ── Mobile: Reduce outline-offset to save space ── */
+@media (max-width: 820px) {
+  *:focus-visible {
+    outline-offset: 1px;
+  }
+
+  .topbar-icon-btn:focus-visible {
+    outline-offset: 2px;
+  }
+
+  .keyboard-hint {
+    display: none !important; /* Never show on mobile */
+  }
+}
+
+/* ── Reduce motion for focus animations ── */
+@media (prefers-reduced-motion: reduce) {
+  *:focus-visible {
+    transition: none;
+    animation: none;
+  }
+}
+
+/* ── High contrast mode support ── */
+@media (prefers-contrast: more) {
+  *:focus-visible {
+    outline-width: 3px;
+    outline-offset: 4px;
+  }
+}
+
+/* ── Dark mode adjustments ── */
+:root[data-theme="dark"] *:focus-visible {
+  outline-color: var(--accent-primary);
+}
+
+:root[data-theme="light"] *:focus-visible {
+  outline-color: var(--accent-primary);
+}

@@ -3,7 +3,9 @@
 import { useEffect, useState } from "react";
 import { deletePost, getMyPosts, getUserProfile, updatePost } from "../api";
 import BookingModal from "../components/BookingModal";
+import { LazyImage } from "../components/LazyImage";
 import { ProfileSkeleton, PostCardSkeleton } from "../components/Skeleton";
+import { getFeedImageSizes, generateImageSrcSet } from "../utils/imageOptimization";
 import {
   IconCalendar,
   IconClose,
@@ -354,7 +356,13 @@ function ProfilePage({ profileId, currentUser, onNavigate, onLogout }: ProfilePa
                     onClick={() => setViewingPost(post)}
                     aria-label={`View ${post.service} image larger`}
                   >
-                    <img src={post.mediaUrl || post.imageUrl} alt={post.service} loading="lazy" />
+                    <LazyImage
+                      src={post.mediaUrl || post.imageUrl}
+                      alt={post.service}
+                      className="profile-gallery-img"
+                      srcSet={generateImageSrcSet(post.mediaUrl || post.imageUrl)}
+                      sizes={getFeedImageSizes()}
+                    />
                     <span className="profile-image-viewer-label">View image</span>
                   </button>
                 ) : (
@@ -447,7 +455,13 @@ function ProfilePage({ profileId, currentUser, onNavigate, onLogout }: ProfilePa
             <IconClose size={22} />
           </button>
           <figure className="portfolio-lightbox-content" onClick={(event) => event.stopPropagation()}>
-            <img src={viewingPost.mediaUrl || viewingPost.imageUrl} alt={viewingPost.service} />
+            <LazyImage
+              src={viewingPost.mediaUrl || viewingPost.imageUrl}
+              alt={viewingPost.service}
+              className="portfolio-lightbox-img"
+              srcSet={generateImageSrcSet(viewingPost.mediaUrl || viewingPost.imageUrl)}
+              sizes="90vw"
+            />
             <figcaption>
               <strong>{viewingPost.service}</strong>
               {viewingPost.caption && <span>{viewingPost.caption}</span>}

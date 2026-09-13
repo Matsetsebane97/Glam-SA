@@ -1,0 +1,177 @@
+/* ──────────────────────────────────────────────────────────────────────────
+   Desktop Layout Optimization
+   Optimized spacing, breakpoints, and responsive behavior for desktop
+   ────────────────────────────────────────────────────────────────────────── */
+
+/* ── Main feed content improvements ── */
+@media (min-width: 821px) {
+  /* Remove unnecessary bottom padding on desktop (mobile bottom nav height) */
+  .feed-main {
+    padding-bottom: 24px;
+  }
+
+  /* Optimize search input width on desktop */
+  .topbar-search-input {
+    max-width: 720px;
+  }
+
+  /* Tighten card spacing on desktop for better content density */
+  .feed-grid {
+    gap: 16px;
+  }
+
+  /* Improve right-rail density */
+  .right-rail-section {
+    gap: 12px;
+  }
+
+  .right-rail-artist-card {
+    padding: 6px;
+  }
+
+  /* Adjust category tabs spacing */
+  .category-tabs {
+    gap: 8px;
+    padding: 0 16px;
+  }
+}
+
+/* ── Ultra-wide breakpoint (1920px+) ── */
+@media (min-width: 1920px) {
+  /* Constrain max-width on ultra-wide screens */
+  .app-shell {
+    max-width: 2000px;
+    margin: 0 auto;
+  }
+
+  /* Improve feed card grid for wide screens */
+  .feed-grid {
+    gap: 20px;
+    padding: 0 32px;
+  }
+
+  /* Scale typography fluidly on ultra-wide */
+  .home-feed-title {
+    font-size: clamp(24px, 2.5vw, 40px);
+  }
+
+  /* Sidebar optimization */
+  .sidebar {
+    padding: 32px 20px 32px 24px;
+  }
+
+  /* Right-rail optimization */
+  .right-rail {
+    padding: 32px 24px;
+  }
+}
+
+/* ── Desktop right-rail visibility optimization ── */
+@media (max-width: 1160px) {
+  /* Hide right-rail at 1160px as currently set */
+  .right-rail {
+    display: none;
+  }
+}
+
+/* ── Show right-rail at wider breakpoint ── */
+@media (min-width: 1200px) {
+  /* Keep right-rail visible on 1200px+ (e.g., 1366px, 1440px, 1920px) */
+  .right-rail {
+    display: flex;
+  }
+}
+
+/* ── Mobile-first: Adjust padding for phones ── */
+@media (max-width: 820px) {
+  .feed-main {
+    padding-bottom: 90px; /* Account for mobile bottom nav */
+  }
+
+  .feed-grid {
+    gap: 20px;
+  }
+
+  /* Increase search input max-width for better mobile UX */
+  .topbar-search-input {
+    max-width: 100%;
+  }
+}
+
+/* ── Tablet: Optimize spacing ── */
+@media (min-width: 821px) and (max-width: 1199px) {
+  .feed-grid {
+    gap: 18px;
+  }
+
+  .topbar-search-input {
+    max-width: 600px;
+  }
+
+  /* Sidebar padding adjustment */
+  .sidebar {
+    padding: 28px 16px 24px;
+  }
+}
+
+/* ── Focus-visible outline cleanup for desktop ── */
+@media (min-width: 821px) {
+  /* Larger outline offset for better visibility on desktop */
+  *:focus-visible {
+    outline-offset: 3px;
+  }
+}
+
+/* ── Print stylesheet ── */
+@media print {
+  .topbar,
+  .sidebar,
+  .right-rail,
+  .mobile-nav,
+  .keyboard-shortcuts-backdrop {
+    display: none !important;
+  }
+
+  .feed-main {
+    padding: 0;
+    margin: 0;
+  }
+
+  .post-card {
+    page-break-inside: avoid;
+    margin-bottom: 20px;
+  }
+}
+
+/* ── High DPI displays ── */
+@media (min-width: 2560px) {
+  /* Scale UI elements slightly larger for 4K displays */
+  .topbar-icon-btn {
+    width: 44px;
+    height: 44px;
+  }
+
+  button {
+    font-size: 16px;
+  }
+
+  .post-card {
+    border-radius: 12px;
+  }
+}
+
+/* ── Reduced motion preferences ── */
+@media (prefers-reduced-motion: reduce) {
+  .feed-grid {
+    transition: none;
+  }
+
+  .post-card {
+    transition: none;
+  }
+
+  *:focus-visible {
+    outline: 2px solid var(--accent-primary);
+    transition: none;
+  }
+}

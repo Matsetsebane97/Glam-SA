@@ -1,0 +1,159 @@
+/* ──────────────────────────────────────────────────────────────────────────
+   Lazy Loading & Image Optimization
+   Smooth loading animations and layout shift prevention (CLS)
+   ────────────────────────────────────────────────────────────────────────── */
+
+/* ── Image loading animation ── */
+.post-media-img[data-loaded="false"] {
+  background: linear-gradient(
+    90deg,
+    var(--bg-muted) 0%,
+    color-mix(in srgb, var(--bg-muted) 80%, white 20%) 50%,
+    var(--bg-muted) 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 2s infinite;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+/* Prevent layout shift while loading */
+.post-media-img {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 4 / 5;
+  object-fit: cover;
+  transition: opacity 0.3s ease-in-out;
+}
+
+.post-media-img[data-loaded="false"] {
+  opacity: 0.8;
+}
+
+.post-media-img[data-loaded="true"] {
+  opacity: 1;
+}
+
+.post-media-img[data-error="true"] {
+  opacity: 0.5;
+  background: var(--bg-muted);
+}
+
+/* ── Video optimization ── */
+.post-media-video {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 4 / 5;
+  object-fit: cover;
+}
+
+/* ── Skeleton loader while image loads ── */
+.post-card-skeleton-image {
+  width: 100%;
+  aspect-ratio: 4 / 5;
+  background: linear-gradient(
+    90deg,
+    var(--bg-muted) 0%,
+    color-mix(in srgb, var(--bg-muted) 80%, white 20%) 50%,
+    var(--bg-muted) 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 2s infinite;
+  border-radius: var(--radius-md);
+  margin-bottom: 16px;
+}
+
+/* ── Profile page image optimization ── */
+.profile-avatar-img,
+.profile-header-img {
+  aspect-ratio: 1 / 1;
+}
+
+/* ── Right rail artist avatar optimization ── */
+.right-rail-artist-avatar,
+.artist-preview-avatar {
+  aspect-ratio: 1 / 1;
+  object-fit: cover;
+}
+
+/* ── Desktop-specific optimizations ── */
+@media (min-width: 821px) {
+  /* Smoother loading transitions on desktop */
+  .post-media-img {
+    transition: opacity 0.4s ease-in-out;
+  }
+
+  /* Reduce shimmer animation speed on desktop */
+  @keyframes shimmer-desktop {
+    0% {
+      background-position: -200% 0;
+    }
+    100% {
+      background-position: 200% 0;
+    }
+  }
+
+  .post-media-img[data-loaded="false"] {
+    animation: shimmer-desktop 2.5s infinite;
+  }
+}
+
+/* ── Mobile: faster animations ── */
+@media (max-width: 820px) {
+  .post-media-img {
+    transition: opacity 0.2s ease-in-out;
+  }
+
+  .post-media-img[data-loaded="false"] {
+    animation: shimmer 1.5s infinite;
+  }
+}
+
+/* ── Preload images above the fold ── */
+.post-media-img[rel="preload"] {
+  /* High priority, load immediately */
+  loading: eager;
+}
+
+/* ── Reduce motion support ── */
+@media (prefers-reduced-motion: reduce) {
+  .post-media-img[data-loaded="false"],
+  .post-card-skeleton-image {
+    animation: none;
+    background: var(--bg-muted);
+  }
+
+  .post-media-img {
+    transition: none;
+  }
+}
+
+/* ── Error state ── */
+.post-media-img-error {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  aspect-ratio: 4 / 5;
+  background: var(--bg-muted);
+  color: var(--ink-muted);
+  font-size: 12px;
+  text-align: center;
+  padding: 16px;
+}
+
+/* ── High DPI displays ── */
+@media (min-device-pixel-ratio: 2) {
+  .post-media-img {
+    image-rendering: -webkit-optimize-contrast;
+  }
+}

@@ -2,6 +2,8 @@
 // are persisted through the API and saved looks are persisted per browser user.
 import { useEffect, useRef, useState } from "react";
 import { useToast } from "../context/ToastContext";
+import { LazyImage } from "./LazyImage";
+import { getFeedImageSizes, generateImageSrcSet } from "../utils/imageOptimization";
 import {
   IconBookmark,
   IconCalendar,
@@ -928,11 +930,13 @@ function PostCard({
             className="post-media-video"
           />
         ) : post.mediaUrl || post.imageUrl ? (
-          <img
+          <LazyImage
             src={post.mediaUrl || post.imageUrl}
             alt={post.service}
-            loading="lazy"
             className="post-media-img"
+            srcSet={generateImageSrcSet(post.mediaUrl || post.imageUrl)}
+            sizes={getFeedImageSizes()}
+            rootMargin="50px"
           />
         ) : (
           <div className="media-placeholder">

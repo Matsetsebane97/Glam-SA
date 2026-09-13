@@ -25,4 +25,10 @@
 @import "./styles/momentum-scroll.css";
 @import "./styles/confirm-dialog.css";
 @import "./styles/sticky-footer.css";
+@import "./styles/desktop-focus.css";
+@import "./styles/keyboard-shortcuts.css";
+@import "./styles/desktop-layout.css";
+@import "./styles/lazy-loading.css";
+@import "./styles/desktop-filter-panel.css";
+@import "./styles/booking-modal-desktop.css";
 @import "./styles/mobile-polish.css";

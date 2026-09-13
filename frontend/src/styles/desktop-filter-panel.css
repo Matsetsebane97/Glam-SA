@@ -1,0 +1,326 @@
+/* ──────────────────────────────────────────────────────────────────────────
+   Desktop Filter Panel
+   Faceted search and filtering UI for desktop experience
+   ────────────────────────────────────────────────────────────────────────── */
+
+.filter-panel-toggle-mobile {
+  display: none;
+}
+
+/* ── Desktop: Sticky filter panel ── */
+@media (min-width: 1100px) {
+  .desktop-filter-panel {
+    position: sticky;
+    top: 76px; /* Below topbar */
+    left: 0;
+    width: 260px;
+    height: calc(100vh - 76px);
+    border-right: 1px solid var(--border-subtle);
+    background: var(--bg-surface);
+    overflow-y: auto;
+    padding-bottom: 60px;
+    z-index: 100;
+  }
+
+  .filter-panel-backdrop {
+    display: none;
+  }
+
+  .filter-panel-close {
+    display: none;
+  }
+}
+
+/* ── Mobile: Drawer-style filter panel ── */
+@media (max-width: 1099px) {
+  .filter-panel-toggle-mobile {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    border: 1px solid var(--border-medium);
+    background: var(--bg-surface);
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--ink-primary);
+    transition: all var(--transition-fast);
+    margin: 16px;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .filter-panel-toggle-mobile:active {
+    background: var(--bg-muted);
+  }
+
+  .desktop-filter-panel {
+    position: fixed;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    max-width: 320px;
+    height: 100vh;
+    background: var(--bg-surface);
+    border-right: 1px solid var(--border-subtle);
+    overflow-y: auto;
+    transition: left var(--transition-base);
+    z-index: 1001;
+    padding-bottom: 0;
+  }
+
+  .desktop-filter-panel.open {
+    left: 0;
+  }
+
+  .filter-panel-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 1000;
+    animation: fadeIn 0.2s ease-out;
+  }
+
+  .filter-panel-close {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    background: transparent;
+    border: none;
+    color: var(--ink-muted);
+    cursor: pointer;
+    padding: 0;
+  }
+}
+
+/* ── Filter panel header ── */
+.filter-panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.filter-panel-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--ink-primary);
+  margin: 0;
+}
+
+/* ── Filter panel content ── */
+.filter-panel-content {
+  padding: 8px 0;
+}
+
+.filter-section {
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.filter-section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 12px 16px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  transition: background var(--transition-fast);
+}
+
+.filter-section-header:hover {
+  background: var(--bg-muted);
+}
+
+.filter-section-title {
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--ink-primary);
+  margin: 0;
+}
+
+/* ── Filter options ── */
+.filter-options {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  padding: 4px 0;
+}
+
+.filter-option {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 16px;
+  cursor: pointer;
+  transition: background var(--transition-fast);
+}
+
+.filter-option:hover {
+  background: var(--bg-muted);
+}
+
+.filter-option input {
+  cursor: pointer;
+  width: 16px;
+  height: 16px;
+  accent-color: var(--accent-primary);
+}
+
+.filter-label {
+  font-size: 13px;
+  color: var(--ink-primary);
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.filter-count {
+  color: var(--ink-muted);
+  font-weight: 500;
+  margin-left: auto;
+  flex-shrink: 0;
+}
+
+/* ── Price range filter ── */
+.filter-price-range {
+  padding: 12px 16px;
+}
+
+.price-inputs {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.price-input {
+  flex: 1;
+  padding: 6px 8px;
+  border: 1px solid var(--border-medium);
+  border-radius: var(--radius-sm);
+  background: var(--bg-muted);
+  color: var(--ink-primary);
+  font-size: 12px;
+}
+
+.price-input::placeholder {
+  color: var(--ink-muted);
+}
+
+.price-separator {
+  color: var(--ink-muted);
+  font-weight: 600;
+}
+
+/* ── Price presets ── */
+.price-presets {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.price-preset {
+  padding: 6px 10px;
+  border: 1px solid var(--border-medium);
+  background: var(--bg-muted);
+  border-radius: var(--radius-sm);
+  color: var(--ink-primary);
+  font-size: 12px;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.price-preset:hover,
+.price-preset:active {
+  background: color-mix(in srgb, var(--accent-primary) 10%, var(--bg-muted));
+  border-color: var(--accent-primary);
+  color: var(--accent-primary);
+}
+
+/* ── Filter panel footer ── */
+.filter-panel-footer {
+  padding: 12px 16px;
+  border-top: 1px solid var(--border-subtle);
+  background: var(--bg-muted);
+}
+
+.filter-clear-button {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid var(--border-medium);
+  background: transparent;
+  border-radius: var(--radius-sm);
+  color: var(--ink-secondary);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.filter-clear-button:hover,
+.filter-clear-button:active {
+  background: var(--bg-surface);
+  color: var(--ink-primary);
+  border-color: var(--border-strong);
+}
+
+/* ── Scrollbar styling ── */
+.desktop-filter-panel::-webkit-scrollbar {
+  width: 6px;
+}
+
+.desktop-filter-panel::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.desktop-filter-panel::-webkit-scrollbar-thumb {
+  background: var(--border-medium);
+  border-radius: 3px;
+}
+
+.desktop-filter-panel::-webkit-scrollbar-thumb:hover {
+  background: var(--border-strong);
+}
+
+/* ── Dark theme ── */
+:root[data-theme="dark"] .desktop-filter-panel {
+  background: color-mix(in srgb, var(--bg-surface) 95%, #ffffff 5%);
+}
+
+:root[data-theme="light"] .desktop-filter-panel {
+  background: #fafafa;
+}
+
+/* ── Reduce motion ── */
+@media (prefers-reduced-motion: reduce) {
+  .desktop-filter-panel {
+    transition: none;
+  }
+
+  .filter-section-header {
+    transition: none;
+  }
+
+  .filter-option {
+    transition: none;
+  }
+
+  .price-preset {
+    transition: none;
+  }
+
+  .filter-clear-button {
+    transition: none;
+  }
+}
