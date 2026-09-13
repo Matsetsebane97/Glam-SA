@@ -7,7 +7,6 @@ type KeyboardShortcuts = {
   toggleBookmark?: () => void;
   toggleLike?: () => void;
   openBooking?: () => void;
-  toggleTheme?: () => void;
   showHelp?: () => void;
 };
 
@@ -20,7 +19,6 @@ type KeyboardShortcuts = {
  * - "s" : toggle save/bookmark
  * - "l" : toggle like
  * - "b" : open booking modal
- * - "t" : toggle theme
  * - "?" : show help
  */
 export function useKeyboardShortcuts(shortcuts: KeyboardShortcuts) {
@@ -71,12 +69,6 @@ export function useKeyboardShortcuts(shortcuts: KeyboardShortcuts) {
         shortcuts.openBooking?.();
       }
 
-      // "t" : toggle theme (t for "theme")
-      if (e.key === "t" && !isInput) {
-        e.preventDefault();
-        shortcuts.toggleTheme?.();
-      }
-
       // "?" : show help
       if (e.key === "?" || (e.shiftKey && e.key === "/")) {
         e.preventDefault();
@@ -99,6 +91,5 @@ export const KEYBOARD_SHORTCUTS = [
   { key: "l", action: "Like post", category: "Actions" },
   { key: "s", action: "Save post", category: "Actions" },
   { key: "b", action: "Book appointment", category: "Actions" },
-  { key: "t", action: "Toggle theme", category: "Settings" },
   { key: "?", action: "Show this help", category: "Help" },
 ];

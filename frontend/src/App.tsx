@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import { ThemeProvider } from "./theme/ThemeContext";
 import { ToastProvider } from "./context/ToastContext";
 import { getCategories, getCurrentUser, getPosts, logout } from "./api";
 import { parseSmartQuery, formatSearchSummary } from "./utils/searchQuery";
@@ -146,9 +145,8 @@ function App() {
   const [showKeyboardShortcuts, setShowKeyboardShortcuts] = useState(false);
 
   return (
-    <ThemeProvider>
-      <ToastProvider>
-        <AppContent
+    <ToastProvider>
+      <AppContent
           showOnboarding={showOnboarding}
           setShowOnboarding={setShowOnboarding}
           currentUser={currentUser}
@@ -179,7 +177,6 @@ function App() {
           setFilterPanelOpen={setFilterPanelOpen}
         />
       </ToastProvider>
-    </ThemeProvider>
   );
 }
 

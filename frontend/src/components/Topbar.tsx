@@ -1,10 +1,9 @@
 // Global search and account controls — frosted glass sticky header.
 import { useEffect, useRef, useState } from "react";
-import { useTheme } from "../theme/ThemeContext";
 import { getBookings, getConversations } from "../api";
 import { brandLogoUrl } from "../constants";
 import { SearchSummary } from "./SearchSummary";
-import { IconBell, IconClose, IconMoon, IconSearch, IconSun } from "./Icons";
+import { IconBell, IconClose, IconSearch } from "./Icons";
 import type { Booking, Conversation, CurrentUser } from "../types";
 
 type TopbarProps = {
@@ -16,7 +15,6 @@ type TopbarProps = {
 };
 
 function Topbar({ currentUser, query, searchSummary, onQueryChange, onNavigate }: TopbarProps) {
-  const { theme, toggleTheme } = useTheme();
   const [showNotifications, setShowNotifications] = useState(false);
   const [notifications, setNotifications] = useState<Conversation[]>([]);
   const [bookingNotifications, setBookingNotifications] = useState<Booking[]>([]);
@@ -118,16 +116,6 @@ function Topbar({ currentUser, query, searchSummary, onQueryChange, onNavigate }
           onClick={() => setMobileSearchOpen(true)}
         >
           <IconSearch size={18} />
-        </button>
-
-        {/* Theme toggle */}
-        <button
-          className="topbar-icon-btn"
-          aria-label={theme === "light" ? "Switch to dark mode" : "Switch to light mode"}
-          type="button"
-          onClick={toggleTheme}
-        >
-          {theme === "light" ? <IconMoon size={18} /> : <IconSun size={18} />}
         </button>
 
         {/* Notifications */}
