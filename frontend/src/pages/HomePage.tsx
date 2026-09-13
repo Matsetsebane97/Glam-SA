@@ -71,7 +71,7 @@ function HomePage({
     <PullToRefresh
       pullDistance={pullDistance}
       isRefreshing={isRefreshing}
-      scrollRef={scrollContainerRef}
+      scrollRef={scrollContainerRef as React.RefObject<HTMLDivElement>}
       onTouchStart={handlers.onTouchStart}
       onTouchMove={handlers.onTouchMove}
       onTouchEnd={handlers.onTouchEnd}

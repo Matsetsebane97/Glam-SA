@@ -114,10 +114,8 @@ body {
 }
 
 /* Touch feedback */
--webkit-user-select: none;
-user-select: none;
-
-/* Ensure fast click response on touch */
 * {
+  -webkit-user-select: none;
+  user-select: none;
   -webkit-tap-highlight-color: transparent;
 }

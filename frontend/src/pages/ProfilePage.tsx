@@ -442,7 +442,6 @@ function ProfilePage({ profileId, currentUser, onNavigate, onLogout }: ProfilePa
       creatorLocation={profile.locationLabel}
       creatorPhone={profile.whatsappNumber}
       postId={posts[0]?.id}
-      postImageUrl={posts[0]?.mediaUrl || posts[0]?.imageUrl}
       initialServiceName={posts[0]?.service}
       currentUser={currentUser}
       onNavigate={onNavigate}

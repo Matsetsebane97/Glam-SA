@@ -30,7 +30,6 @@ type PageRouterProps = {
   onRefresh: () => Promise<void>;
   onSelectCategory: (category: string) => void;
   onToggleNearby: () => void;
-  onQueryChange: (query: string) => void;
   priceRange: { min: number; max: number };
   onPriceRangeChange: (min: number, max: number) => void;
   selectedLocation: string;
@@ -49,7 +48,6 @@ export function renderPage({
   nearbyOnly,
   isLoading,
   posts,
-  query,
   searchSummary,
   categories,
   emptyCopy,
@@ -59,7 +57,6 @@ export function renderPage({
   onRefresh,
   onSelectCategory,
   onToggleNearby,
-  onQueryChange,
   priceRange,
   onPriceRangeChange,
   selectedLocation,
@@ -74,6 +71,7 @@ export function renderPage({
         categories={categories}
         currentUser={currentUser}
         onNavigate={onNavigate}
+        onUploaded={() => onNavigate("/")}
       />
     );
   }
@@ -84,7 +82,9 @@ export function renderPage({
       <SettingsPage
         currentUser={currentUser}
         onNavigate={onNavigate}
-        onLogout={onLogout}
+        onSaved={() => {
+          // Update user in parent state if needed
+        }}
       />
     );
   }
@@ -132,7 +132,7 @@ export function renderPage({
 
   // /info
   if (pathname === "/info") {
-    return <InfoPage onNavigate={onNavigate} />;
+    return <InfoPage page="about" onNavigate={onNavigate} />;
   }
 
   // /notifications
@@ -145,7 +145,7 @@ export function renderPage({
   // /saved
   if (pathname === "/saved") {
     return (
-      <SavedPage currentUser={currentUser} onNavigate={onNavigate} />
+      <SavedPage currentUser={currentUser} posts={posts} onNavigate={onNavigate} />
     );
   }
 
@@ -154,6 +154,7 @@ export function renderPage({
     return (
       <ClientDashboardPage
         currentUser={currentUser}
+        posts={posts}
         onNavigate={onNavigate}
       />
     );
@@ -170,7 +171,6 @@ export function renderPage({
       isLoading={isLoading}
       nearbyOnly={nearbyOnly}
       posts={posts}
-      query={query}
       searchSummary={searchSummary}
       currentUser={currentUser}
       onNavigate={onNavigate}

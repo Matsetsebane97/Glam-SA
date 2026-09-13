@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { IconChevronDown, IconClose } from "./Icons";
+import { IconChevronRight, IconClose } from "./Icons";
 import type { Post } from "../types";
 
 type FilterPanelProps = {
@@ -77,7 +77,9 @@ export function DesktopFilterPanel({
         aria-label="Toggle filters"
       >
         Filters
-        <IconChevronDown size={18} style={{ transform: isOpen ? "rotate(180deg)" : "" }} />
+        <span style={{ display: "inline-flex", transform: isOpen ? "rotate(90deg)" : "", transition: "transform 0.2s" }}>
+          <IconChevronRight size={18} />
+        </span>
       </button>
 
       {/* Filter panel */}
@@ -108,13 +110,13 @@ export function DesktopFilterPanel({
               aria-expanded={expandedSections.category}
             >
               <h3 className="filter-section-title">Category</h3>
-              <IconChevronDown
-                size={16}
-                style={{
-                  transform: expandedSections.category ? "rotate(180deg)" : "",
-                  transition: "transform 0.2s",
-                }}
-              />
+              <span style={{
+                display: "inline-flex",
+                transform: expandedSections.category ? "rotate(90deg)" : "",
+                transition: "transform 0.2s",
+              }}>
+                <IconChevronRight size={16} />
+              </span>
             </button>
 
             {expandedSections.category && (
@@ -157,13 +159,13 @@ export function DesktopFilterPanel({
               aria-expanded={expandedSections.price}
             >
               <h3 className="filter-section-title">Price Range</h3>
-              <IconChevronDown
-                size={16}
-                style={{
-                  transform: expandedSections.price ? "rotate(180deg)" : "",
-                  transition: "transform 0.2s",
-                }}
-              />
+              <span style={{
+                display: "inline-flex",
+                transform: expandedSections.price ? "rotate(90deg)" : "",
+                transition: "transform 0.2s",
+              }}>
+                <IconChevronRight size={16} />
+              </span>
             </button>
 
             {expandedSections.price && (
@@ -223,13 +225,13 @@ export function DesktopFilterPanel({
               aria-expanded={expandedSections.location}
             >
               <h3 className="filter-section-title">Location</h3>
-              <IconChevronDown
-                size={16}
-                style={{
-                  transform: expandedSections.location ? "rotate(180deg)" : "",
-                  transition: "transform 0.2s",
-                }}
-              />
+              <span style={{
+                display: "inline-flex",
+                transform: expandedSections.location ? "rotate(90deg)" : "",
+                transition: "transform 0.2s",
+              }}>
+                <IconChevronRight size={16} />
+              </span>
             </button>
 
             {expandedSections.location && (

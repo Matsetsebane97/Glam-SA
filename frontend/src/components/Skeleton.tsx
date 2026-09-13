@@ -126,14 +126,13 @@ export function BookingModalSkeleton() {
           />
         ))}
       </div>
-      <Skeleton height="18px" width="80%" className="skeleton-label" style={{ marginTop: "20px" }} />
+      <Skeleton height="18px" width="80%" className="skeleton-label" />
       <Skeleton height="200px" borderRadius="8px" className="skeleton-calendar" />
       <Skeleton
         height="40px"
         width="100%"
         borderRadius="8px"
         className="skeleton-button"
-        style={{ marginTop: "20px" }}
       />
     </div>
   );

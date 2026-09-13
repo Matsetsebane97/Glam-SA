@@ -1,5 +1,4 @@
-import React from "react";
-import { IconCheck, IconClose, IconAlert } from "./Icons";
+import { IconCheck, IconClose, IconZap } from "./Icons";
 import type { Toast, ToastType } from "../context/ToastContext";
 
 type ToastProps = Toast & {
@@ -15,10 +14,10 @@ export function ToastItem({ id, message, type, onClose }: ToastProps) {
       case "success":
         return <IconCheck size={16} />;
       case "error":
-        return <IconAlert size={16} />;
+        return <IconZap size={16} />;
       case "info":
       default:
-        return <IconAlert size={16} />;
+        return <IconZap size={16} />;
     }
   };
 

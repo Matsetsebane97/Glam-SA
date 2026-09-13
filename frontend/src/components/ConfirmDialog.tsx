@@ -1,5 +1,4 @@
-import React from "react";
-import { IconClose, IconAlert } from "./Icons";
+import { IconClose, IconZap } from "./Icons";
 
 type ConfirmDialogProps = {
   isOpen: boolean;
@@ -50,7 +49,7 @@ export function ConfirmDialog({
         </button>
 
         <div className="confirm-dialog-icon">
-          <IconAlert size={24} />
+          <IconZap size={24} />
         </div>
 
         <h2 id="confirm-title" className="confirm-dialog-title">

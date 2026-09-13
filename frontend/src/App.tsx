@@ -251,7 +251,6 @@ function AppContent(props: AppContentProps) {
     onRefresh: props.refreshPosts,
     onSelectCategory: props.setActiveCategory,
     onToggleNearby: () => props.setNearbyOnly(!props.nearbyOnly),
-    onQueryChange: props.setQuery,
     priceRange: props.priceRange,
     onPriceRangeChange: (min, max) => props.setPriceRange({ min, max }),
     selectedLocation: props.selectedLocation,

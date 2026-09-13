@@ -29,11 +29,9 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
 
       // Auto-remove after duration
       if (duration > 0) {
-        const timer = setTimeout(() => {
+        setTimeout(() => {
           removeToast(id);
         }, duration);
-
-        return () => clearTimeout(timer);
       }
 
       return id;
