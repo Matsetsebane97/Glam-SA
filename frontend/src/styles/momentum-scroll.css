@@ -113,9 +113,18 @@ body {
   overscroll-behavior: contain;
 }
 
-/* Touch feedback */
+/* Touch feedback - only disable tap highlight, allow text selection */
 * {
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Disable text selection only on interactive elements */
+button,
+a,
+.post-card-actions,
+.topbar-icon-btn,
+.mobile-nav-item,
+[role="button"] {
   -webkit-user-select: none;
   user-select: none;
-  -webkit-tap-highlight-color: transparent;
 }

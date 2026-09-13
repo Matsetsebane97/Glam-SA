@@ -82,6 +82,7 @@
     background: rgba(0, 0, 0, 0.5);
     z-index: 1000;
     animation: fadeIn 0.2s ease-out;
+    touch-action: auto;
   }
 
   .filter-panel-close {
