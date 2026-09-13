@@ -1,0 +1,232 @@
+/* ──────────────────────────────────────────────────────────────────────────
+   Mobile Compact Post Cards
+   Reduces post card sizes on mobile for better content density
+   ────────────────────────────────────────────────────────────────────────── */
+
+/* ── Mobile: Compact post cards (≤768px) ── */
+@media (max-width: 768px) {
+  /* Reduce spacing between cards */
+  .feed-grid,
+  .home-feed-grid {
+    gap: 12px !important;
+  }
+
+  /* Compact post card header */
+  .post-card-header {
+    padding: 8px 12px !important;
+    min-height: 48px;
+  }
+
+  /* Smaller avatar */
+  .post-artist-avatar {
+    width: 32px !important;
+    height: 32px !important;
+    font-size: 12px !important;
+  }
+
+  /* Tighter artist info */
+  .post-artist-info {
+    gap: 0 !important;
+  }
+
+  .post-artist-name {
+    font-size: 12px !important;
+    line-height: 1.3;
+  }
+
+  .post-artist-role {
+    font-size: 10px !important;
+    line-height: 1.2;
+  }
+
+  /* Reduce media container slightly on mobile */
+  .post-media-wrap {
+    aspect-ratio: 3 / 4 !important; /* Shorter than 4/5 */
+  }
+
+  /* Compact action bar */
+  .post-card-actions,
+  .post-actions-bar {
+    padding: 6px 10px !important;
+    min-height: 48px !important;
+    gap: 8px !important;
+  }
+
+  /* Smaller action buttons */
+  .action-btn {
+    min-width: 40px !important;
+    min-height: 40px !important;
+    padding: 6px 8px !important;
+    font-size: 12px !important;
+  }
+
+  .action-btn svg {
+    width: 18px !important;
+    height: 18px !important;
+  }
+
+  .action-count {
+    font-size: 11px !important;
+  }
+
+  /* Compact caption */
+  .post-caption,
+  .post-caption-box {
+    padding: 6px 12px 8px !important;
+    font-size: 12px !important;
+    line-height: 1.4 !important;
+  }
+
+  .post-caption-text {
+    font-size: 12px !important;
+  }
+
+  /* Smaller badges and pills */
+  .post-media-badge {
+    padding: 3px 7px !important;
+    font-size: 10px !important;
+    top: 8px !important;
+    right: 8px !important;
+  }
+
+  .post-media-price-pill,
+  .post-price-pill {
+    padding: 4px 10px !important;
+    font-size: 11px !important;
+    bottom: 8px !important;
+    left: 8px !important;
+  }
+
+  /* Compact location/distance badges */
+  .post-location-badge,
+  .post-distance-badge {
+    font-size: 10px !important;
+    padding: 3px 8px !important;
+  }
+
+  /* Reduce scrim overlay padding */
+  .post-media-scrim {
+    padding: 24px 10px 8px !important;
+  }
+
+  .post-media-service-label {
+    font-size: 11px !important;
+  }
+
+  .post-media-category-badge {
+    font-size: 9px !important;
+    padding: 2px 6px !important;
+  }
+
+  /* Compact skeleton loaders */
+  .home-post-skeleton {
+    gap: 8px !important;
+  }
+
+  .home-skeleton-media {
+    aspect-ratio: 3 / 4 !important;
+  }
+
+  /* Reduce feed header spacing */
+  .home-feed-header {
+    padding: 12px 14px 10px !important;
+    gap: 10px !important;
+  }
+
+  .home-feed-title h2 {
+    font-size: 20px !important;
+    margin-bottom: 4px;
+  }
+
+  .home-feed-subtitle {
+    font-size: 11px !important;
+    line-height: 1.4;
+  }
+
+  /* Compact nearby button */
+  .home-nearby-btn {
+    min-height: 40px !important;
+    padding: 8px 12px !important;
+    font-size: 12px !important;
+  }
+
+  .home-nearby-btn svg {
+    width: 12px !important;
+    height: 12px !important;
+  }
+
+  .home-post-count {
+    font-size: 11px !important;
+  }
+}
+
+/* ── Extra small mobile (≤480px) ── */
+@media (max-width: 480px) {
+  /* Even tighter spacing on small phones */
+  .feed-grid,
+  .home-feed-grid {
+    gap: 10px !important;
+  }
+
+  .post-card-header {
+    padding: 6px 10px !important;
+  }
+
+  .post-card-actions,
+  .post-actions-bar {
+    padding: 4px 8px !important;
+  }
+
+  /* Smaller media aspect ratio for small screens */
+  .post-media-wrap {
+    aspect-ratio: 3 / 4 !important;
+    max-height: 65vh;
+  }
+
+  /* Very compact action buttons */
+  .action-btn {
+    min-width: 38px !important;
+    min-height: 38px !important;
+    padding: 5px 6px !important;
+  }
+
+  .action-btn svg {
+    width: 16px !important;
+    height: 16px !important;
+  }
+}
+
+/* ── Preserve tap targets for accessibility ── */
+@media (max-width: 768px) {
+  /* Ensure buttons are still easily tappable */
+  .action-btn,
+  .post-options-btn,
+  .home-nearby-btn {
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+  }
+
+  /* Visual active state for touch feedback */
+  .action-btn:active {
+    transform: scale(0.92);
+    background: var(--bg-muted);
+  }
+
+  /* Maintain accessibility for small touch targets */
+  .action-btn::before {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: max(100%, 44px);
+    height: max(100%, 44px);
+  }
+}
+
+/* ── Reduced motion ── */
+@media (prefers-reduced-motion: reduce) {
+  .action-btn:active {
+    transform: none;
+  }
+}
