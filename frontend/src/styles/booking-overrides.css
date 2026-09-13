@@ -414,8 +414,8 @@
 .glam-calendar-day.past {
   opacity: 0.28 !important;
   cursor: not-allowed !important;
-  background: transparent !important;
-  border-color: transparent !important;
+  background: var(--bg-muted) !important;
+  border-color: var(--border-subtle) !important;
 }
 
 .glam-calendar-day.unavailable .day-number,
@@ -425,14 +425,14 @@
 
 .glam-calendar-day.available {
   background: var(--bg-surface) !important;
-  border-color: var(--border-medium) !important;
+  border: 2px solid var(--accent-secondary) !important;
 }
 
 .glam-calendar-day.available:hover {
-  background: var(--bg-muted) !important;
-  border-color: var(--accent-primary) !important;
+  background: color-mix(in srgb, var(--accent-secondary) 12%, var(--bg-surface)) !important;
+  border-color: var(--accent-secondary) !important;
   transform: translateY(-2px) !important;
-  box-shadow: var(--shadow-glow-rose) !important;
+  box-shadow: 0 4px 12px color-mix(in srgb, var(--accent-secondary) 25%, transparent) !important;
 }
 
 .glam-calendar-day.selected {
@@ -467,14 +467,17 @@
 }
 
 .glam-calendar-day .slot-indicator {
-  font-size: 9px !important;
+  font-size: 10px !important;
   font-weight: 700 !important;
   color: var(--accent-secondary) !important;
-  padding: 2px 5px !important;
-  background: var(--accent-gold-bg) !important;
+  padding: 3px 6px !important;
+  background: var(--accent-secondary) !important;
+  background: color-mix(in srgb, var(--accent-secondary) 15%, transparent) !important;
+  border: 1px solid var(--accent-secondary) !important;
   border-radius: var(--radius-full) !important;
-  line-height: 1 !important;
+  line-height: 1.2 !important;
   white-space: nowrap !important;
+  display: inline-block !important;
 }
 
 .glam-calendar-day.selected .slot-indicator {

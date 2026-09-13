@@ -1,0 +1,115 @@
+/* ──────────────────────────────────────────────────────────────────────────
+   Search Summary Component
+   Shows parsed search filters (category, location, price) with visual feedback
+   ────────────────────────────────────────────────────────────────────────── */
+
+.search-summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 12px;
+  background: var(--bg-muted);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-subtle);
+  font-size: 12px;
+  color: var(--ink-secondary);
+  animation: slideDown 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.search-summary-content {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  flex: 1;
+  min-width: 0;
+}
+
+.search-filter-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 10px;
+  background: var(--bg-surface);
+  border-radius: var(--radius-full);
+  border: 1px solid var(--border-subtle);
+  color: var(--ink-primary);
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.search-filter-tag.category {
+  border-color: var(--accent-primary);
+  color: var(--accent-primary);
+}
+
+.search-filter-tag.location {
+  border-color: var(--accent-secondary);
+  color: var(--accent-secondary);
+}
+
+.search-filter-tag.price {
+  border-color: var(--accent-rose);
+  color: var(--accent-rose);
+}
+
+.search-filter-tag svg {
+  flex-shrink: 0;
+  opacity: 0.7;
+}
+
+.search-summary-clear {
+  flex-shrink: 0;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-full);
+  background: transparent;
+  border: 1px solid var(--border-subtle);
+  color: var(--ink-muted);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  -webkit-tap-highlight-color: transparent;
+}
+
+.search-summary-clear:hover,
+.search-summary-clear:active {
+  background: var(--bg-surface);
+  border-color: var(--border-medium);
+  color: var(--ink-primary);
+}
+
+/* ── Mobile adjustments ── */
+@media (max-width: 640px) {
+  .search-summary {
+    padding: 8px 10px;
+    font-size: 11px;
+    gap: 8px;
+  }
+
+  .search-filter-tag {
+    padding: 4px 8px;
+    font-size: 11px;
+  }
+
+  .search-summary-clear {
+    width: 24px;
+    height: 24px;
+  }
+}

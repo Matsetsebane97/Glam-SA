@@ -1,6 +1,7 @@
 // Conversation list, message threads, and appointments/bookings management.
 import { useEffect, useRef, useState } from "react";
 import { getBookings, getConversations, getMessages, sendMessage, updateBookingStatus } from "../api";
+import { MessageThreadSkeleton } from "../components/Skeleton";
 import {
   IconCalendar,
   IconCheck,
@@ -329,7 +330,7 @@ function MessagesPage({ currentUser, onNavigate }: MessagesPageProps) {
                   </header>
 
                   <div className="message-list" ref={messageListRef} aria-live="polite">
-                    {isLoadingMessages && messages.length === 0 && <p className="message-list-status">Loading conversation...</p>}
+                    {isLoadingMessages && messages.length === 0 && <MessageThreadSkeleton />}
                     {!isLoadingMessages && messages.length === 0 && <p className="message-list-status">No messages yet. Start the conversation below.</p>}
                     {messages.map((message) => (
                       <div

@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { deletePost, getMyPosts, getUserProfile, updatePost } from "../api";
 import BookingModal from "../components/BookingModal";
+import { ProfileSkeleton, PostCardSkeleton } from "../components/Skeleton";
 import {
   IconCalendar,
   IconClose,
@@ -159,7 +160,12 @@ function ProfilePage({ profileId, currentUser, onNavigate, onLogout }: ProfilePa
   if (!profile) {
     return (
       <section className="page-content profile-page">
-        <div className="empty-state"><p>Loading profile...</p></div>
+        <ProfileSkeleton />
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px" }}>
+          {Array.from({ length: 4 }).map((_, i) => (
+            <PostCardSkeleton key={i} />
+          ))}
+        </div>
       </section>
     );
   }

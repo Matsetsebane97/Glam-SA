@@ -1,98 +1,26 @@
 import { useEffect, useState } from "react";
 import { ThemeProvider } from "./theme/ThemeContext";
+import { ToastProvider } from "./context/ToastContext";
 import { getCategories, getCurrentUser, getPosts, logout } from "./api";
+import { parseSmartQuery, formatSearchSummary } from "./utils/searchQuery";
+import { renderPage } from "./pages/PageRouter";
 import "./App.css";
 import OnboardingWalkthrough, { STORAGE_KEY as ONBOARDING_KEY } from "./components/OnboardingWalkthrough";
 import MobileNav from "./components/MobileNav";
-import AssistantPanel from "./components/AssistantPanel";
+import { Toaster } from "./components/Toast";
+import { useToast } from "./context/ToastContext";
 import RightRail from "./components/RightRail";
 import Sidebar from "./components/Sidebar";
 import Topbar from "./components/Topbar";
 import { navForPath } from "./constants";
-import DiscoverPage from "./pages/DiscoverPage";
-import HomePage from "./pages/HomePage";
-import LoginPage from "./pages/LoginPage";
-import UploadPage from "./pages/UploadPage";
-import ProfilePage from "./pages/ProfilePage";
-import MessagesPage from "./pages/MessagesPage";
-import SettingsPage from "./pages/SettingsPage";
-import InfoPage from "./pages/InfoPage";
-import NotificationsPage from "./pages/NotificationsPage";
-import AdminPage from "./pages/AdminPage";
-import SavedPage from "./pages/SavedPage";
-import ClientDashboardPage from "./pages/ClientDashboardPage";
 import type { CurrentUser, Post } from "./types";
 
-const categoryAliases: Record<string, string> = {
-  bridal: "Bridal",
-  wedding: "Bridal",
-  weddings: "Bridal",
-  bride: "Bridal",
-  bridesmaid: "Bridal",
-  braid: "Hair",
-  braids: "Hair",
-  hair: "Hair",
-  nails: "Nails",
-  nail: "Nails",
-  manicure: "Nails",
-  pedicure: "Nails",
-  barber: "Barbering",
-  barbers: "Barbering",
-  barbering: "Barbering",
-  makeup: "Makeup",
-  skincare: "Skincare",
-  facial: "Skincare",
-  facials: "Skincare",
-  tattoo: "Tattoos",
-  tattoos: "Tattoos",
-  lashes: "Lashes & Brows",
-  lash: "Lashes & Brows",
-  brows: "Lashes & Brows",
-  brow: "Lashes & Brows",
-  loc: "Locs & Dreadlocks",
-  locs: "Locs & Dreadlocks",
-  dreadlock: "Locs & Dreadlocks",
-  dreadlocks: "Locs & Dreadlocks",
-  wig: "Wigs & Weaves",
-  wigs: "Wigs & Weaves",
-  weave: "Wigs & Weaves",
-  weaves: "Wigs & Weaves",
-  natural: "Natural Hair",
-  "natural hair": "Natural Hair",
-  spa: "Spa & Wellness",
-  wellness: "Spa & Wellness",
-  massage: "Massage",
-  waxing: "Waxing & Hair Removal",
-  piercing: "Piercing",
-  "teeth whitening": "Teeth Whitening",
-  aesthetics: "Aesthetics & Injectables",
-  injectables: "Aesthetics & Injectables",
-  "men's grooming": "Men's Grooming",
-  "beauty courses": "Beauty Courses",
-};
-
-const searchStopWords = new Set(["a", "an", "and", "for", "in", "near", "the", "under", "below", "less", "than"]);
-
-function parseSmartQuery(query: string) {
-  const normalizedQuery = query.trim().toLowerCase();
-  const categoryToken = normalizedQuery.match(/\b(natural hair|bridal|bride|bridesmaid|weddings?|braids?|hair|nails?|manicure|pedicure|barber(?:ing|s)?|makeup|skincare|facials?|tattoos?|lashes?|brows?|locs?|dreadlocks?|wigs?|weaves?|spa|wellness|massage|waxing|piercing|teeth whitening|aesthetics|injectables|men's grooming|beauty courses)\b/);
-  const priceMatch = normalizedQuery.match(/(?:under|below|less than)\s*r?\s*(\d+(?:\.\d+)?)/);
-  const nearMatch = normalizedQuery.match(/\bnear\s+([a-z][a-z\s-]*?)(?=\s+(?:under|below|less than)\b|$)/);
-  const category = categoryToken ? categoryAliases[categoryToken[1]] : undefined;
-  const location = nearMatch?.[1].trim();
-  const searchTerms = normalizedQuery
-    .replace(categoryToken?.[0] || "", "")
-    .replace(priceMatch?.[0] || "", "")
-    .replace(nearMatch?.[0] || "", "")
-    .split(/\s+/)
-    .filter((term) => term && !searchStopWords.has(term));
-
-  return { category, location, maxPrice: priceMatch ? Number(priceMatch[1]) : undefined, searchTerms };
-}
-
+/**
+ * Main App component
+ * Coordinates global state: auth, search, navigation, posts
+ * Delegates page rendering to PageRouter
+ */
 function App() {
-  // The lightweight pathname router keeps the app dependency-free while still
-  // supporting direct links to protected pages.
   const [activeCategory, setActiveCategory] = useState("For you");
   const [nearbyOnly, setNearbyOnly] = useState(false);
   const [query, setQuery] = useState("");
@@ -102,19 +30,19 @@ function App() {
   const [error, setError] = useState("");
   const [pathname, setPathname] = useState(window.location.pathname);
   const [currentUser, setCurrentUser] = useState<CurrentUser | null>(null);
-  // Show the onboarding walkthrough once per account (cleared on dismiss).
   const [showOnboarding, setShowOnboarding] = useState(false);
 
-  // Keep navigation client-side so page changes do not reload feed state.
+  // Client-side navigation without page reload
   const navigate = (path: string) => {
     window.history.pushState({}, "", path);
     setPathname(path);
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
-  const hasLocation =
-    currentUser?.latitude != null && currentUser?.longitude != null;
+  // Determine if user has location for nearby filtering
+  const hasLocation = currentUser?.latitude != null && currentUser?.longitude != null;
 
+  // Refresh posts from API
   const refreshPosts = async () => {
     const nextPosts = await getPosts(
       nearbyOnly && hasLocation
@@ -128,12 +56,11 @@ function App() {
     setPosts(nextPosts);
   };
 
-  // Re-check the session after navigation so protected pages reflect logout/login changes.
+  // Auth: re-check session on navigation
   useEffect(() => {
     void getCurrentUser()
       .then((user) => {
         setCurrentUser(user);
-        // Trigger walkthrough for newly signed-up users who haven't seen it yet.
         if (user && !localStorage.getItem(ONBOARDING_KEY)) {
           setShowOnboarding(true);
         }
@@ -141,13 +68,14 @@ function App() {
       .catch(() => setCurrentUser(null));
   }, [pathname]);
 
+  // Router: listen for back button
   useEffect(() => {
     const handlePopState = () => setPathname(window.location.pathname);
     window.addEventListener("popstate", handlePopState);
     return () => window.removeEventListener("popstate", handlePopState);
   }, []);
 
-  // Categories and posts share the same loading cycle so the feed renders consistently.
+  // Data: load categories and posts on mount and filter changes
   useEffect(() => {
     const loadContent = async () => {
       setIsLoading(true);
@@ -177,9 +105,9 @@ function App() {
     void loadContent();
   }, [nearbyOnly, hasLocation, currentUser]);
 
-  const normalizedQuery = query.trim().toLowerCase();
+  // Search: parse query and filter posts
   const smartQuery = parseSmartQuery(query);
-  // Search is intentionally applied after the nearby/category filters are loaded.
+  const normalizedQuery = query.trim().toLowerCase();
   const visiblePosts = posts.filter((post) => {
     const selectedCategory = smartQuery.category || (activeCategory === "For you" ? undefined : activeCategory);
     const matchesCategory = !selectedCategory || post.category.toLowerCase() === selectedCategory.toLowerCase();
@@ -194,13 +122,7 @@ function App() {
     return matchesCategory && matchesLocation && matchesPrice && matchesSearch;
   });
 
-  const searchSummary = query.trim()
-    ? [
-        smartQuery.category,
-        smartQuery.location && `near ${smartQuery.location}`,
-        smartQuery.maxPrice != null && `under R${smartQuery.maxPrice}`,
-      ].filter(Boolean).join(" · ") || "Matching looks and artists"
-    : "";
+  const searchSummary = query.trim() ? formatSearchSummary(smartQuery) : "";
 
   const emptyCopy = query
     ? "No community posts match your search yet."
@@ -210,125 +132,121 @@ function App() {
         ? "No community posts yet. Be the first to share your work."
         : `No ${activeCategory.toLowerCase()} posts yet. Be the first to share one.`;
 
-  const handleUploaded = () => {
-    void refreshPosts().catch(() => setError("We could not refresh the feed."));
-  };
-
   const handleLogout = async () => {
     await logout();
     setCurrentUser(null);
     navigate("/");
   };
 
-  const handleProfileUpdated = (updatedUser: CurrentUser) => {
-    setCurrentUser(updatedUser);
-    navigate("/profile");
-  };
-
-  if (pathname === "/login") {
-    return <LoginPage onNavigate={navigate} />;
-  }
-
-  const renderPage = () => {
-    // The lightweight pathname router keeps deep links working without a routing dependency.
-    if (pathname === "/upload") {
-      return (
-        <UploadPage
-          categories={categories}
-          currentUser={currentUser}
-          onNavigate={navigate}
-          onUploaded={() => {
-            handleUploaded();
-            navigate("/");
-          }}
-        />
-      );
-    }
-
-    if (pathname === "/discover") {
-      return <DiscoverPage currentUser={currentUser} onNavigate={navigate} />;
-    }
-
-    if (pathname === "/profile" || pathname.startsWith("/profile/")) {
-      const profileId = Number(pathname.split("/")[2]);
-      return (
-        <ProfilePage
-          profileId={Number.isInteger(profileId) && profileId > 0 ? profileId : undefined}
-          currentUser={currentUser}
-          onNavigate={navigate}
-          onLogout={() => void handleLogout()}
-        />
-      );
-    }
-
-    if (pathname === "/messages") {
-      return <MessagesPage currentUser={currentUser} onNavigate={navigate} />;
-    }
-
-    if (pathname === "/saved") {
-      return <SavedPage currentUser={currentUser} posts={posts} onNavigate={navigate} />;
-    }
-
-    if (pathname === "/dashboard") {
-      return <ClientDashboardPage currentUser={currentUser} posts={posts} onNavigate={navigate} />;
-    }
-
-    if (pathname === "/settings") {
-      return <SettingsPage currentUser={currentUser} onNavigate={navigate} onSaved={handleProfileUpdated} />;
-    }
-
-    if (pathname === "/notifications") {
-      return <NotificationsPage currentUser={currentUser} onNavigate={navigate} />;
-    }
-
-    if (pathname === "/admin-dashboard") {
-      return <AdminPage currentUser={currentUser} onNavigate={navigate} />;
-    }
-
-    if (pathname === "/about" || pathname === "/terms" || pathname === "/privacy") {
-      return <InfoPage page={pathname.slice(1) as "about" | "terms" | "privacy"} onNavigate={navigate} />;
-    }
-
-    return (
-      <HomePage
-        activeCategory={activeCategory}
-        categories={categories}
-
-        emptyCopy={emptyCopy}
-        error={error}
-        hasLocation={hasLocation}
-        isLoading={isLoading}
-        nearbyOnly={nearbyOnly}
-        posts={visiblePosts}
-        currentUser={currentUser}
-        searchSummary={searchSummary}
-        onNavigate={navigate}
-        onSelectCategory={setActiveCategory}
-        onToggleNearby={() => setNearbyOnly((value) => !value)}
-      />
-    );
-  };
-
   return (
     <ThemeProvider>
-      <div className="app-shell">
-        {showOnboarding && currentUser && (
-          <OnboardingWalkthrough
-            currentUser={currentUser}
-            onNavigate={navigate}
-            onDismiss={() => setShowOnboarding(false)}
-          />
-        )}
-        <Sidebar activeNav={navForPath(pathname)} currentUser={currentUser} onNavigate={navigate} onLogout={() => void handleLogout()} />
-        <main className="feed-main">
-          <Topbar currentUser={currentUser} query={query} onQueryChange={setQuery} onNavigate={navigate} />
-          {renderPage()}
-        </main>
-        <RightRail currentUser={currentUser} onNavigate={navigate} />
-        <MobileNav pathname={pathname} currentUser={currentUser} onNavigate={navigate} />
-        <AssistantPanel posts={posts} currentUser={currentUser} onNavigate={navigate} onSearch={setQuery} />
-      </div>
+      <ToastProvider>
+        <AppContent
+          showOnboarding={showOnboarding}
+          setShowOnboarding={setShowOnboarding}
+          currentUser={currentUser}
+          pathname={pathname}
+          query={query}
+          setQuery={setQuery}
+          searchSummary={searchSummary}
+          activeCategory={activeCategory}
+          setActiveCategory={setActiveCategory}
+          nearbyOnly={nearbyOnly}
+          setNearbyOnly={setNearbyOnly}
+          isLoading={isLoading}
+          error={error}
+          posts={visiblePosts}
+          categories={categories}
+          emptyCopy={emptyCopy}
+          hasLocation={hasLocation}
+          navigate={navigate}
+          handleLogout={handleLogout}
+          refreshPosts={refreshPosts}
+        />
+      </ToastProvider>
     </ThemeProvider>
+  );
+}
+
+type AppContentProps = {
+  showOnboarding: boolean;
+  setShowOnboarding: (show: boolean) => void;
+  currentUser: CurrentUser | null;
+  pathname: string;
+  query: string;
+  setQuery: (query: string) => void;
+  searchSummary: string;
+  activeCategory: string;
+  setActiveCategory: (category: string) => void;
+  nearbyOnly: boolean;
+  setNearbyOnly: (nearbyOnly: boolean) => void;
+  isLoading: boolean;
+  error: string;
+  posts: Post[];
+  categories: string[];
+  emptyCopy: string;
+  hasLocation: boolean;
+  navigate: (path: string) => void;
+  handleLogout: () => Promise<void>;
+  refreshPosts: () => Promise<void>;
+};
+
+/**
+ * AppContent: renders the layout and delegates page rendering
+ * Separated so it can use useToast hook inside ToastProvider
+ */
+function AppContent(props: AppContentProps) {
+  const { toasts, removeToast } = useToast();
+
+  const pageContent = renderPage({
+    pathname: props.pathname,
+    currentUser: props.currentUser,
+    activeCategory: props.activeCategory,
+    nearbyOnly: props.nearbyOnly,
+    isLoading: props.isLoading,
+    posts: props.posts,
+    query: props.query,
+    searchSummary: props.searchSummary,
+    categories: props.categories,
+    emptyCopy: props.emptyCopy,
+    hasLocation: props.hasLocation,
+    onNavigate: props.navigate,
+    onLogout: props.handleLogout,
+    onRefresh: props.refreshPosts,
+    onSelectCategory: props.setActiveCategory,
+    onToggleNearby: () => props.setNearbyOnly(!props.nearbyOnly),
+    onQueryChange: props.setQuery,
+  });
+
+  return (
+    <div className="app-shell">
+      {props.showOnboarding && props.currentUser && (
+        <OnboardingWalkthrough
+          currentUser={props.currentUser}
+          onNavigate={props.navigate}
+          onDismiss={() => props.setShowOnboarding(false)}
+        />
+      )}
+      <Sidebar
+        activeNav={navForPath(props.pathname)}
+        currentUser={props.currentUser}
+        onNavigate={props.navigate}
+        onLogout={() => void props.handleLogout()}
+      />
+      <main className="feed-main">
+        <Topbar
+          currentUser={props.currentUser}
+          query={props.query}
+          searchSummary={props.searchSummary}
+          onQueryChange={props.setQuery}
+          onNavigate={props.navigate}
+        />
+        {pageContent}
+      </main>
+      <RightRail currentUser={props.currentUser} onNavigate={props.navigate} />
+      <MobileNav pathname={props.pathname} currentUser={props.currentUser} onNavigate={props.navigate} />
+      <Toaster toasts={toasts} onClose={removeToast} />
+    </div>
   );
 }
 

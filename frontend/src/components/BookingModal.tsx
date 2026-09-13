@@ -11,6 +11,8 @@ import {
   createBooking,
   sendMessage,
 } from "../api";
+import { useToast } from "../context/ToastContext";
+import { BookingModalSkeleton } from "./Skeleton";
 import {
   IconCalendar,
   IconClock,
@@ -114,12 +116,13 @@ export default function BookingModal({
   currentUser,
   onNavigate,
 }: BookingModalProps) {
+  const { addToast } = useToast();
   // Navigation & tabs
   const [activeTab, setActiveTab] = useState<"book" | "inquire">("book");
   const [showAuthGate, setShowAuthGate] = useState(false);
 
   // Calendar navigation
-  const [calendarMonth, setCalendarMonth] = useState<Date>(new Date());
+  const [calendarMonth, setCalendarMonth] = useState<Date>(() => new Date());
 
   // Services & Availability data
   const [services, setServices] = useState<ServiceOffering[]>([]);
@@ -297,11 +300,13 @@ export default function BookingModal({
         postId,
       });
       setInquirySent(true);
+      addToast("Message sent! They'll get back to you soon.", "success", 3000);
       setInquiryText("");
     } catch (err) {
       setErrorMessage(
         err instanceof Error ? err.message : "Unable to send message.",
       );
+      addToast("Failed to send message", "error");
     } finally {
       setIsInquiring(false);
     }
@@ -339,6 +344,7 @@ export default function BookingModal({
       });
 
       setConfirmedBooking(newBooking);
+      addToast("Booking confirmed! Check your appointments.", "success", 4000);
       // Remove booked slot locally so it can't be clicked again
       setSlots((prev) => prev.filter((s) => String(s.id) !== selectedSlotId));
     } catch (err) {
@@ -605,9 +611,7 @@ export default function BookingModal({
                 </div>
 
                 {isLoadingData ? (
-                  <div className="glam-loading-pill">
-                    Loading menu & availability...
-                  </div>
+                  <BookingModalSkeleton />
                 ) : services.length > 0 ? (
                   <div className="glam-services-chips-grid">
                     {services.map((service) => {

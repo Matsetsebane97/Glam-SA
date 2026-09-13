@@ -3,17 +3,19 @@ import { useEffect, useRef, useState } from "react";
 import { useTheme } from "../theme/ThemeContext";
 import { getBookings, getConversations } from "../api";
 import { brandLogoUrl } from "../constants";
+import { SearchSummary } from "./SearchSummary";
 import { IconBell, IconClose, IconMoon, IconSearch, IconSun } from "./Icons";
 import type { Booking, Conversation, CurrentUser } from "../types";
 
 type TopbarProps = {
   currentUser: CurrentUser | null;
   query: string;
+  searchSummary?: string;
   onQueryChange: (query: string) => void;
   onNavigate: (path: string) => void;
 };
 
-function Topbar({ currentUser, query, onQueryChange, onNavigate }: TopbarProps) {
+function Topbar({ currentUser, query, searchSummary, onQueryChange, onNavigate }: TopbarProps) {
   const { theme, toggleTheme } = useTheme();
   const [showNotifications, setShowNotifications] = useState(false);
   const [notifications, setNotifications] = useState<Conversation[]>([]);
@@ -101,6 +103,9 @@ function Topbar({ currentUser, query, onQueryChange, onNavigate }: TopbarProps) 
             </button>
           )}
         </label>
+        {searchSummary && (
+          <SearchSummary summary={searchSummary} onClear={() => onQueryChange("")} />
+        )}
       </div>
 
       {/* Right action cluster */}

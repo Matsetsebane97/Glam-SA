@@ -1,0 +1,73 @@
+/* ──────────────────────────────────────────────────────────────────────────
+   Pull-to-Refresh Component
+   Native app feel for feed and message list refresh
+   ────────────────────────────────────────────────────────────────────────── */
+
+.pull-to-refresh-container {
+  position: relative;
+  width: 100%;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+}
+
+.pull-to-refresh-indicator {
+  position: fixed;
+  top: calc(58px + env(safe-area-inset-top));
+  left: 50%;
+  transform: translateX(-50%);
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 50;
+  pointer-events: none;
+}
+
+.pull-to-refresh-spinner {
+  width: 24px;
+  height: 24px;
+  color: var(--accent-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.pull-to-refresh-spinner svg {
+  width: 100%;
+  height: 100%;
+}
+
+.pull-to-refresh-label {
+  position: fixed;
+  top: calc(108px + env(safe-area-inset-top));
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ink-muted);
+  white-space: nowrap;
+  z-index: 50;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+}
+
+.pull-to-refresh-label.refreshing {
+  color: var(--accent-primary);
+}
+
+.pull-to-refresh-content {
+  width: 100%;
+}
+
+/* ── Mobile-specific adjustments ── */
+@media (max-width: 768px) {
+  .pull-to-refresh-indicator {
+    top: calc(58px + env(safe-area-inset-top));
+  }
+
+  .pull-to-refresh-label {
+    top: calc(108px + env(safe-area-inset-top));
+  }
+}

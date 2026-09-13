@@ -1,0 +1,181 @@
+/* ──────────────────────────────────────────────────────────────────────────
+   Skeleton Loader Component
+   Animated placeholder content for loading states
+   ────────────────────────────────────────────────────────────────────────── */
+
+.skeleton {
+  background: var(--bg-muted);
+  border-radius: 4px;
+  display: block;
+}
+
+.skeleton-animated {
+  animation: skeleton-shimmer 1.5s infinite ease-in-out;
+  background: linear-gradient(
+    90deg,
+    var(--bg-muted) 0%,
+    var(--bg-surface) 50%,
+    var(--bg-muted) 100%
+  );
+  background-size: 200% 100%;
+}
+
+@keyframes skeleton-shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+/* ── Skeleton variants ── */
+.skeleton-circle {
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.skeleton-line {
+  height: 12px;
+  border-radius: 4px;
+}
+
+.skeleton-rect {
+  border-radius: 8px;
+}
+
+.skeleton-card {
+  border-radius: 12px;
+  padding: 16px;
+}
+
+/* ── Skeleton group ── */
+.skeleton-group {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* ── Profile skeleton ── */
+.skeleton-profile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  padding: 24px 20px;
+}
+
+.skeleton-profile .skeleton-avatar {
+  margin-bottom: 8px;
+}
+
+.skeleton-profile .skeleton-name {
+  max-width: 200px;
+}
+
+.skeleton-profile .skeleton-bio {
+  max-width: 280px;
+}
+
+.skeleton-profile .skeleton-actions {
+  display: flex;
+  gap: 12px;
+  width: 100%;
+  max-width: 300px;
+  margin-top: 8px;
+}
+
+/* ── Post card skeleton ── */
+.skeleton-post-card {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.skeleton-post-card .skeleton-image {
+  width: 100%;
+}
+
+.skeleton-post-card .skeleton-title {
+  height: 16px;
+}
+
+.skeleton-post-card .skeleton-subtitle {
+  height: 12px;
+}
+
+/* ── Booking modal skeleton ── */
+.skeleton-booking-modal {
+  padding: 16px;
+}
+
+.skeleton-booking-modal .skeleton-label {
+  height: 14px;
+  margin-bottom: 12px;
+}
+
+.skeleton-booking-modal .skeleton-chips {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.skeleton-booking-modal .skeleton-chips > div {
+  flex: 1;
+  min-height: 48px;
+  border-radius: 8px;
+}
+
+.skeleton-booking-modal .skeleton-calendar {
+  width: 100%;
+  min-height: 250px;
+}
+
+.skeleton-booking-modal .skeleton-button {
+  width: 100%;
+  min-height: 48px;
+}
+
+/* ── Message thread skeleton ── */
+.skeleton-message-thread {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 16px;
+}
+
+.skeleton-message {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.skeleton-message.own {
+  justify-content: flex-end;
+}
+
+.skeleton-message.other {
+  justify-content: flex-start;
+}
+
+.skeleton-message > .skeleton {
+  min-height: 40px;
+  max-width: 80%;
+}
+
+/* ── Mobile adjustments ── */
+@media (max-width: 768px) {
+  .skeleton-profile {
+    padding: 20px 16px;
+  }
+
+  .skeleton-booking-modal {
+    padding: 14px;
+  }
+
+  .skeleton-message-thread {
+    padding: 12px;
+  }
+}

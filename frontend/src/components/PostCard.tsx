@@ -1,6 +1,7 @@
 // A portfolio card owns lightweight interaction state, while bookings and likes
 // are persisted through the API and saved looks are persisted per browser user.
 import { useEffect, useRef, useState } from "react";
+import { useToast } from "../context/ToastContext";
 import {
   IconBookmark,
   IconCalendar,
@@ -50,6 +51,7 @@ function PostCard({
   onCloseBooking,
   bookingOnly,
 }: PostCardProps) {
+  const { addToast } = useToast();
   const [isLiked, setIsLiked] = useState(false);
   const [likesCount, setLikesCount] = useState(post.likesCount);
   const [isUpdatingLike, setIsUpdatingLike] = useState(false);
@@ -216,8 +218,10 @@ function PostCard({
       setHeartBurst(true);
       setTimeout(() => setHeartBurst(false), 600);
       haptic([6, 30, 10]); // double-tap pulse feel
+      addToast("Added to likes", "success", 2000);
     } else {
       haptic(4);
+      addToast("Removed from likes", "success", 2000);
     }
     setIsUpdatingLike(true);
     try {
@@ -225,6 +229,7 @@ function PostCard({
     } catch {
       setIsLiked(!nextIsLiked);
       setLikesCount(previousCount);
+      addToast("Unable to update like", "error");
     } finally {
       setIsUpdatingLike(false);
     }
@@ -236,7 +241,9 @@ function PostCard({
       return;
     }
     haptic(8);
-    setIsSaved(toggleSavedPost(currentUser.id!, post));
+    const nextIsSaved = toggleSavedPost(currentUser.id!, post);
+    setIsSaved(nextIsSaved);
+    addToast(nextIsSaved ? "Saved to collection" : "Removed from saves", "success", 2000);
     setAuthNotice("");
   };
 
@@ -308,13 +315,17 @@ function PostCard({
           text: `Check out ${post.service} by ${post.creator} on Glam SA!`,
           url: window.location.href,
         });
+        addToast("Shared successfully!", "success", 2000);
       } else {
         await navigator.clipboard.writeText(window.location.href);
         setCopied(true);
+        addToast("Link copied to clipboard!", "success", 2000);
         setTimeout(() => setCopied(false), 2000);
       }
-    } catch {
-      // Ignore user cancellations or copy errors
+    } catch (error) {
+      if (error instanceof Error && error.name !== "AbortError") {
+        addToast("Unable to share", "error");
+      }
     }
   };
 

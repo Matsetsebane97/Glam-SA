@@ -1,7 +1,9 @@
 // Home feed — hero tagline, category pills, and 2-column editorial post grid.
 import CategoryTabs from "../components/CategoryTabs";
 import PostCard from "../components/PostCard";
+import PullToRefresh from "../components/PullToRefresh";
 import { IconPin } from "../components/Icons";
+import { usePullToRefresh } from "../hooks/usePullToRefresh";
 import type { CurrentUser, Post } from "../types";
 
 type HomePageProps = {
@@ -18,6 +20,7 @@ type HomePageProps = {
   onNavigate: (path: string) => void;
   onSelectCategory: (category: string) => void;
   onToggleNearby: () => void;
+  onRefresh: () => Promise<void>;
 };
 
 function HomePage({
@@ -34,9 +37,22 @@ function HomePage({
   onToggleNearby,
   currentUser,
   searchSummary,
+  onRefresh,
 }: HomePageProps) {
+  const { pullDistance, isRefreshing, scrollContainerRef, handlers } = usePullToRefresh({
+    onRefresh,
+  });
+
   return (
-    <div className="page-content home-page">
+    <PullToRefresh
+      pullDistance={pullDistance}
+      isRefreshing={isRefreshing}
+      scrollRef={scrollContainerRef}
+      onTouchStart={handlers.onTouchStart}
+      onTouchMove={handlers.onTouchMove}
+      onTouchEnd={handlers.onTouchEnd}
+    >
+      <div className="page-content home-page">
 
       {/* Category pill strip */}
       <section className="home-cat-section">
@@ -126,6 +142,7 @@ function HomePage({
         )}
       </div>
     </div>
+    </PullToRefresh>
   );
 }
 
