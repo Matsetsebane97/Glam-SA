@@ -65,7 +65,7 @@ export function usePullToRefresh({
     try {
       await onRefresh();
     } catch (error) {
-      console.error("Pull-to-refresh error:", error);
+      // Error already handled by parent component via onRefresh callback
     } finally {
       setIsRefreshing(false);
     }

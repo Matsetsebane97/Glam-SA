@@ -1,0 +1,123 @@
+/* ──────────────────────────────────────────────────────────────────────────
+   Momentum Scrolling
+   Native smooth scroll physics for iOS-style deceleration
+   ────────────────────────────────────────────────────────────────────────── */
+
+/* Enable momentum scrolling on all scrollable containers */
+.scrollable,
+.feed-content,
+.glam-services-chips-grid,
+.glam-time-periods-container,
+.glam-calendar-dates,
+.message-list,
+.skeleton-message-thread,
+.topbar-notif-list,
+.right-rail-content,
+.modal-body,
+.sheet-content,
+[class*="scroll"],
+[class*="-list"],
+[class*="-grid"] {
+  -webkit-overflow-scrolling: touch;
+  scroll-behavior: smooth;
+}
+
+/* Mobile: Ensure smooth scrolling on overflow */
+@media (max-width: 768px) {
+  /* Feed and post containers */
+  .post-feed,
+  .home-page,
+  .page-content {
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Message threads */
+  .message-list {
+    -webkit-overflow-scrolling: touch;
+    scroll-behavior: smooth;
+  }
+
+  /* Booking modal */
+  .glam-booking-sheet,
+  .glam-booking-modal {
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Calendar grid */
+  .glam-calendar-dates {
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Horizontal scrollers (chips, pills, dates) */
+  .glam-services-chips-grid,
+  .glam-time-periods-container,
+  .glam-date-pills-row {
+    -webkit-overflow-scrolling: touch;
+    scroll-snap-type: x mandatory;
+    scroll-padding-left: 16px;
+  }
+
+  /* Individual chips/pills with snap points */
+  .glam-service-chip,
+  .glam-time-chip,
+  .glam-date-pill {
+    scroll-snap-align: start;
+    scroll-snap-stop: always;
+  }
+}
+
+/* Desktop: Use auto for faster scrolling */
+@media (min-width: 769px) {
+  .scrollable,
+  [class*="scroll"] {
+    scroll-behavior: smooth;
+  }
+}
+
+/* Scrollbar styling for better UX */
+/* Chrome, Edge, Safari */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border-medium);
+  border-radius: 4px;
+  transition: background var(--transition-fast);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--border-strong);
+}
+
+/* Firefox */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-medium) transparent;
+}
+
+/* Reduce bounce effect on iOS for better control */
+body {
+  overscroll-behavior: auto;
+}
+
+/* Prevent overscroll effect on specific containers */
+.modal-body,
+.sheet-content,
+.glam-booking-sheet {
+  overscroll-behavior: contain;
+}
+
+/* Touch feedback */
+-webkit-user-select: none;
+user-select: none;
+
+/* Ensure fast click response on touch */
+* {
+  -webkit-tap-highlight-color: transparent;
+}

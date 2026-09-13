@@ -22,4 +22,7 @@
 @import "./styles/search-summary.css";
 @import "./styles/pull-to-refresh.css";
 @import "./styles/toast.css";
+@import "./styles/momentum-scroll.css";
+@import "./styles/confirm-dialog.css";
+@import "./styles/sticky-footer.css";
 @import "./styles/mobile-polish.css";

@@ -6,6 +6,8 @@ import {
   IconBookmark,
   IconCalendar,
   IconCheck,
+  IconChevronLeft,
+  IconChevronRight,
   IconClock,
   IconClose,
   IconHeart,
@@ -21,18 +23,6 @@ import { whatsappUrl } from "../utils/whatsapp";
 import { isPostSaved, toggleSavedPost, SAVED_POSTS_EVENT } from "../utils/savedPosts";
 import { createBooking, getAvailability, getServices, sendMessage, setPostLike } from "../api";
 import type { AvailabilitySlot, Booking, ServiceOffering } from "../types";
-
-const IconChevronLeft = ({ size = 16 }: { size?: number }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-    <path d="M15 18l-6-6 6-6" />
-  </svg>
-);
-
-const IconChevronRight = ({ size = 16 }: { size?: number }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-    <path d="M9 18l6-6-6-6" />
-  </svg>
-);
 
 type PostCardProps = {
   post: Post;

@@ -13,8 +13,12 @@ import {
 } from "../api";
 import { useToast } from "../context/ToastContext";
 import { BookingModalSkeleton } from "./Skeleton";
+import { ConfirmDialog } from "./ConfirmDialog";
+import { StickyFooter, StickyFooterButton, StickyFooterInfo } from "./StickyFooter";
 import {
   IconCalendar,
+  IconChevronLeft,
+  IconChevronRight,
   IconClock,
   IconCheck,
   IconClose,
@@ -28,19 +32,6 @@ import {
 } from "./Icons";
 import { formatDurationMinutes } from "../utils/assistantLogic";
 
-// Calendar navigation icons
-const IconChevronLeft = ({ size = 16 }: { size?: number }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-    <path d="M15 18l-6-6 6-6" />
-  </svg>
-);
-
-const IconChevronRight = ({ size = 16 }: { size?: number }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-    <path d="M9 18l6-6-6-6" />
-  </svg>
-);
-
 export interface BookingModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -51,7 +42,6 @@ export interface BookingModalProps {
   creatorAvatar?: string;
   creatorPhone?: string;
   postId?: number;
-  postImageUrl?: string;
   initialServiceId?: string;
   initialServiceName?: string;
   initialPrice?: string | number;
@@ -108,7 +98,6 @@ export default function BookingModal({
   creatorAvatar,
   creatorPhone,
   postId,
-  postImageUrl: _postImageUrl,
   initialServiceId,
   initialServiceName,
   initialPrice,
@@ -145,9 +134,8 @@ export default function BookingModal({
   // Booking submission & result
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
-  const [confirmedBooking, setConfirmedBooking] = useState<Booking | null>(
-    null,
-  );
+  const [confirmedBooking, setConfirmedBooking] = useState<Booking | null>(null);
+  const [showConfirmBooking, setShowConfirmBooking] = useState(false);
 
   // Close on Escape key
   useEffect(() => {
@@ -324,6 +312,19 @@ export default function BookingModal({
       return;
     }
 
+    // Show confirmation dialog instead of submitting directly
+    setShowConfirmBooking(true);
+  };
+
+  // Confirmed booking submission
+  const confirmBooking = async () => {
+    if (!currentUser) return;
+
+    if (!selectedSlotId) {
+      setErrorMessage("Please select a date and time slot.");
+      return;
+    }
+
     // Need a valid service ID; fallback to selectedServiceId or first service
     const serviceIdNum =
       Number(selectedServiceId) || (services[0] ? services[0].id : null);
@@ -347,12 +348,14 @@ export default function BookingModal({
       addToast("Booking confirmed! Check your appointments.", "success", 4000);
       // Remove booked slot locally so it can't be clicked again
       setSlots((prev) => prev.filter((s) => String(s.id) !== selectedSlotId));
+      setShowConfirmBooking(false);
     } catch (err) {
       setErrorMessage(
         err instanceof Error
           ? err.message
           : "That time slot is no longer available. Please choose another.",
       );
+      addToast("Booking failed", "error");
     } finally {
       setIsSubmitting(false);
     }
@@ -361,6 +364,24 @@ export default function BookingModal({
   if (!isOpen) return null;
 
   return (
+    <>
+      <ConfirmDialog
+        isOpen={showConfirmBooking}
+        title="Confirm Booking"
+        message={
+          <div>
+            <p>Ready to book this appointment?</p>
+            <p style={{ marginTop: "8px", fontSize: "13px", opacity: 0.7 }}>
+              <strong>{currentServiceName}</strong> • {selectedDateKey} at {selectedSlotId ? new Date(slots.find(s => String(s.id) === selectedSlotId)?.startsAt || "").toLocaleTimeString("en-ZA", { hour: "2-digit", minute: "2-digit" }) : "TBD"}
+            </p>
+          </div>
+        }
+        confirmText="Confirm Booking"
+        cancelText="Go Back"
+        isLoading={isSubmitting}
+        onConfirm={() => void confirmBooking()}
+        onCancel={() => setShowConfirmBooking(false)}
+      />
     <div className="glam-modal-backdrop" onClick={onClose}>
       <div
         className="glam-booking-sheet"
@@ -1023,37 +1044,21 @@ export default function BookingModal({
               )}
 
               {/* Sticky Order Summary & Submit Footer */}
-              <div className="glam-booking-sheet-footer">
-                <div className="glam-footer-price-summary">
-                  <span className="summary-total-label">Estimated Total:</span>
-                  <div className="summary-price-line">
-                    <strong className="summary-total-price">
-                      {currentPrice}
-                    </strong>
-                    <span className="summary-duration">
-                      ({currentDuration})
-                    </span>
-                  </div>
-                  <small className="summary-payment-terms">
-                    Pay at appointment · No upfront deposit required
-                  </small>
-                </div>
-
-                <button
-                  type="button"
-                  className="btn-primary btn-book-submit"
+              <StickyFooter>
+                <StickyFooterInfo
+                  price={Number(currentPrice?.replace(/[R,]/g, "")) || 0}
+                  duration={currentDuration ? parseInt(currentDuration) : undefined}
+                  details="Pay at appointment"
+                />
+                <StickyFooterButton
+                  variant="primary"
                   onClick={() => void handleSubmitBooking()}
                   disabled={!slots.length || !selectedSlotId || isSubmitting}
+                  icon={<IconCalendar size={17} />}
                 >
-                  {isSubmitting ? (
-                    "Sending Request..."
-                  ) : (
-                    <>
-                      <IconCalendar size={17} /> Request Appointment
-                    </>
-                  )}
-                </button>
-              </div>
+                  {isSubmitting ? "Sending..." : "Request"}
+                </StickyFooterButton>
+              </StickyFooter>
             </div>
           ) : (
             /* ─────────────────────────────────────────────────────────────
